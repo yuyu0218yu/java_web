@@ -145,11 +145,12 @@ public class PasswordUtil {
                 return false;
             }
 
-            String hash = parts[0];
+            String expectedHash = parts[0];
             String salt = parts[1];
 
             String encrypted = encryptPassword(password, salt);
-            return encrypted.equals(encryptedPassword);
+            String actualHash = encrypted.split(":")[0];
+            return expectedHash.equals(actualHash);
         } catch (Exception e) {
             return false;
         }
