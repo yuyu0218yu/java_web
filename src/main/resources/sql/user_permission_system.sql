@@ -37,7 +37,7 @@ CREATE INDEX idx_create_time ON sys_user(create_time);
 -- ================================
 CREATE TABLE sys_role (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '角色ID',
-    role_name VARCHAR(50) NOT NULL COMMENT '角色名称',
+    role_name VARCHAR(100) NOT NULL COMMENT '角色名称',
     role_code VARCHAR(50) NOT NULL UNIQUE COMMENT '角色编码',
     description VARCHAR(200) COMMENT '角色描述',
     sort_order INT DEFAULT 0 COMMENT '排序',
@@ -57,7 +57,7 @@ CREATE INDEX idx_sort_order ON sys_role(sort_order);
 -- ================================
 CREATE TABLE sys_permission (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '权限ID',
-    permission_name VARCHAR(100) NOT NULL COMMENT '权限名称',
+    permission_name VARCHAR(200) NOT NULL COMMENT '权限名称',
     permission_code VARCHAR(100) NOT NULL UNIQUE COMMENT '权限编码',
     permission_type TINYINT NOT NULL COMMENT '权限类型：1-菜单，2-按钮，3-接口',
     parent_id BIGINT DEFAULT 0 COMMENT '父级权限ID',
@@ -160,12 +160,12 @@ SELECT 3, id FROM sys_permission
 WHERE deleted = 0
 AND permission_code IN ('user:list', 'user:query:api');
 
--- 初始化用户数据（密码为 123456，使用项目中的密码工具加密）
--- 注意：这里的密码需要使用 PasswordUtil.encryptPassword("123456") 生成
+-- 初始化用户数据（密码为 123456，使用项目中的PasswordUtil工具加密）
+-- 密码通过PasswordGeneratorTest.java生成，格式为：hash:salt
 INSERT INTO sys_user (username, password, salt, real_name, email, phone, gender, status) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa', 'admin_salt', '超级管理员', 'admin@example.com', '13800138000', 1, 1),
-('manager', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa', 'manager_salt', '管理员', 'manager@example.com', '13800138001', 1, 1),
-('user1', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa', 'user1_salt', '普通用户1', 'user1@example.com', '13800138002', 1, 1);
+('admin', 'MQiU57rODHpNR2+XppiF7PrO5s6o88/46713hljqSJ8=:zmSWUI+FEbJCiGL3n+2LuA==', 'zmSWUI+FEbJCiGL3n+2LuA==', '超级管理员', 'admin@example.com', '13800138000', 1, 1),
+('manager', 'o9qMcxgklvW8pfZ699i8yF/QTd+66X2k8SnvtALRpk0=:HtLRAjsRBNHPnN3E1MF7vg==', 'HtLRAjsRBNHPnN3E1MF7vg==', '管理员', 'manager@example.com', '13800138001', 1, 1),
+('user1', '/QHM25w2flfkrQCeQpuhGCApbFvp6es01JESSfxwsxA=:/C/bOg+bvZytGtWd/hKuwQ==', '/C/bOg+bvZytGtWd/hKuwQ==', '普通用户1', 'user1@example.com', '13800138002', 1, 1);
 
 -- 为用户分配角色
 INSERT INTO sys_user_role (user_id, role_id) VALUES

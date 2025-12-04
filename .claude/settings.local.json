@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(./mvnw exec:java:*)"
+      "Bash(./mvnw exec:java:*)",
+      "Bash(javac:*)",
+      "Bash(java:*)",
+      "Bash(mysql:*)"
     ],
     "deny": [],
     "ask": []
