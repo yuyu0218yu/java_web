@@ -1,5 +1,6 @@
 package com.yushuang.demo.controller;
 
+import com.yushuang.demo.annotation.AuditLog;
 import com.yushuang.demo.common.Result;
 import com.yushuang.demo.dto.LoginRequest;
 import com.yushuang.demo.dto.LoginResponse;
@@ -33,6 +34,7 @@ public class AuthController {
      */
     @PostMapping("/login")
     @Operation(summary = "用户登录", description = "用户登录获取JWT token")
+    @AuditLog(operation = "用户登录", module = "认证管理", saveRequestData = false)
     public Result<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
             LoginResponse response = authService.login(loginRequest);
@@ -48,6 +50,7 @@ public class AuthController {
      */
     @GetMapping("/userinfo")
     @Operation(summary = "获取用户信息", description = "获取当前登录用户的详细信息")
+    @AuditLog(operation = "获取用户信息", module = "认证管理")
     public Result<Object> getUserInfo() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
