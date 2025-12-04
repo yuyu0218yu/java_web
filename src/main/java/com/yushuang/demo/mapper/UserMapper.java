@@ -51,6 +51,12 @@ public interface UserMapper extends BaseMapper<User> {
             "WHERE u.deleted = 0 AND u.id = #{userId}")
     List<String> selectUserPermissions(@Param("userId") Long userId);
 
+      /**
+     * 根据用户名查询用户
+     */
+    @Select("SELECT * FROM sys_user WHERE deleted = 0 AND username = #{username}")
+    User selectByUsername(@Param("username") String username);
+
     /**
      * 检查用户名是否存在
      */
