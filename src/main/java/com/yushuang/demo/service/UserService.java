@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.yushuang.demo.entity.User;
 import com.yushuang.demo.mapper.UserMapper;
 import com.yushuang.demo.mapper.UserMapper.UserWithRole;
-import com.yushuang.demo.util.PasswordUtil;
 
 import java.util.List;
 

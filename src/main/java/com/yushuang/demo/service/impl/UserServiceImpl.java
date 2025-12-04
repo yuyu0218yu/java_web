@@ -11,7 +11,7 @@ import com.yushuang.demo.mapper.RoleMapper;
 import com.yushuang.demo.mapper.UserMapper;
 import com.yushuang.demo.mapper.UserRoleMapper;
 import com.yushuang.demo.service.UserService;
-import com.yushuang.demo.util.PasswordUtil;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +34,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final UserMapper userMapper;
     private final UserRoleMapper userRoleMapper;
     private final RoleMapper roleMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public IPage<UserMapper.UserWithRole> getUserPageWithRole(Page<UserMapper.UserWithRole> page) {
@@ -61,7 +62,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 验证密码
-        if (!PasswordUtil.verifyPassword(password, user.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             return null;
         }
 
@@ -102,8 +103,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 加密密码
-        String encryptedPassword = PasswordUtil.encryptPassword(user.getPassword());
-        user.setPassword(encryptedPassword);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // 设置默认状态
         if (user.getStatus() == null) {
@@ -181,13 +181,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 验证旧密码
-        if (!PasswordUtil.verifyPassword(oldPassword, user.getPassword())) {
-            throw new RuntimeException("旧密码错误");
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("原密码错误");
         }
-
+        
         // 加密新密码
-        String encryptedPassword = PasswordUtil.encryptPassword(newPassword);
-        user.setPassword(encryptedPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         user.setUpdateTime(LocalDateTime.now());
 
         return updateById(user);
@@ -206,8 +205,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 加密新密码
-        String encryptedPassword = PasswordUtil.encryptPassword(newPassword);
-        user.setPassword(encryptedPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         user.setUpdateTime(LocalDateTime.now());
 
         return updateById(user);

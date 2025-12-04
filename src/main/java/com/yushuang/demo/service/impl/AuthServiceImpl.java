@@ -7,7 +7,6 @@ import com.yushuang.demo.entity.User;
 import com.yushuang.demo.mapper.UserMapper;
 import com.yushuang.demo.service.AuthService;
 import com.yushuang.demo.util.JwtUtil;
-import com.yushuang.demo.util.PasswordUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;

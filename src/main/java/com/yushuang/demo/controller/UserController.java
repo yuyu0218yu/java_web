@@ -8,7 +8,6 @@ import com.yushuang.demo.entity.User;
 import com.yushuang.demo.mapper.UserMapper.UserWithRole;
 import com.yushuang.demo.service.UserService;
 import com.yushuang.demo.util.IpUtil;
-import com.yushuang.demo.util.PasswordUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
