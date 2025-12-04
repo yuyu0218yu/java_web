@@ -10,31 +10,34 @@ const routes = [
   },
   {
     path: '/',
-    redirect: '/dashboard'
-  },
-  {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: () => import('@/views/Dashboard.vue'),
-    meta: { title: '仪表盘', requiresAuth: true }
-  },
-  {
-    path: '/users',
-    name: 'Users',
-    component: () => import('@/views/Users.vue'),
-    meta: { title: '用户列表', requiresAuth: true }
-  },
-  {
-    path: '/roles',
-    name: 'Roles',
-    component: () => import('@/views/Roles.vue'),
-    meta: { title: '角色管理', requiresAuth: true }
-  },
-  {
-    path: '/permissions',
-    name: 'Permissions',
-    component: () => import('@/views/Permissions.vue'),
-    meta: { title: '权限管理', requiresAuth: true }
+    component: () => import('@/layout/MainLayout.vue'),
+    redirect: '/dashboard',
+    children: [
+      {
+        path: 'dashboard',
+        name: 'Dashboard',
+        component: () => import('@/views/Dashboard.vue'),
+        meta: { title: '仪表盘', requiresAuth: true }
+      },
+      {
+        path: 'users',
+        name: 'Users',
+        component: () => import('@/views/Users.vue'),
+        meta: { title: '用户列表', requiresAuth: true }
+      },
+      {
+        path: 'roles',
+        name: 'Roles',
+        component: () => import('@/views/Roles.vue'),
+        meta: { title: '角色管理', requiresAuth: true }
+      },
+      {
+        path: 'permissions',
+        name: 'Permissions',
+        component: () => import('@/views/Permissions.vue'),
+        meta: { title: '权限管理', requiresAuth: true }
+      }
+    ]
   }
 ]
 

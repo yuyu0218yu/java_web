@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Spring Boot 3.2.5 web application using Java 21 and Maven with MyBatis-Plus for data persistence. It follows standard Spring Boot conventions and provides a comprehensive foundation for secure REST API development with database integration and a rich utility library. The project includes user management functionality with roles, permissions, and password security features.
+This is a comprehensive Spring Boot 3.2.5 enterprise application using Java 21 and Maven with MyBatis-Plus for data persistence. It features a complete JWT-based authentication system, operation logging/auditing functionality, file management module, and user management with RBAC (Role-Based Access Control). The project demonstrates enterprise-grade architecture with security, logging, and file handling capabilities.
 
 ## Development Commands
 
@@ -46,9 +46,11 @@ This is a Spring Boot 3.2.5 web application using Java 21 and Maven with MyBatis
 - **Framework**: Spring Boot 3.2.5
 - **Java**: Java 21 (LTS)
 - **Build**: Apache Maven (with Maven wrapper)
-- **Security**: Spring Security (included but not configured)
+- **Security**: Spring Security with JWT authentication
 - **Database**: MyBatis-Plus 3.5.14 (Spring Boot 3 compatible)
 - **Database Driver**: MySQL Connector (runtime), H2 (test)
+- **JWT**: io.jsonwebtoken (JJWT) 0.12.3 for token handling
+- **AOP**: Spring AOP for logging and cross-cutting concerns
 - **API Documentation**: SpringDoc OpenAPI 3 (Swagger)
 - **Testing**: JUnit 5 with Spring Boot Test
 - **Code Generation**: Lombok for reduced boilerplate
@@ -59,10 +61,17 @@ This is a Spring Boot 3.2.5 web application using Java 21 and Maven with MyBatis
 - Layered architecture: Controllers → Services → Mappers
 - `com.yushuang.demo.common`: Common response and pagination components
 - `com.yushuang.demo.util`: Comprehensive utility library
-- `com.yushuang.demo.entity`: Entity classes (User, Role, Permission, UserRole, RolePermission)
+- `com.yushuang.demo.entity`: Entity classes (User, Role, Permission, UserRole, RolePermission, OperationLog, LoginLog, FileInfo)
 - `com.yushuang.demo.mapper`: MyBatis-Plus mapper interfaces
 - `com.yushuang.demo.service`: Business logic services
 - `com.yushuang.demo.controller`: REST controllers
+- `com.yushuang.demo.dto`: Data transfer objects (LoginRequest, LoginResponse, UserInfo)
+- `com.yushuang.demo.security`: JWT authentication and security components
+- `com.yushuang.demo.annotation`: Custom annotations (@AuditLog)
+- `com.yushuang.demo.aspect`: AOP aspects for logging
+- `com.yushuang.demo.event`: Application events (LoginEvent)
+- `com.yushuang.demo.listener`: Event listeners for logging
+- `com.yushuang.demo.config`: Configuration classes
 
 ### Key Components
 - `DemoApplication.java`: Main Spring Boot application class with `@MapperScan("com.yushuang.demo.mapper")`
