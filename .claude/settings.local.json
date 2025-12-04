@@ -4,7 +4,8 @@
       "Bash(./mvnw exec:java:*)",
       "Bash(javac:*)",
       "Bash(java:*)",
-      "Bash(mysql:*)"
+      "Bash(mysql:*)",
+      "Bash(./mvnw test:*)"
     ],
     "deny": [],
     "ask": []
