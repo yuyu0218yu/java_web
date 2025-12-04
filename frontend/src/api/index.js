@@ -1,5 +1,42 @@
 import request from '@/utils/request'
 
+// 认证管理API
+export const authApi = {
+  // 用户登录
+  login(data) {
+    return request({
+      url: '/auth/login',
+      method: 'post',
+      data
+    })
+  },
+
+  // 获取用户信息
+  getUserInfo() {
+    return request({
+      url: '/auth/userinfo',
+      method: 'get'
+    })
+  },
+
+  // 刷新Token
+  refreshToken(refreshToken) {
+    return request({
+      url: '/auth/refresh',
+      method: 'post',
+      data: { refreshToken }
+    })
+  },
+
+  // 退出登录
+  logout() {
+    return request({
+      url: '/auth/logout',
+      method: 'post'
+    })
+  }
+}
+
 // 用户管理API
 export const userApi = {
   // 获取用户分页列表

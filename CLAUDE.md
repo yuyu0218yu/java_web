@@ -75,11 +75,15 @@ This is a comprehensive Spring Boot 3.2.5 enterprise application using Java 21 a
 
 ### Key Components
 - `DemoApplication.java`: Main Spring Boot application class with `@MapperScan("com.yushuang.demo.mapper")`
-- `application.properties`: Database and MyBatis-Plus configuration
-- `DemoApplicationTests.java`: JUnit 5 test infrastructure
+- `application.properties`: Database, JWT, and file upload configuration
 - `Result.java`: Standard API response wrapper with HTTP status codes
 - `PageResult.java`: Pagination utility with navigation helpers
-- User management system with RBAC (Role-Based Access Control) structure
+- `@AuditLog`: Custom annotation for operation logging
+- `JwtUtil`: JWT token generation and validation utility
+- `AuditLogAspect`: AOP aspect for automatic operation logging
+- Complete JWT authentication system with role-based access control
+- Operation logging and auditing system with async processing
+- File management system with upload/download capabilities
 
 ### Database Configuration
 - **Production**: MySQL database (localhost:3306/java_web)
@@ -100,16 +104,65 @@ This is a comprehensive Spring Boot 3.2.5 enterprise application using Java 21 a
 - Default UI URL: `http://localhost:8080/swagger-ui.html`
 - OpenAPI spec: `http://localhost:8080/v3/api-docs`
 
+### Authentication & Security
+- **JWT Authentication**: Complete JWT-based auth system with login/logout/token refresh
+- **Default Admin User**: Username: `admin`, Password: `123456`
+- **Security Configuration**: `/api/auth/login` and `/api/auth/refresh` allow anonymous access
+- **CORS Support**: Configured for cross-origin requests
+- **Password Encryption**: BCrypt hashing for secure password storage
+
 ### Development Notes
-- Spring Security is included but uses default configuration
+- Spring Security with JWT integration for API authentication
 - MyBatis-Plus mappers are auto-scanned in `com.yushuang.demo.mapper` package
-- Database schema needs to be created manually before first run
-- Entity classes should include logical delete field if using that feature
+- Database schema includes init scripts for RBAC and logging tables
+- Entity classes include logical delete field for soft deletes
 - Lombok is configured for code generation
-- IDE null analysis is enabled in VSCode configuration
+- Async processing for logging to avoid performance impact
+- File upload directory `uploads/` is auto-created on startup
 - Chinese comments used throughout the codebase
 
-## Common Patterns
+## Core Features & Patterns
+
+### JWT Authentication
+```java
+// Login request/response
+POST /api/auth/login
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+// Response includes JWT token and user info
+{
+  "code": 200,
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": { "username": "admin", "email": "admin@example.com" },
+    "permissions": ["user:view", "role:view", "*"]
+  }
+}
+```
+
+### Operation Logging with @AuditLog
+```java
+@AuditLog(operation = "用户登录", module = "认证管理", saveRequestData = false)
+@PostMapping("/login")
+public Result<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+    // Automatic logging handled by AOP aspect
+}
+```
+
+### File Management
+```java
+// File upload
+POST /api/files/upload
+Content-Type: multipart/form-data
+// Single or batch file upload with security validation
+
+// File download
+GET /api/files/{id}/download
+// Returns file with proper headers and increments download count
+```
 
 ### API Response Format
 ```java
@@ -125,34 +178,15 @@ return Result.error(400, "参数错误");
 return Result.success(PageResult.of(records, total, current, size));
 ```
 
-### Password Security
-```java
-// Password encryption
-String encryptedPassword = PasswordUtil.encryptPassword("password");
-
-// Password verification
-boolean isValid = PasswordUtil.verifyPassword("password", encryptedPassword);
-
-// Random password generation
-String randomPassword = PasswordUtil.generateRandomPassword(12);
-```
-
-### Database Queries
-```java
-// Build queries with utility
-QueryWrapper<User> wrapper = QueryWrapperUtil.create()
-    .eq("status", 1)
-    .like("name", keyword)
-    .orderByDesc("create_time");
-```
-
 ## Utility Library
 
-### Common Components
+### Core Utilities
 - **Result<T>**: Standard API response wrapper with HTTP status codes
 - **PageResult<T>**: Pagination utility with navigation helpers
+- **JwtUtil**: JWT token generation, validation, and refresh functionality
+- **UserAgentUtil**: Browser and operating system parsing from user agents
 
-### Utility Classes
+### Extended Utilities
 - **QueryWrapperUtil**: MyBatis-Plus query builder with simplified API
 - **WebUtil**: HTTP request/response utilities, parameter handling
 - **PasswordUtil**: Password hashing, salt generation, strength validation
@@ -161,21 +195,38 @@ QueryWrapper<User> wrapper = QueryWrapperUtil.create()
 - **DateUtil**: Comprehensive date/time operations and formatting
 - **StringUtil**: String manipulation, validation, format conversion
 
-## Project State
-The codebase includes:
-- Complete Spring Boot foundation with MyBatis-Plus integration
-- Database connection configuration (MySQL java_web)
-- Comprehensive utility library (9 major utility classes)
-- User management entities and RBAC structure (User, Role, Permission, UserRole, RolePermission)
-- Standard API response patterns established with Result wrapper
-- Code quality standards with Lombok integration
-- Test database setup with H2
-- Swagger/OpenAPI 3 documentation ready
+## Enterprise Features
 
-Ready for implementation of:
-- Service layer business logic for user management
-- REST API controllers using Result wrapper
-- Custom security configuration
-- Database schema creation and migrations
-- Role-based access control implementation
-- API endpoint development with proper validation
+### Security Architecture
+- JWT-based stateless authentication
+- Role-based access control (RBAC)
+- CORS configuration for cross-origin requests
+- Password encryption with BCrypt
+- Sensitive data masking in logs
+
+### Auditing & Logging
+- Automatic operation logging with @AuditLog annotation
+- Login success/failure tracking with IP and browser info
+- Async logging to prevent performance impact
+- Sensitive field masking (passwords, tokens)
+- Comprehensive log statistics and reporting
+
+### File Management
+- Secure file upload with type and size validation
+- File deduplication using SHA256 hashing
+- Download tracking and statistics
+- File preview and download endpoints
+- Configurable storage paths and allowed file types
+
+## Project State
+The codebase includes a complete enterprise-grade foundation:
+- ✅ JWT authentication system with role-based permissions
+- ✅ Operation logging and auditing with async processing
+- ✅ File management system with security controls
+- ✅ User management with RBAC structure (User, Role, Permission entities)
+- ✅ Database schemas for authentication, logging, and file management
+- ✅ Comprehensive utility library (12+ utility classes)
+- ✅ Standard API response patterns with Result wrapper
+- ✅ Swagger/OpenAPI 3 documentation
+- ✅ Async configuration for background processing
+- ✅ CORS and security configuration
