@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Spring Boot 3.5.8 web application using Java 21 and Maven with MyBatis-Plus for data persistence. It follows standard Spring Boot conventions and provides a comprehensive foundation for secure REST API development with database integration and a rich utility library.
+This is a Spring Boot 3.2.5 web application using Java 21 and Maven with MyBatis-Plus for data persistence. It follows standard Spring Boot conventions and provides a comprehensive foundation for secure REST API development with database integration and a rich utility library. The project includes user management functionality with roles, permissions, and password security features.
 
 ## Development Commands
 
@@ -43,12 +43,13 @@ This is a Spring Boot 3.5.8 web application using Java 21 and Maven with MyBatis
 ## Architecture
 
 ### Technology Stack
-- **Framework**: Spring Boot 3.5.8
+- **Framework**: Spring Boot 3.2.5
 - **Java**: Java 21 (LTS)
 - **Build**: Apache Maven (with Maven wrapper)
 - **Security**: Spring Security (included but not configured)
-- **Database**: MyBatis-Plus 3.5.8
+- **Database**: MyBatis-Plus 3.5.14 (Spring Boot 3 compatible)
 - **Database Driver**: MySQL Connector (runtime), H2 (test)
+- **API Documentation**: SpringDoc OpenAPI 3 (Swagger)
 - **Testing**: JUnit 5 with Spring Boot Test
 - **Code Generation**: Lombok for reduced boilerplate
 
@@ -58,28 +59,37 @@ This is a Spring Boot 3.5.8 web application using Java 21 and Maven with MyBatis
 - Layered architecture: Controllers → Services → Mappers
 - `com.yushuang.demo.common`: Common response and pagination components
 - `com.yushuang.demo.util`: Comprehensive utility library
-- `com.yushuang.demo.entity`: Entity classes
+- `com.yushuang.demo.entity`: Entity classes (User, Role, Permission, UserRole, RolePermission)
 - `com.yushuang.demo.mapper`: MyBatis-Plus mapper interfaces
 - `com.yushuang.demo.service`: Business logic services
 - `com.yushuang.demo.controller`: REST controllers
 
 ### Key Components
-- `DemoApplication.java`: Main Spring Boot application class with `@MapperScan`
+- `DemoApplication.java`: Main Spring Boot application class with `@MapperScan("com.yushuang.demo.mapper")`
 - `application.properties`: Database and MyBatis-Plus configuration
 - `DemoApplicationTests.java`: JUnit 5 test infrastructure
+- `Result.java`: Standard API response wrapper with HTTP status codes
+- `PageResult.java`: Pagination utility with navigation helpers
+- User management system with RBAC (Role-Based Access Control) structure
 
 ### Database Configuration
 - **Production**: MySQL database (localhost:3306/java_web)
   - Username: root
   - Password: 123456
-  - Encoding: UTF-8MB4 (utf8mb4_unicode_ci collation)
+  - Encoding: UTF-8MB4 with Asia/Shanghai timezone
+  - No SSL configuration
 - **Testing**: H2 in-memory database
 - **MyBatis-Plus Features**:
   - Automatic camel case mapping (`user_name` → `userName`)
-  - Logical delete support (`deleted` field)
+  - Logical delete support (`deleted` field: 1=deleted, 0=active)
   - SQL logging to console
+  - Entity scanning: `com.yushuang.demo.entity` package
   - XML mapper location: `classpath:mapper/*.xml`
-  - Entity package: `com.yushuang.demo.entity`
+
+### API Documentation
+- Swagger/OpenAPI 3 available via SpringDoc
+- Default UI URL: `http://localhost:8080/swagger-ui.html`
+- OpenAPI spec: `http://localhost:8080/v3/api-docs`
 
 ### Development Notes
 - Spring Security is included but uses default configuration
@@ -146,15 +156,17 @@ QueryWrapper<User> wrapper = QueryWrapperUtil.create()
 The codebase includes:
 - Complete Spring Boot foundation with MyBatis-Plus integration
 - Database connection configuration (MySQL java_web)
-- Comprehensive utility library (7 major utility classes)
-- Standard API response patterns established
+- Comprehensive utility library (9 major utility classes)
+- User management entities and RBAC structure (User, Role, Permission, UserRole, RolePermission)
+- Standard API response patterns established with Result wrapper
 - Code quality standards with Lombok integration
-- Ready architecture for layered development
 - Test database setup with H2
+- Swagger/OpenAPI 3 documentation ready
 
 Ready for implementation of:
-- Entity classes with MyBatis-Plus annotations
-- Service layer business logic
+- Service layer business logic for user management
 - REST API controllers using Result wrapper
 - Custom security configuration
-- Database schema and migrations
+- Database schema creation and migrations
+- Role-based access control implementation
+- API endpoint development with proper validation
