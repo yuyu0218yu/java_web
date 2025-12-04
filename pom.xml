@@ -53,11 +53,11 @@
 			<version>2.3.0</version>
 		</dependency>
 
-		<!-- MyBatis-Plus Boot Starter -->
+		<!-- MyBatis-Plus Boot Starter for Spring Boot 3.x -->
 		<dependency>
 			<groupId>com.baomidou</groupId>
-			<artifactId>mybatis-plus-boot-starter</artifactId>
-			<version>3.5.3.1</version>
+			<artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+			<version>3.5.14</version>
 		</dependency>
 
 		<!-- MySQL Connector -->
