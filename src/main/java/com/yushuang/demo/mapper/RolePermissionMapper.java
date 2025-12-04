@@ -51,7 +51,7 @@ public interface RolePermissionMapper extends BaseMapper<RolePermission> {
     /**
      * 根据角色ID和权限类型查询权限数量
      */
-    @Select("SELECT COUNT(rp.*) FROM sys_role_permission rp " +
+    @Select("SELECT COUNT(rp.id) FROM sys_role_permission rp " +
             "JOIN sys_permission p ON rp.permission_id = p.id " +
             "WHERE rp.deleted = 0 AND p.deleted = 0 AND rp.role_id = #{roleId} AND p.permission_type = #{permissionType}")
     int countPermissionsByRoleIdAndType(@Param("roleId") Long roleId, @Param("permissionType") Integer permissionType);
