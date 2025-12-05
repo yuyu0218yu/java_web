@@ -33,7 +33,13 @@ public interface UserMapper extends BaseMapper<User> {
     /**
      * 根据用户名查询用户（包含角色信息）
      */
-    @Select("SELECT u.*, r.role_name, r.role_code " +
+    @Select("SELECT u.id, u.username, u.password, u.salt, " +
+            "u.real_name AS realName, u.nickname, " +
+            "u.email, u.phone, u.avatar, u.gender, u.birthday, u.status, " +
+            "u.last_login_time AS lastLoginTime, u.last_login_ip AS lastLoginIp, " +
+            "u.create_time AS createTime, u.update_time AS updateTime, " +
+            "u.deleted, u.remark, " +
+            "r.role_name AS roleName, r.role_code AS roleCode " +
             "FROM sys_user u " +
             "LEFT JOIN sys_user_role ur ON u.id = ur.user_id AND ur.deleted = 0 " +
             "LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0 " +
