@@ -4,6 +4,7 @@ import com.yushuang.demo.annotation.AuditLog;
 import com.yushuang.demo.common.Result;
 import com.yushuang.demo.dto.LoginRequest;
 import com.yushuang.demo.dto.LoginResponse;
+import com.yushuang.demo.dto.RegisterRequest;
 import com.yushuang.demo.service.AuthService;
 import com.yushuang.demo.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,6 +43,21 @@ public class AuthController {
         } catch (Exception e) {
             log.warn("登录失败: {}", e.getMessage());
             return Result.error(401, "用户名或密码错误");
+        }
+    }
+
+    /**
+     * 用户注册（默认普通用户）
+     */
+    @PostMapping("/register")
+    @Operation(summary = "用户注册", description = "注册新用户，默认为普通用户角色")
+    public Result<Void> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        try {
+            authService.register(registerRequest);
+            return Result.success("注册成功");
+        } catch (Exception e) {
+            log.warn("注册失败: {}", e.getMessage());
+            return Result.error(400, e.getMessage());
         }
     }
 

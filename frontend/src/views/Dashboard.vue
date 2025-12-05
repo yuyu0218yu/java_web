@@ -429,6 +429,9 @@ onUnmounted(() => {
   transition: all 0.3s ease;
   border-radius: 12px;
   overflow: hidden;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #ffffff;
 }
 
 .stats-card:hover {
@@ -471,7 +474,7 @@ onUnmounted(() => {
 .count-up {
   font-size: 28px;
   font-weight: 700;
-  color: #303133;
+  color: #ffffff;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
@@ -506,7 +509,7 @@ onUnmounted(() => {
   justify-content: space-between;
   margin-top: 16px;
   padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid #333;
   font-size: 12px;
   color: #909399;
 }
@@ -523,12 +526,40 @@ onUnmounted(() => {
 .activity-card {
   border-radius: 12px;
   min-height: 400px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #ffffff;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+:deep(.el-card__header) {
+  border-bottom: 1px solid #333;
+  padding: 15px 20px;
+}
+
+:deep(.el-table) {
+  background-color: transparent;
+  --el-table-border-color: #333;
+  --el-table-header-bg-color: #1a1a1a;
+  --el-table-row-hover-bg-color: #2b2b3c;
+  color: #a0a0a0;
+}
+
+:deep(.el-table tr) {
+  background-color: transparent;
+}
+
+:deep(.el-table th.el-table__cell) {
+  background-color: #1a1a1a;
+  border-bottom: 1px solid #333;
+  color: #ffffff;
+}
+
+:deep(.el-table td.el-table__cell) {
+  border-bottom: 1px solid #333;
+}
+
+:deep(.el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell) {
+  background-color: #2b2b3c;
 }
 
 .header-title {
@@ -662,19 +693,19 @@ onUnmounted(() => {
   transform: translate(-50%, -50%);
   width: 100px;
   height: 100px;
-  background: white;
+  background: #1a1a1a;
   border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .pie-total {
   font-size: 28px;
   font-weight: 700;
-  color: #303133;
+  color: #ffffff;
 }
 
 .pie-label {
@@ -691,7 +722,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid #333;
   transition: background 0.2s;
 }
 
@@ -700,7 +731,7 @@ onUnmounted(() => {
 }
 
 .legend-item:hover {
-  background: #f5f7fa;
+  background: #2b2b3c;
   margin: 0 -12px;
   padding: 12px;
   border-radius: 8px;
@@ -714,12 +745,12 @@ onUnmounted(() => {
 
 .legend-name {
   flex: 1;
-  color: #606266;
+  color: #a0a0a0;
 }
 
 .legend-value {
   font-weight: 600;
-  color: #303133;
+  color: #ffffff;
 }
 
 .legend-percent {

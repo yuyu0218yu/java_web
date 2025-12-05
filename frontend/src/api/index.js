@@ -11,6 +11,14 @@ export const authApi = {
     })
   },
 
+  register(data) {
+    return request({
+      url: '/auth/register',
+      method: 'post',
+      data
+    })
+  },
+
   // 获取用户信息
   getUserInfo() {
     return request({

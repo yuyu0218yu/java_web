@@ -22,9 +22,9 @@
             class="sidebar-menu"
             router
             :collapse="isCollapse"
-            background-color="#1e1e2d"
-            text-color="#a2a3b7"
-            active-text-color="#ffffff"
+            background-color="#0a0a0a"
+            text-color="#a0a0a0"
+            active-text-color="#1a1a1a"
           >
             <el-menu-item index="/dashboard" class="menu-item-animated">
               <el-icon class="menu-icon"><House /></el-icon>
@@ -210,8 +210,8 @@ const handleLogout = () => {
 
 /* 侧边栏样式 */
 .sidebar {
-  background: linear-gradient(180deg, #1e1e2d 0%, #1a1a27 100%);
-  color: #a2a3b7;
+  background: #0a0a0a;
+  color: #a0a0a0;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   display: flex;
@@ -248,14 +248,14 @@ const handleLogout = () => {
 .logo-icon {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ffffff;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #1a1a1a;
   font-size: 18px;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
 }
 
 .logo h2 {
@@ -307,17 +307,17 @@ const handleLogout = () => {
 }
 
 .menu-item-animated:hover {
-  background: rgba(102, 126, 234, 0.1) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 :deep(.el-menu-item.is-active) {
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%) !important;
+  background: #ffffff !important;
   border-radius: 8px;
-  color: white !important;
+  color: #1a1a1a !important;
 }
 
 :deep(.el-menu-item.is-active .el-icon) {
-  color: white !important;
+  color: #1a1a1a !important;
 }
 
 .menu-icon {
@@ -360,19 +360,19 @@ const handleLogout = () => {
 .main-container {
   display: flex;
   flex-direction: column;
-  background: #f5f7fa;
+  background: #0a0a0a;
 }
 
 /* 顶部导航 */
 .header {
-  background-color: #fff;
-  border-bottom: 1px solid #e6e6e6;
+  background-color: #0a0a0a;
+  border-bottom: 1px solid #333;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
   height: 64px;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .header-left {
@@ -386,6 +386,18 @@ const handleLogout = () => {
   gap: 8px;
 }
 
+:deep(.el-breadcrumb__inner) {
+  color: #666 !important;
+}
+
+:deep(.el-breadcrumb__inner.is-link:hover) {
+  color: #fff !important;
+}
+
+:deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
+  color: #fff !important;
+}
+
 .header-action {
   width: 40px;
   height: 40px;
@@ -395,12 +407,12 @@ const handleLogout = () => {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s;
-  color: #606266;
+  color: #a0a0a0;
 }
 
 .header-action:hover {
-  background: #f5f7fa;
-  color: #667eea;
+  background: #1a1a1a;
+  color: #ffffff;
 }
 
 .notification-badge :deep(.el-badge__content) {
@@ -420,13 +432,14 @@ const handleLogout = () => {
 }
 
 .user-info:hover {
-  background: #f5f7fa;
+  background: #1a1a1a;
 }
 
 .user-avatar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #1a1a1a;
+  color: #ffffff;
   font-weight: 600;
+  border: 1px solid #333;
 }
 
 .user-details {
@@ -437,13 +450,13 @@ const handleLogout = () => {
 .user-name {
   font-size: 14px;
   font-weight: 500;
-  color: #303133;
+  color: #ffffff;
   line-height: 1.2;
 }
 
 .user-role {
   font-size: 12px;
-  color: #909399;
+  color: #666;
 }
 
 .dropdown-icon {
@@ -457,7 +470,7 @@ const handleLogout = () => {
 
 /* 主内容区 */
 .main-content {
-  background-color: #f5f7fa;
+  background-color: #0a0a0a;
   padding: 20px;
   flex: 1;
   overflow-y: auto;
@@ -469,15 +482,15 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border-top: 1px solid #e6e6e6;
-  color: #909399;
+  background: #0a0a0a;
+  border-top: 1px solid #333;
+  color: #666;
   font-size: 12px;
 }
 
 .footer .divider {
   margin: 0 12px;
-  color: #dcdfe6;
+  color: #333;
 }
 
 /* 页面切换动画 */

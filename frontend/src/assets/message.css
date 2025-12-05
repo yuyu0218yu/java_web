@@ -1,0 +1,28 @@
+.el-message {
+  background: rgba(26, 26, 26, 0.92);
+  color: #f5f7fa;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+}
+
+.el-message.is-closable .el-message__content,
+.el-message .el-message__content {
+  color: #f5f7fa;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.el-message--error .el-message__icon {
+  color: #ff7676;
+}
+
+.el-message--success {
+  background: rgba(22, 163, 74, 0.92);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.el-message--success .el-message__content,
+.el-message--success .el-message__icon {
+  color: #f5f7fa;
+}

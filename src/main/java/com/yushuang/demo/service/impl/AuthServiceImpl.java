@@ -3,9 +3,14 @@ package com.yushuang.demo.service.impl;
 import com.yushuang.demo.dto.LoginRequest;
 import com.yushuang.demo.dto.LoginResponse;
 import com.yushuang.demo.dto.UserInfo;
+import com.yushuang.demo.dto.RegisterRequest;
 import com.yushuang.demo.entity.User;
+import com.yushuang.demo.entity.Role;
+import com.yushuang.demo.entity.UserRole;
 import com.yushuang.demo.event.LoginEvent;
 import com.yushuang.demo.mapper.UserMapper;
+import com.yushuang.demo.mapper.RoleMapper;
+import com.yushuang.demo.mapper.UserRoleMapper;
 import com.yushuang.demo.service.AuthService;
 import com.yushuang.demo.util.IpUtil;
 import com.yushuang.demo.util.JwtUtil;
@@ -13,13 +18,12 @@ import com.yushuang.demo.util.WebUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -33,11 +37,13 @@ import java.util.List;
 @Slf4j
 public class AuthServiceImpl implements AuthService {
 
-    private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
     private final UserMapper userMapper;
+    private final RoleMapper roleMapper;
+    private final UserRoleMapper userRoleMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
@@ -46,22 +52,25 @@ public class AuthServiceImpl implements AuthService {
         String userAgent = request != null ? request.getHeader("User-Agent") : "";
 
         try {
-            // 验证用户名和密码
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    loginRequest.getUsername(),
-                    loginRequest.getPassword()
-                )
-            );
+            // 加载用户信息并验证密码
+            User user = userMapper.selectByUsername(loginRequest.getUsername());
+            if (user == null) {
+                throw new RuntimeException("用户不存在");
+            }
+
+            boolean matches = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
+            log.debug("登录密码匹配结果: {}", matches);
+            if (!matches) {
+                throw new RuntimeException("用户名或密码错误");
+            }
 
             // 获取用户详情
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
 
             // 生成JWT token
             String token = jwtUtil.generateToken(userDetails);
 
             // 获取用户信息
-            User user = userMapper.selectByUsername(loginRequest.getUsername());
             UserInfo userInfo = convertToUserInfo(user);
 
             // 获取用户权限（这里简化处理，实际应该从数据库获取）
@@ -77,7 +86,7 @@ public class AuthServiceImpl implements AuthService {
 
             return response;
 
-        } catch (AuthenticationException e) {
+        } catch (Exception e) {
             log.warn("用户 {} 登录失败: {}", loginRequest.getUsername(), e.getMessage());
 
             // 发布登录失败事件
@@ -107,6 +116,57 @@ public class AuthServiceImpl implements AuthService {
         }
 
         return convertToUserInfo(user);
+    }
+
+    /**
+     * 用户注册（默认普通用户）
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void register(RegisterRequest registerRequest) {
+        // 保留账号直接拒绝
+        if ("admin".equalsIgnoreCase(registerRequest.getUsername())) {
+            throw new RuntimeException("用户名已存在");
+        }
+
+        // 校验用户名是否重复
+        if (userMapper.checkUsernameExists(registerRequest.getUsername(), null) > 0) {
+            throw new RuntimeException("用户名已存在");
+        }
+
+        // 查找普通用户角色
+        Role userRole = roleMapper.selectByRoleCode("USER");
+        if (userRole == null || (userRole.getDeleted() != null && userRole.getDeleted() == 1)) {
+            throw new RuntimeException("普通用户角色不存在，请先初始化角色数据");
+        }
+
+        // 创建用户
+        User user = new User();
+        user.setUsername(registerRequest.getUsername());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setEmail(registerRequest.getEmail());
+        user.setPhone(registerRequest.getPhone());
+        user.setStatus(User.Status.ENABLED.getCode());
+
+        try {
+            int inserted = userMapper.insert(user);
+            if (inserted != 1) {
+                throw new RuntimeException("注册失败，请重试");
+            }
+        } catch (DuplicateKeyException e) {
+            throw new RuntimeException("用户名已存在");
+        }
+        try {
+            // 绑定普通用户角色
+            UserRole ur = new UserRole();
+            ur.setUserId(user.getId());
+            ur.setRoleId(userRole.getId());
+            userRoleMapper.insert(ur);
+        } catch (DuplicateKeyException e) {
+            throw new RuntimeException("用户名已存在");
+        }
+
+        log.info("用户 {} 注册成功", registerRequest.getUsername());
     }
 
     /**

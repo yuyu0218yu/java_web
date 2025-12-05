@@ -44,6 +44,22 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const register = async (data) => {
+    try {
+      await request({
+        url: '/auth/register',
+        method: 'post',
+        data,
+        suppressMessage: true
+      })
+      ElMessage.success('注册成功，请登录')
+      return true
+    } catch (error) {
+      ElMessage.error(error.message || '注册失败')
+      return false
+    }
+  }
+
   const logout = () => {
     token.value = ''
     user.value = null
@@ -103,6 +119,7 @@ export const useAuthStore = defineStore('auth', () => {
     
     // 方法
     login,
+    register,
     logout,
     refreshToken,
     getUserInfo

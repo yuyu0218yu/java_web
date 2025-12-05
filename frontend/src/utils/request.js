@@ -26,15 +26,15 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   response => {
-    // 对响应数据做点什么
     const res = response.data
-    
-    // 如果返回的状态码为200，说明接口请求成功，可以正常拿到数据
+    const { suppressMessage } = response.config || {}
+
     if (res.code === 200) {
       return res
     } else {
-      // 否则的话抛出错误
-      ElMessage.error(res.message || '请求失败')
+      if (!suppressMessage) {
+        ElMessage.error(res.message || '请求失败')
+      }
       return Promise.reject(new Error(res.message || '请求失败'))
     }
   },

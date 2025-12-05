@@ -81,6 +81,9 @@
         </el-form>
         
         <div class="login-footer">
+          <p class="register-link">
+            还没有账号？ <router-link to="/register">立即注册</router-link>
+          </p>
           <div class="divider">
             <span>其他登录方式</span>
           </div>
@@ -496,6 +499,22 @@ onUnmounted(() => {
 
 .login-footer {
   text-align: center;
+}
+
+.register-link {
+  margin: 0 0 16px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.register-link a {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
 }
 
 .divider {

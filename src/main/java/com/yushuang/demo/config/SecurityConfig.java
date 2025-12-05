@@ -111,7 +111,7 @@ public class SecurityConfig {
             // 配置请求授权
             .authorizeHttpRequests(auth -> auth
                 // 允许匿名访问的接口
-                .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/error").permitAll()
 

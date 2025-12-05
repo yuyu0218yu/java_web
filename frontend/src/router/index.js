@@ -9,6 +9,12 @@ const routes = [
     meta: { title: '登录', requiresAuth: false }
   },
   {
+    path: '/register',
+    name: 'Register',
+    component: () => import('@/views/Register.vue'),
+    meta: { title: '注册', requiresAuth: false }
+  },
+  {
     path: '/',
     component: () => import('@/layout/MainLayout.vue'),
     redirect: '/dashboard',
@@ -50,8 +56,8 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
   
-  // 如果访问登录页面且已登录，重定向到仪表盘
-  if (to.name === 'Login' && authStore.isAuthenticated) {
+  // 如果访问登录/注册页面且已登录，重定向到仪表盘
+  if ((to.name === 'Login' || to.name === 'Register') && authStore.isAuthenticated) {
     next('/dashboard')
     return
   }
