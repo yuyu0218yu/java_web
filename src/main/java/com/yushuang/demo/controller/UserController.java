@@ -4,6 +4,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yushuang.demo.common.PageResult;
 import com.yushuang.demo.common.Result;
+import com.yushuang.demo.dto.ChangePasswordRequest;
+import com.yushuang.demo.dto.CreateUserRequest;
+import com.yushuang.demo.dto.ResetPasswordRequest;
+import com.yushuang.demo.dto.UpdateUserRequest;
+import com.yushuang.demo.dto.UpdateUserStatusRequest;
+import com.yushuang.demo.dto.UserLoginResponse;
 import com.yushuang.demo.dto.LoginRequest;
 import com.yushuang.demo.entity.User;
 import com.yushuang.demo.mapper.UserMapper.UserWithRole;
@@ -13,10 +19,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +39,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "用户管理", description = "用户管理相关接口")
 public class UserController {
 
@@ -36,9 +47,10 @@ public class UserController {
 
     @GetMapping("/page")
     @Operation(summary = "分页查询用户列表")
+    @PreAuthorize("hasAuthority('user:view') or hasRole('ADMIN')")
     public Result<PageResult<UserWithRole>> getUserPage(
-            @Parameter(description = "页码") @RequestParam(defaultValue = "1") Integer current,
-            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Integer size) {
+            @Parameter(description = "页码") @RequestParam(defaultValue = "1") @Min(1) Integer current,
+            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size) {
 
         Page<UserWithRole> page = new Page<>(current, size);
         IPage<UserWithRole> result = userService.getUserPageWithRole(page);
@@ -55,6 +67,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @Operation(summary = "根据ID查询用户")
+    @PreAuthorize("hasAuthority('user:view') or hasRole('ADMIN')")
     public Result<User> getUserById(@Parameter(description = "用户ID") @PathVariable Long id) {
         User user = userService.getById(id);
         if (user == null) {
@@ -67,6 +80,7 @@ public class UserController {
 
     @GetMapping("/username/{username}")
     @Operation(summary = "根据用户名查询用户")
+    @PreAuthorize("hasAuthority('user:view') or hasRole('ADMIN')")
     public Result<UserWithRole> getUserByUsername(@Parameter(description = "用户名") @PathVariable String username) {
         UserWithRole user = userService.getUserWithRoleByUsername(username);
         if (user == null) {
@@ -79,6 +93,7 @@ public class UserController {
 
     @PostMapping
     @Operation(summary = "创建用户")
+    @PreAuthorize("hasAuthority('user:create') or hasRole('ADMIN')")
     public Result<Void> createUser(@Valid @RequestBody CreateUserRequest request) {
         try {
             User user = new User();
@@ -105,6 +120,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     @Operation(summary = "更新用户")
+    @PreAuthorize("hasAuthority('user:update') or hasRole('ADMIN')")
     public Result<Void> updateUser(
             @Parameter(description = "用户ID") @PathVariable Long id,
             @Valid @RequestBody UpdateUserRequest request) {
@@ -133,11 +149,12 @@ public class UserController {
 
     @PutMapping("/{id}/status")
     @Operation(summary = "更新用户状态")
+    @PreAuthorize("hasAuthority('user:update') or hasRole('ADMIN')")
     public Result<Void> updateUserStatus(
             @Parameter(description = "用户ID") @PathVariable Long id,
-            @RequestBody Map<String, Integer> request) {
+            @Valid @RequestBody UpdateUserStatusRequest request) {
         try {
-            Integer status = request.get("status");
+            Integer status = request.getStatus();
             boolean success = userService.updateUserStatus(id, status);
             if (success) {
                 return Result.success("用户状态更新成功");
@@ -151,9 +168,10 @@ public class UserController {
 
     @PutMapping("/{id}/password")
     @Operation(summary = "修改密码")
+    @PreAuthorize("hasAuthority('user:update') or hasRole('ADMIN')")
     public Result<Void> changePassword(
             @Parameter(description = "用户ID") @PathVariable Long id,
-            @RequestBody ChangePasswordRequest request) {
+            @Valid @RequestBody ChangePasswordRequest request) {
         try {
             boolean success = userService.changePassword(id, request.getOldPassword(), request.getNewPassword());
             if (success) {
@@ -168,16 +186,12 @@ public class UserController {
 
     @PutMapping("/{id}/reset-password")
     @Operation(summary = "重置密码")
+    @PreAuthorize("hasAuthority('user:update') or hasRole('ADMIN')")
     public Result<Void> resetPassword(
             @Parameter(description = "用户ID") @PathVariable Long id,
-            @RequestBody Map<String, String> request) {
+            @Valid @RequestBody ResetPasswordRequest request) {
         try {
-            String newPassword = request.get("newPassword");
-            if (!newPassword.matches(".{6,20}")) {
-                return Result.error("密码长度必须在6-20位之间");
-            }
-
-            boolean success = userService.resetPassword(id, newPassword);
+            boolean success = userService.resetPassword(id, request.getNewPassword());
             if (success) {
                 return Result.success("密码重置成功");
             } else {
@@ -190,6 +204,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "删除用户")
+    @PreAuthorize("hasAuthority('user:delete') or hasRole('ADMIN')")
     public Result<Void> deleteUser(@Parameter(description = "用户ID") @PathVariable Long id) {
         boolean success = userService.removeById(id);
         if (success) {
@@ -201,7 +216,7 @@ public class UserController {
 
     @PostMapping("/login")
     @Operation(summary = "用户登录")
-    public Result<LoginResponse> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+    public Result<UserLoginResponse> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         try {
             String loginIp = IpUtil.getClientIp(httpRequest);
             User user = userService.login(request.getUsername(), request.getPassword(), loginIp);
@@ -210,7 +225,7 @@ public class UserController {
                 return Result.error("用户名或密码错误");
             }
 
-            LoginResponse response = new LoginResponse();
+            UserLoginResponse response = new UserLoginResponse();
             response.setUserId(user.getId());
             response.setUsername(user.getUsername());
             response.setRealName(user.getRealName());
@@ -274,117 +289,5 @@ public class UserController {
 
         boolean exists = userService.checkPhoneExists(phone, excludeId);
         return Result.success(Map.of("exists", exists));
-    }
-
-    // 请求和响应对象
-    public static class CreateUserRequest {
-        private String username;
-        private String password;
-        private String realName;
-        private String email;
-        private String phone;
-        private Integer gender;
-        private java.time.LocalDate birthday;
-        private String avatar;
-        private String remark;
-        private Long roleId;
-
-        // getters and setters
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
-        public String getRealName() { return realName; }
-        public void setRealName(String realName) { this.realName = realName; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public String getPhone() { return phone; }
-        public void setPhone(String phone) { this.phone = phone; }
-        public Integer getGender() { return gender; }
-        public void setGender(Integer gender) { this.gender = gender; }
-        public java.time.LocalDate getBirthday() { return birthday; }
-        public void setBirthday(java.time.LocalDate birthday) { this.birthday = birthday; }
-        public String getAvatar() { return avatar; }
-        public void setAvatar(String avatar) { this.avatar = avatar; }
-        public String getRemark() { return remark; }
-        public void setRemark(String remark) { this.remark = remark; }
-        public Long getRoleId() { return roleId; }
-        public void setRoleId(Long roleId) { this.roleId = roleId; }
-    }
-
-    public static class UpdateUserRequest {
-        private String username;
-        private String realName;
-        private String email;
-        private String phone;
-        private Integer gender;
-        private java.time.LocalDate birthday;
-        private String avatar;
-        private String remark;
-        private List<Long> roleIds;
-
-        // getters and setters
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getRealName() { return realName; }
-        public void setRealName(String realName) { this.realName = realName; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public String getPhone() { return phone; }
-        public void setPhone(String phone) { this.phone = phone; }
-        public Integer getGender() { return gender; }
-        public void setGender(Integer gender) { this.gender = gender; }
-        public java.time.LocalDate getBirthday() { return birthday; }
-        public void setBirthday(java.time.LocalDate birthday) { this.birthday = birthday; }
-        public String getAvatar() { return avatar; }
-        public void setAvatar(String avatar) { this.avatar = avatar; }
-        public String getRemark() { return remark; }
-        public void setRemark(String remark) { this.remark = remark; }
-        public List<Long> getRoleIds() { return roleIds; }
-        public void setRoleIds(List<Long> roleIds) { this.roleIds = roleIds; }
-    }
-
-    public static class ChangePasswordRequest {
-        private String oldPassword;
-        private String newPassword;
-
-        public String getOldPassword() { return oldPassword; }
-        public void setOldPassword(String oldPassword) { this.oldPassword = oldPassword; }
-        public String getNewPassword() { return newPassword; }
-        public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
-    }
-
-    // 注：LoginRequest 已移至 com.yushuang.demo.dto.LoginRequest，不再重复定义
-
-    public static class LoginResponse {
-        private Long userId;
-        private String username;
-        private String realName;
-        private String email;
-        private String phone;
-        private String avatar;
-        private java.time.LocalDateTime lastLoginTime;
-        private String lastLoginIp;
-        private List<String> permissions;
-
-        // getters and setters
-        public Long getUserId() { return userId; }
-        public void setUserId(Long userId) { this.userId = userId; }
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getRealName() { return realName; }
-        public void setRealName(String realName) { this.realName = realName; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public String getPhone() { return phone; }
-        public void setPhone(String phone) { this.phone = phone; }
-        public String getAvatar() { return avatar; }
-        public void setAvatar(String avatar) { this.avatar = avatar; }
-        public java.time.LocalDateTime getLastLoginTime() { return lastLoginTime; }
-        public void setLastLoginTime(java.time.LocalDateTime lastLoginTime) { this.lastLoginTime = lastLoginTime; }
-        public String getLastLoginIp() { return lastLoginIp; }
-        public void setLastLoginIp(String lastLoginIp) { this.lastLoginIp = lastLoginIp; }
-        public List<String> getPermissions() { return permissions; }
-        public void setPermissions(List<String> permissions) { this.permissions = permissions; }
     }
 }

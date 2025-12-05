@@ -41,22 +41,35 @@ request.interceptors.response.use(
   error => {
     // 对响应错误做点什么
     if (error.response) {
-      switch (error.response.status) {
+      const { status, data } = error.response
+      const message = data?.message || ''
+      
+      switch (status) {
         case 401:
-          ElMessage.error('未授权，请登录')
-          // 可以在这里处理登出逻辑
+          ElMessage.error(message || '未授权，请登录')
+          // 清除本地存储的token和用户信息
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          localStorage.removeItem('permissions')
+          // 跳转到登录页
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login'
+          }
           break
         case 403:
-          ElMessage.error('拒绝访问')
+          ElMessage.error(message || '没有权限访问此资源')
           break
         case 404:
-          ElMessage.error('请求地址不存在')
+          ElMessage.error(message || '请求地址不存在')
+          break
+        case 400:
+          ElMessage.error(message || '参数错误')
           break
         case 500:
-          ElMessage.error('服务器内部错误')
+          ElMessage.error(message || '服务器内部错误')
           break
         default:
-          ElMessage.error(`连接错误${error.response.status}`)
+          ElMessage.error(message || `连接错误${status}`)
       }
     } else {
       ElMessage.error('连接到服务器失败')
