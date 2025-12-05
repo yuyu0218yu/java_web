@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yushuang.demo.common.PageResult;
 import com.yushuang.demo.common.Result;
+import com.yushuang.demo.dto.BatchDeleteRequest;
 import com.yushuang.demo.dto.ChangePasswordRequest;
 import com.yushuang.demo.dto.CreateUserRequest;
 import com.yushuang.demo.dto.ResetPasswordRequest;
@@ -136,7 +137,7 @@ public class UserController {
             user.setAvatar(request.getAvatar());
             user.setRemark(request.getRemark());
 
-            boolean success = userService.updateUser(user, request.getRoleIds());
+            boolean success = userService.updateUser(user, request.getEffectiveRoleIds());
             if (success) {
                 return Result.success("用户更新成功");
             } else {
@@ -211,6 +212,22 @@ public class UserController {
             return Result.success("用户删除成功");
         } else {
             return Result.error("用户删除失败");
+        }
+    }
+
+    @DeleteMapping("/batch")
+    @Operation(summary = "批量删除用户")
+    @PreAuthorize("hasAuthority('user:delete') or hasRole('ADMIN')")
+    public Result<Void> batchDeleteUsers(@Valid @RequestBody BatchDeleteRequest request) {
+        try {
+            boolean success = userService.removeByIds(request.getIds());
+            if (success) {
+                return Result.success("批量删除用户成功");
+            } else {
+                return Result.error("批量删除用户失败");
+            }
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
         }
     }
 
