@@ -234,6 +234,68 @@ export const permissionApi = {
   }
 }
 
+// 菜单管理API
+export const menuApi = {
+  // 获取菜单树
+  getMenuTree() {
+    return request({
+      url: '/menus/tree',
+      method: 'get'
+    })
+  },
+
+  // 获取菜单列表
+  getMenuList() {
+    return request({
+      url: '/menus/list',
+      method: 'get'
+    })
+  },
+
+  // 创建菜单
+  createMenu(data) {
+    return request({
+      url: '/menus',
+      method: 'post',
+      data
+    })
+  },
+
+  // 更新菜单
+  updateMenu(id, data) {
+    return request({
+      url: `/menus/${id}`,
+      method: 'put',
+      data
+    })
+  },
+
+  // 删除菜单
+  deleteMenu(id) {
+    return request({
+      url: `/menus/${id}`,
+      method: 'delete'
+    })
+  },
+
+  // 获取角色的菜单ID列表
+  getRoleMenuIds(roleId) {
+    return request({
+      url: `/menus/role/${roleId}`,
+      method: 'get'
+    })
+  },
+
+  // 分配角色菜单权限
+  saveRoleMenus(roleId, menuIds) {
+    return request({
+      url: `/menus/role/${roleId}`,
+      method: 'post',
+      data: menuIds
+    })
+  }
+}
+
 // 文件管理API
 export const fileApi = {
   // 上传单个文件

@@ -41,7 +41,13 @@ const routes = [
         path: 'permissions',
         name: 'Permissions',
         component: () => import('@/views/Permissions.vue'),
-        meta: { title: '权限管理', requiresAuth: true, requiredPermissions: ['permission:manage'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
+        meta: { title: '权限管理', requiresAuth: true, requiredPermissions: ['permission:view'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
+      },
+      {
+        path: 'menus',
+        name: 'Menus',
+        component: () => import('@/views/Menus.vue'),
+        meta: { title: '菜单管理', requiresAuth: true, requiredPermissions: ['menu:view'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
       },
       {
         path: 'profile',

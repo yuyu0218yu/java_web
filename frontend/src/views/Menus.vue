@@ -1,20 +1,20 @@
 <template>
-  <div class="permissions-page">
+  <div class="menus-page">
     <!-- 操作栏 -->
     <transition name="fade-slide-down" appear>
       <el-card class="action-card">
         <div class="action-header">
           <div class="page-title">
-            <el-icon class="title-icon"><Key /></el-icon>
-            <span>权限管理</span>
+            <el-icon class="title-icon"><Menu /></el-icon>
+            <span>菜单管理</span>
             <el-tag type="info" size="small" effect="plain" round style="margin-left: 12px;">
-              共 {{ getTotalPermissions() }} 个权限
+              共 {{ getTotalMenus() }} 个菜单
             </el-tag>
           </div>
           <div class="action-buttons">
             <el-button type="primary" @click="handleAdd()" class="action-btn primary-gradient">
               <el-icon><Plus /></el-icon>
-              新增权限
+              新增菜单
             </el-button>
             <el-button type="success" @click="handleExpandAll" class="action-btn">
               <el-icon><Expand /></el-icon>
@@ -24,16 +24,16 @@
               <el-icon><Fold /></el-icon>
               折叠全部
             </el-button>
-            <el-button type="info" @click="handleExport" class="action-btn">
-              <el-icon><Download /></el-icon>
-              导出
+            <el-button type="info" @click="handleRefresh" class="action-btn">
+              <el-icon><Refresh /></el-icon>
+              刷新
             </el-button>
           </div>
         </div>
       </el-card>
     </transition>
 
-    <!-- 权限树形表格 -->
+    <!-- 菜单树形表格 -->
     <transition name="fade-slide-up" appear>
       <el-card class="table-card">
         <el-table
@@ -47,61 +47,63 @@
           highlight-current-row
           stripe
         >
-          <el-table-column prop="permissionName" label="权限名称" width="250">
+          <el-table-column prop="menuName" label="菜单名称" width="220">
             <template #default="scope">
-              <div class="permission-name-cell">
-                <div class="permission-icon" :class="getTypeClass(scope.row.resourceType)">
-                  <el-icon v-if="scope.row.resourceType === 1"><Menu /></el-icon>
-                  <el-icon v-else-if="scope.row.resourceType === 2"><Pointer /></el-icon>
-                  <el-icon v-else><Connection /></el-icon>
+              <div class="menu-name-cell">
+                <div class="menu-icon" :class="getTypeClass(scope.row.menuType)">
+                  <el-icon v-if="scope.row.icon && scope.row.icon !== '#'">
+                    <component :is="scope.row.icon" />
+                  </el-icon>
+                  <el-icon v-else-if="scope.row.menuType === 'M'"><Folder /></el-icon>
+                  <el-icon v-else-if="scope.row.menuType === 'C'"><Document /></el-icon>
+                  <el-icon v-else><Pointer /></el-icon>
                 </div>
-                <span class="permission-name">{{ scope.row.permissionName }}</span>
+                <span class="menu-name">{{ scope.row.menuName }}</span>
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="permissionCode" label="权限编码" width="180">
-            <template #default="scope">
-              <el-tag effect="plain" size="small" type="info">
-                <el-icon style="margin-right: 4px;"><Tickets /></el-icon>
-                {{ scope.row.permissionCode }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="resourceType" label="类型" width="100">
-            <template #default="scope">
-              <el-tag :type="getTypeTagType(scope.row.resourceType)" size="small" effect="light" round>
-                {{ getTypeLabel(scope.row.resourceType) }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="path" label="路径" width="160">
+          <el-table-column prop="path" label="路由地址" width="150">
             <template #default="scope">
               <span v-if="scope.row.path" class="path-text">{{ scope.row.path }}</span>
               <span v-else class="no-path">-</span>
             </template>
           </el-table-column>
-          <el-table-column prop="component" label="组件" width="160">
+          <el-table-column prop="component" label="组件路径" width="140">
             <template #default="scope">
               <span v-if="scope.row.component" class="component-text">{{ scope.row.component }}</span>
               <span v-else class="no-component">-</span>
             </template>
           </el-table-column>
-          <el-table-column prop="icon" label="图标" width="80" align="center">
+          <el-table-column prop="perms" label="权限标识" width="140">
             <template #default="scope">
-              <el-icon v-if="scope.row.icon" :size="20" class="icon-preview">
-                <component :is="scope.row.icon" />
-              </el-icon>
-              <span v-else class="no-icon">-</span>
+              <el-tag v-if="scope.row.perms" effect="plain" size="small" type="info">
+                {{ scope.row.perms }}
+              </el-tag>
+              <span v-else class="no-perms">-</span>
             </template>
           </el-table-column>
-          <el-table-column prop="sortOrder" label="排序" width="80" align="center">
+          <el-table-column prop="menuType" label="类型" width="90" align="center">
             <template #default="scope">
-              <el-tag type="info" size="small" effect="plain" round>
-                {{ scope.row.sortOrder }}
+              <el-tag :type="getTypeTagType(scope.row.menuType)" size="small" effect="light" round>
+                {{ getTypeLabel(scope.row.menuType) }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="status" label="状态" width="90">
+          <el-table-column prop="orderNum" label="排序" width="70" align="center">
+            <template #default="scope">
+              <el-tag type="info" size="small" effect="plain" round>
+                {{ scope.row.orderNum }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="visible" label="可见" width="80" align="center">
+            <template #default="scope">
+              <el-tag :type="scope.row.visible === 1 ? 'success' : 'info'" size="small" effect="light">
+                {{ scope.row.visible === 1 ? '显示' : '隐藏' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="status" label="状态" width="90" align="center">
             <template #default="scope">
               <el-switch
                 v-model="scope.row.status"
@@ -117,7 +119,7 @@
           <el-table-column label="操作" width="180" fixed="right">
             <template #default="scope">
               <div class="operation-buttons">
-                <el-tooltip content="新增子权限" placement="top">
+                <el-tooltip content="新增子菜单" placement="top">
                   <el-button type="success" size="small" circle @click="handleAdd(scope.row)">
                     <el-icon><Plus /></el-icon>
                   </el-button>
@@ -139,13 +141,13 @@
       </el-card>
     </transition>
 
-    <!-- 权限表单对话框 -->
+    <!-- 菜单表单对话框 -->
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
       width="650px"
       @close="handleDialogClose"
-      class="permission-dialog"
+      class="menu-dialog"
       :close-on-click-modal="false"
     >
       <transition name="fade" appear>
@@ -158,12 +160,12 @@
         >
           <el-row :gutter="20">
             <el-col :span="24">
-              <el-form-item label="上级权限" prop="parentId">
+              <el-form-item label="上级菜单" prop="parentId">
                 <el-tree-select
                   v-model="form.parentId"
-                  :data="permissionTreeOptions"
+                  :data="menuTreeOptions"
                   :props="treeSelectProps"
-                  placeholder="请选择上级权限"
+                  placeholder="请选择上级菜单"
                   clearable
                   check-strictly
                   style="width: 100%"
@@ -171,51 +173,59 @@
               </el-form-item>
             </el-col>
             <el-col :span="24">
-              <el-form-item label="权限类型" prop="resourceType">
-                <el-radio-group v-model="form.resourceType" class="type-radio-group">
-                  <el-radio :label="1" border>
-                    <el-icon style="margin-right: 4px;"><Menu /></el-icon>
+              <el-form-item label="菜单类型" prop="menuType">
+                <el-radio-group v-model="form.menuType" class="type-radio-group">
+                  <el-radio label="M" border>
+                    <el-icon style="margin-right: 4px;"><Folder /></el-icon>
+                    目录
+                  </el-radio>
+                  <el-radio label="C" border>
+                    <el-icon style="margin-right: 4px;"><Document /></el-icon>
                     菜单
                   </el-radio>
-                  <el-radio :label="2" border>
+                  <el-radio label="F" border>
                     <el-icon style="margin-right: 4px;"><Pointer /></el-icon>
                     按钮
-                  </el-radio>
-                  <el-radio :label="3" border>
-                    <el-icon style="margin-right: 4px;"><Connection /></el-icon>
-                    接口
                   </el-radio>
                 </el-radio-group>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="权限名称" prop="permissionName">
-                <el-input v-model="form.permissionName" placeholder="请输入权限名称" />
+              <el-form-item label="菜单名称" prop="menuName">
+                <el-input v-model="form.menuName" placeholder="请输入菜单名称" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="权限编码" prop="permissionCode">
-                <el-input v-model="form.permissionCode" placeholder="如：user:list" />
+              <el-form-item label="排序" prop="orderNum">
+                <el-input-number v-model="form.orderNum" :min="0" :max="999" style="width: 100%;" />
               </el-form-item>
             </el-col>
-            <el-col :span="12" v-if="form.resourceType === 1">
-              <el-form-item label="路径" prop="path">
+            <el-col :span="12" v-if="form.menuType !== 'F'">
+              <el-form-item label="路由地址" prop="path">
                 <el-input v-model="form.path" placeholder="如：/users" />
               </el-form-item>
             </el-col>
-            <el-col :span="12" v-if="form.resourceType === 1">
-              <el-form-item label="组件" prop="component">
-                <el-input v-model="form.component" placeholder="如：views/Users" />
+            <el-col :span="12" v-if="form.menuType === 'C'">
+              <el-form-item label="组件路径" prop="component">
+                <el-input v-model="form.component" placeholder="如：Users" />
               </el-form-item>
             </el-col>
-            <el-col :span="12" v-if="form.resourceType === 1">
+            <el-col :span="12">
+              <el-form-item label="权限标识" prop="perms">
+                <el-input v-model="form.perms" placeholder="如：user:view" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12" v-if="form.menuType !== 'F'">
               <el-form-item label="图标" prop="icon">
                 <el-input v-model="form.icon" placeholder="图标名称" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="排序" prop="sortOrder">
-                <el-input-number v-model="form.sortOrder" :min="0" :max="999" style="width: 100%;" />
+              <el-form-item label="是否可见" prop="visible">
+                <el-radio-group v-model="form.visible">
+                  <el-radio :label="1">显示</el-radio>
+                  <el-radio :label="0">隐藏</el-radio>
+                </el-radio-group>
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -223,25 +233,13 @@
                 <el-radio-group v-model="form.status">
                   <el-radio :label="1">
                     <el-icon style="color: #67C23A;"><CircleCheck /></el-icon>
-                    启用
+                    正常
                   </el-radio>
                   <el-radio :label="0">
                     <el-icon style="color: #F56C6C;"><CircleClose /></el-icon>
-                    禁用
+                    停用
                   </el-radio>
                 </el-radio-group>
-              </el-form-item>
-            </el-col>
-            <el-col :span="24">
-              <el-form-item label="备注" prop="remark">
-                <el-input
-                  v-model="form.remark"
-                  type="textarea"
-                  :rows="2"
-                  placeholder="请输入备注信息"
-                  maxlength="200"
-                  show-word-limit
-                />
               </el-form-item>
             </el-col>
           </el-row>
@@ -267,10 +265,10 @@
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
-  Plus, Expand, Fold, Download, Edit, Delete, Menu, Pointer, 
-  Key, Connection, Tickets, CircleCheck, CircleClose, Close, Check
+  Plus, Expand, Fold, Refresh, Edit, Delete, Menu, Pointer, 
+  Folder, Document, CircleCheck, CircleClose, Close, Check
 } from '@element-plus/icons-vue'
-import { permissionApi } from '@/api'
+import { menuApi } from '@/api'
 
 // 响应式数据
 const loading = ref(false)
@@ -283,57 +281,54 @@ const formRef = ref()
 // 表单数据
 const form = reactive({
   id: null,
-  parentId: null,
-  resourceType: 1,
-  permissionName: '',
-  permissionCode: '',
+  parentId: 0,
+  menuType: 'C',
+  menuName: '',
   path: '',
   component: '',
+  perms: '',
   icon: '',
-  sortOrder: 0,
-  status: 1,
-  remark: ''
+  orderNum: 0,
+  visible: 1,
+  status: 1
 })
 
 // 表格数据
 const tableData = ref([])
-const permissionTreeOptions = ref([])
+const menuTreeOptions = ref([])
 
 // 树形选择组件配置
 const treeSelectProps = {
   children: 'children',
-  label: 'permissionName',
+  label: 'menuName',
   value: 'id'
 }
 
 // 表单验证规则
 const rules = {
-  resourceType: [
-    { required: true, message: '请选择权限类型', trigger: 'change' }
+  menuType: [
+    { required: true, message: '请选择菜单类型', trigger: 'change' }
   ],
-  permissionName: [
-    { required: true, message: '请输入权限名称', trigger: 'blur' }
+  menuName: [
+    { required: true, message: '请输入菜单名称', trigger: 'blur' }
   ],
-  permissionCode: [
-    { required: true, message: '请输入权限编码', trigger: 'blur' }
-  ],
-  sortOrder: [
+  orderNum: [
     { required: true, message: '请输入排序', trigger: 'blur' }
   ]
 }
 
-// 获取权限类型样式类
-const getTypeClass = (resourceType) => {
+// 获取菜单类型样式类
+const getTypeClass = (type) => {
   const classMap = {
-    1: 'type-menu',
-    2: 'type-button',
-    3: 'type-api'
+    'M': 'type-dir',
+    'C': 'type-menu',
+    'F': 'type-button'
   }
-  return classMap[resourceType] || ''
+  return classMap[type] || ''
 }
 
-// 获取权限总数
-const getTotalPermissions = () => {
+// 获取菜单总数
+const getTotalMenus = () => {
   const countNodes = (nodes) => {
     let count = 0
     nodes.forEach(node => {
@@ -351,7 +346,7 @@ const getTotalPermissions = () => {
 const loadData = async () => {
   loading.value = true
   try {
-    const response = await permissionApi.getPermissionTree()
+    const response = await menuApi.getMenuTree()
     const addStatusLoading = (nodes) => {
       return nodes.map(node => ({
         ...node,
@@ -360,9 +355,10 @@ const loadData = async () => {
       }))
     }
     tableData.value = addStatusLoading(response.data || [])
-    permissionTreeOptions.value = buildTreeSelectOptions(response.data || [])
+    menuTreeOptions.value = buildTreeSelectOptions(response.data || [])
   } catch (error) {
     console.error('加载数据失败:', error)
+    ElMessage.error('加载菜单数据失败')
   } finally {
     loading.value = false
   }
@@ -370,61 +366,61 @@ const loadData = async () => {
 
 const buildTreeSelectOptions = (data) => {
   return [
-    { id: 0, permissionName: '根权限', children: data }
+    { id: 0, menuName: '根菜单', children: data }
   ]
 }
 
-const getTypeLabel = (resourceType) => {
+const getTypeLabel = (type) => {
   const typeMap = {
-    1: '菜单',
-    2: '按钮',
-    3: '接口'
+    'M': '目录',
+    'C': '菜单',
+    'F': '按钮'
   }
-  return typeMap[resourceType] || resourceType
+  return typeMap[type] || type
 }
 
-const getTypeTagType = (resourceType) => {
+const getTypeTagType = (type) => {
   const typeMap = {
-    1: 'primary',
-    2: 'warning',
-    3: 'success'
+    'M': 'primary',
+    'C': 'success',
+    'F': 'warning'
   }
-  return typeMap[resourceType] || 'info'
+  return typeMap[type] || 'info'
 }
 
 const handleAdd = (row = null) => {
-  dialogTitle.value = row ? '新增子权限' : '新增权限'
+  dialogTitle.value = row ? '新增子菜单' : '新增菜单'
   dialogVisible.value = true
   Object.assign(form, {
     id: null,
     parentId: row ? row.id : 0,
-    resourceType: 1,
-    permissionName: '',
-    permissionCode: '',
+    menuType: 'C',
+    menuName: '',
     path: '',
     component: '',
+    perms: '',
     icon: '',
-    sortOrder: 0,
-    status: 1,
-    remark: ''
+    orderNum: 0,
+    visible: 1,
+    status: 1
   })
 }
 
 const handleEdit = (row) => {
-  dialogTitle.value = '编辑权限'
+  dialogTitle.value = '编辑菜单'
   dialogVisible.value = true
   Object.assign(form, {
     id: row.id,
     parentId: row.parentId,
-    resourceType: row.resourceType,
-    permissionName: row.permissionName,
-    permissionCode: row.permissionCode,
+    menuType: row.menuType,
+    menuName: row.menuName,
     path: row.path,
     component: row.component,
+    perms: row.perms,
     icon: row.icon,
-    sortOrder: row.sortOrder,
-    status: row.status,
-    remark: row.remark
+    orderNum: row.orderNum,
+    visible: row.visible,
+    status: row.status
   })
 }
 
@@ -436,11 +432,11 @@ const handleSubmit = async () => {
     submitLoading.value = true
     
     if (form.id) {
-      await permissionApi.updatePermission(form.id, form)
-      ElMessage.success('更新权限成功')
+      await menuApi.updateMenu(form.id, form)
+      ElMessage.success('更新菜单成功')
     } else {
-      await permissionApi.createPermission(form)
-      ElMessage.success('创建权限成功')
+      await menuApi.createMenu(form)
+      ElMessage.success('创建菜单成功')
     }
     
     dialogVisible.value = false
@@ -457,8 +453,8 @@ const handleDelete = async (row) => {
     const hasChildren = row.children && row.children.length > 0
     await ElMessageBox.confirm(
       `<div style="text-align: center;">
-        <p style="font-size: 16px; margin-bottom: 10px;">确定要删除权限 <strong>${row.name}</strong> 吗？</p>
-        ${hasChildren ? '<p style="color: #F56C6C; font-size: 13px;">⚠️ 该权限存在子权限，将一并删除</p>' : ''}
+        <p style="font-size: 16px; margin-bottom: 10px;">确定要删除菜单 <strong>${row.menuName}</strong> 吗？</p>
+        ${hasChildren ? '<p style="color: #F56C6C; font-size: 13px;">⚠️ 该菜单存在子菜单，将一并删除</p>' : ''}
       </div>`,
       '删除确认',
       {
@@ -469,8 +465,8 @@ const handleDelete = async (row) => {
       }
     )
     
-    await permissionApi.deletePermission(row.id)
-    ElMessage.success('删除权限成功')
+    await menuApi.deleteMenu(row.id)
+    ElMessage.success('删除菜单成功')
     loadData()
   } catch (error) {
     if (error !== 'cancel') {
@@ -482,12 +478,12 @@ const handleDelete = async (row) => {
 const handleStatusChange = async (row) => {
   row.statusLoading = true
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 500))
-    ElMessage.success(`${row.status === 1 ? '启用' : '禁用'}权限成功`)
+    await menuApi.updateMenu(row.id, { status: row.status })
+    ElMessage.success(`${row.status === 1 ? '启用' : '停用'}菜单成功`)
   } catch (error) {
     row.status = row.status === 1 ? 0 : 1
     console.error('更新状态失败:', error)
+    ElMessage.error('更新状态失败')
   } finally {
     row.statusLoading = false
   }
@@ -496,7 +492,6 @@ const handleStatusChange = async (row) => {
 const handleExpandAll = () => {
   nextTick(() => {
     if (tableRef.value) {
-      // 使用迭代方式避免递归深度问题
       const queue = [...tableData.value]
       while (queue.length > 0) {
         const row = queue.shift()
@@ -512,7 +507,6 @@ const handleExpandAll = () => {
 const handleCollapseAll = () => {
   nextTick(() => {
     if (tableRef.value) {
-      // 使用迭代方式避免递归深度问题
       const queue = [...tableData.value]
       while (queue.length > 0) {
         const row = queue.shift()
@@ -525,8 +519,8 @@ const handleCollapseAll = () => {
   })
 }
 
-const handleExport = () => {
-  ElMessage.info('导出功能开发中...')
+const handleRefresh = () => {
+  loadData()
 }
 
 const handleDialogClose = () => {
@@ -542,7 +536,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.permissions-page {
+.menus-page {
   padding: 0;
 }
 
@@ -601,7 +595,7 @@ onMounted(() => {
 .title-icon {
   font-size: 24px;
   margin-right: 8px;
-  color: #E6A23C;
+  color: #409EFF;
 }
 
 .action-buttons {
@@ -628,14 +622,14 @@ onMounted(() => {
   border-radius: 12px;
 }
 
-/* 权限名称单元格 */
-.permission-name-cell {
+/* 菜单名称单元格 */
+.menu-name-cell {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.permission-icon {
+.menu-icon {
   width: 32px;
   height: 32px;
   border-radius: 8px;
@@ -645,19 +639,19 @@ onMounted(() => {
   color: white;
 }
 
-.permission-icon.type-menu {
+.menu-icon.type-dir {
   background: linear-gradient(135deg, #409EFF 0%, #53a8ff 100%);
 }
 
-.permission-icon.type-button {
-  background: linear-gradient(135deg, #E6A23C 0%, #ebb563 100%);
-}
-
-.permission-icon.type-api {
+.menu-icon.type-menu {
   background: linear-gradient(135deg, #67C23A 0%, #85ce61 100%);
 }
 
-.permission-name {
+.menu-icon.type-button {
+  background: linear-gradient(135deg, #E6A23C 0%, #ebb563 100%);
+}
+
+.menu-name {
   font-weight: 500;
 }
 
@@ -670,12 +664,8 @@ onMounted(() => {
 
 .no-path,
 .no-component,
-.no-icon {
+.no-perms {
   color: #c0c4cc;
-}
-
-.icon-preview {
-  color: #409EFF;
 }
 
 .operation-buttons {
@@ -692,7 +682,7 @@ onMounted(() => {
 }
 
 /* 对话框样式 */
-.permission-dialog :deep(.el-dialog) {
+.menu-dialog :deep(.el-dialog) {
   border-radius: 16px;
 }
 
