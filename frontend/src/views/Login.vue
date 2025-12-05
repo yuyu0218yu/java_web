@@ -6,6 +6,12 @@
     
     <transition name="zoom-in" appear>
       <div class="login-box">
+        <!-- 主题切换按钮 -->
+        <div class="theme-toggle" @click="toggleTheme">
+          <el-icon v-if="isDarkMode"><Moon /></el-icon>
+          <el-icon v-else><Sunny /></el-icon>
+        </div>
+
         <div class="login-header">
           <div class="logo-icon">
             <el-icon><Lock /></el-icon>
@@ -115,7 +121,7 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { User, Lock, Unlock, ChatDotRound, OfficeBuilding, Message } from '@element-plus/icons-vue'
+import { User, Lock, Unlock, ChatDotRound, OfficeBuilding, Message, Moon, Sunny } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -131,9 +137,33 @@ const fullText = '安全 · 高效 · 便捷'
 let typingIndex = 0
 let typingTimer = null
 
+// 切换主题
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value
+  const html = document.documentElement
+  if (isDarkMode.value) {
+    html.classList.add('dark')
+    localStorage.setItem('theme', 'dark')
+  } else {
+    html.classList.remove('dark')
+    localStorage.setItem('theme', 'light')
+  }
+}
+
 // 检测系统暗色模式
 const checkDarkMode = () => {
-  isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+  const savedTheme = localStorage.getItem('theme')
+  if (savedTheme) {
+    isDarkMode.value = savedTheme === 'dark'
+    const html = document.documentElement
+    if (isDarkMode.value) {
+      html.classList.add('dark')
+    } else {
+      html.classList.remove('dark')
+    }
+  } else {
+    isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+  }
 }
 
 // 登录表单
@@ -211,16 +241,11 @@ onMounted(() => {
   
   // 初始化暗色模式检测
   checkDarkMode()
-  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-  mediaQuery.addEventListener('change', checkDarkMode)
 })
 
 onUnmounted(() => {
   if (typingTimer) {
     clearInterval(typingTimer)
-  }
-  if (mediaQuery) {
-    mediaQuery.removeEventListener('change', checkDarkMode)
   }
 })
 </script>
@@ -351,6 +376,27 @@ onUnmounted(() => {
   padding: 48px 40px;
   border: 1px solid var(--border-color);
   transition: all 0.3s ease;
+  position: relative;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all 0.3s;
+}
+
+.theme-toggle:hover {
+  background: var(--bg-primary);
+  color: var(--accent-color);
 }
 
 .login-header {

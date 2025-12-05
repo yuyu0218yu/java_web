@@ -429,9 +429,10 @@ onUnmounted(() => {
   transition: all 0.3s ease;
   border-radius: 12px;
   overflow: hidden;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  color: #ffffff;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  box-shadow: var(--card-shadow);
 }
 
 .stats-card:hover {
@@ -474,7 +475,7 @@ onUnmounted(() => {
 .count-up {
   font-size: 28px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
@@ -509,9 +510,9 @@ onUnmounted(() => {
   justify-content: space-between;
   margin-top: 16px;
   padding-top: 12px;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--border-color);
   font-size: 12px;
-  color: #909399;
+  color: var(--text-secondary);
 }
 
 .text-success {
@@ -526,22 +527,23 @@ onUnmounted(() => {
 .activity-card {
   border-radius: 12px;
   min-height: 400px;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  color: #ffffff;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  box-shadow: var(--card-shadow);
 }
 
 :deep(.el-card__header) {
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--border-color);
   padding: 15px 20px;
 }
 
 :deep(.el-table) {
   background-color: transparent;
-  --el-table-border-color: #333;
-  --el-table-header-bg-color: #1a1a1a;
-  --el-table-row-hover-bg-color: #2b2b3c;
-  color: #a0a0a0;
+  --el-table-border-color: var(--border-color);
+  --el-table-header-bg-color: var(--bg-secondary);
+  --el-table-row-hover-bg-color: var(--hover-bg);
+  color: var(--text-secondary);
 }
 
 :deep(.el-table tr) {
@@ -549,17 +551,17 @@ onUnmounted(() => {
 }
 
 :deep(.el-table th.el-table__cell) {
-  background-color: #1a1a1a;
-  border-bottom: 1px solid #333;
-  color: #ffffff;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 
 :deep(.el-table td.el-table__cell) {
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--border-color);
 }
 
 :deep(.el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell) {
-  background-color: #2b2b3c;
+  background-color: var(--hover-bg);
 }
 
 .header-title {
@@ -693,19 +695,19 @@ onUnmounted(() => {
   transform: translate(-50%, -50%);
   width: 100px;
   height: 100px;
-  background: #1a1a1a;
+  background: var(--bg-secondary);
   border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .pie-total {
   font-size: 28px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
 }
 
 .pie-label {
@@ -722,7 +724,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--border-color);
   transition: background 0.2s;
 }
 
@@ -731,7 +733,7 @@ onUnmounted(() => {
 }
 
 .legend-item:hover {
-  background: #2b2b3c;
+  background: var(--hover-bg);
   margin: 0 -12px;
   padding: 12px;
   border-radius: 8px;
@@ -745,12 +747,12 @@ onUnmounted(() => {
 
 .legend-name {
   flex: 1;
-  color: #a0a0a0;
+  color: var(--text-secondary);
 }
 
 .legend-value {
   font-weight: 600;
-  color: #ffffff;
+  color: var(--text-primary);
 }
 
 .legend-percent {

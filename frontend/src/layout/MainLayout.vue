@@ -22,9 +22,9 @@
             class="sidebar-menu"
             router
             :collapse="isCollapse"
-            background-color="#0a0a0a"
-            text-color="#a0a0a0"
-            active-text-color="#1a1a1a"
+            :background-color="isDark ? '#0a0a0a' : '#ffffff'"
+            :text-color="isDark ? '#a0a0a0' : '#303133'"
+            :active-text-color="isDark ? '#1a1a1a' : '#409EFF'"
           >
             <el-menu-item index="/dashboard" class="menu-item-animated">
               <el-icon class="menu-icon"><House /></el-icon>
@@ -78,6 +78,16 @@
             <el-tooltip content="全屏" placement="bottom">
               <div class="header-action" @click="toggleFullscreen">
                 <el-icon><FullScreen /></el-icon>
+              </div>
+            </el-tooltip>
+
+            <!-- 主题切换 -->
+            <el-tooltip :content="isDark ? '切换亮色' : '切换暗色'" placement="bottom">
+              <div class="header-action" @click="toggleTheme">
+                <el-icon>
+                  <Moon v-if="isDark" />
+                  <Sunny v-else />
+                </el-icon>
               </div>
             </el-tooltip>
             
@@ -145,17 +155,44 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { 
   House, User, UserFilled, Lock, ArrowDown, Key, Avatar,
-  HomeFilled, FullScreen, Bell, Setting, SwitchButton, DArrowLeft
+  HomeFilled, FullScreen, Bell, Setting, SwitchButton, DArrowLeft,
+  Moon, Sunny
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+
+// 主题切换
+const isDark = ref(true)
+const toggleTheme = () => {
+  isDark.value = !isDark.value
+  const html = document.documentElement
+  if (isDark.value) {
+    html.classList.add('dark')
+    localStorage.setItem('theme', 'dark')
+  } else {
+    html.classList.remove('dark')
+    localStorage.setItem('theme', 'light')
+  }
+}
+
+onMounted(() => {
+  const savedTheme = localStorage.getItem('theme')
+  const html = document.documentElement
+  if (savedTheme === 'light') {
+    isDark.value = false
+    html.classList.remove('dark')
+  } else {
+    isDark.value = true
+    html.classList.add('dark')
+  }
+})
 
 // 侧边栏折叠状态
 const isCollapse = ref(false)
@@ -210,13 +247,14 @@ const handleLogout = () => {
 
 /* 侧边栏样式 */
 .sidebar {
-  background: #0a0a0a;
-  color: #a0a0a0;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--bg-sidebar);
+  color: var(--sidebar-text);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  border-right: 1px solid var(--border-color);
 }
 
 .sidebar.is-collapse {
@@ -248,18 +286,18 @@ const handleLogout = () => {
 .logo-icon {
   width: 36px;
   height: 36px;
-  background: #ffffff;
+  background: var(--sidebar-active-bg);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1a1a1a;
+  color: var(--sidebar-active-text);
   font-size: 18px;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .logo h2 {
-  color: #fff;
+  color: var(--sidebar-text);
   font-size: 15px;
   margin: 0;
   font-weight: 600;
@@ -294,6 +332,7 @@ const handleLogout = () => {
 .sidebar-menu {
   border-right: none;
   padding: 12px 8px;
+  background-color: transparent !important;
 }
 
 .sidebar-menu:not(.el-menu--collapse) {
@@ -307,17 +346,21 @@ const handleLogout = () => {
 }
 
 .menu-item-animated:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: var(--hover-bg) !important;
+}
+
+:deep(.el-menu-item) {
+  color: var(--sidebar-text) !important;
 }
 
 :deep(.el-menu-item.is-active) {
-  background: #ffffff !important;
+  background: var(--sidebar-active-bg) !important;
   border-radius: 8px;
-  color: #1a1a1a !important;
+  color: var(--sidebar-active-text) !important;
 }
 
 :deep(.el-menu-item.is-active .el-icon) {
-  color: #1a1a1a !important;
+  color: var(--sidebar-active-text) !important;
 }
 
 .menu-icon {
@@ -360,19 +403,21 @@ const handleLogout = () => {
 .main-container {
   display: flex;
   flex-direction: column;
-  background: #0a0a0a;
+  background: var(--bg-primary);
+  transition: background-color 0.3s;
 }
 
 /* 顶部导航 */
 .header {
-  background-color: #0a0a0a;
-  border-bottom: 1px solid #333;
+  background-color: var(--bg-header);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
   height: 64px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--card-shadow);
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .header-left {
@@ -387,15 +432,15 @@ const handleLogout = () => {
 }
 
 :deep(.el-breadcrumb__inner) {
-  color: #666 !important;
+  color: var(--text-secondary) !important;
 }
 
 :deep(.el-breadcrumb__inner.is-link:hover) {
-  color: #fff !important;
+  color: var(--text-primary) !important;
 }
 
 :deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
-  color: #fff !important;
+  color: var(--text-primary) !important;
 }
 
 .header-action {
@@ -407,12 +452,12 @@ const handleLogout = () => {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s;
-  color: #a0a0a0;
+  color: var(--text-secondary);
 }
 
 .header-action:hover {
-  background: #1a1a1a;
-  color: #ffffff;
+  background: var(--hover-bg);
+  color: var(--text-primary);
 }
 
 .notification-badge :deep(.el-badge__content) {
@@ -432,14 +477,14 @@ const handleLogout = () => {
 }
 
 .user-info:hover {
-  background: #1a1a1a;
+  background: var(--hover-bg);
 }
 
 .user-avatar {
-  background: #1a1a1a;
-  color: #ffffff;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   font-weight: 600;
-  border: 1px solid #333;
+  border: 1px solid var(--border-color);
 }
 
 .user-details {
@@ -450,13 +495,13 @@ const handleLogout = () => {
 .user-name {
   font-size: 14px;
   font-weight: 500;
-  color: #ffffff;
+  color: var(--text-primary);
   line-height: 1.2;
 }
 
 .user-role {
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .dropdown-icon {
@@ -470,10 +515,11 @@ const handleLogout = () => {
 
 /* 主内容区 */
 .main-content {
-  background-color: #0a0a0a;
+  background-color: var(--bg-primary);
   padding: 20px;
   flex: 1;
   overflow-y: auto;
+  transition: background-color 0.3s;
 }
 
 /* 页脚 */
@@ -482,15 +528,16 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0a0a0a;
-  border-top: 1px solid #333;
-  color: #666;
+  background: var(--bg-header);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
   font-size: 12px;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .footer .divider {
   margin: 0 12px;
-  color: #333;
+  color: var(--border-color);
 }
 
 /* 页面切换动画 */
