@@ -1,5 +1,6 @@
 package com.yushuang.demo.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.yushuang.demo.entity.Permission;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.Map;
 /**
  * 权限服务接口
  */
-public interface PermissionService {
+public interface PermissionService extends IService<Permission> {
 
     /**
      * 获取所有权限列表
@@ -44,4 +45,14 @@ public interface PermissionService {
      * 根据角色ID获取权限列表
      */
     List<Permission> getPermissionsByRoleId(Long roleId);
+
+    /**
+     * 检查权限编码是否存在
+     */
+    boolean checkPermissionCodeExists(String permissionCode, Long excludeId);
+
+    /**
+     * 根据父级ID查询子权限
+     */
+    List<Permission> getPermissionsByParentId(Long parentId);
 }

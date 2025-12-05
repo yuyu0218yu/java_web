@@ -1,5 +1,6 @@
 package com.yushuang.demo.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yushuang.demo.entity.Menu;
 import com.yushuang.demo.entity.RoleMenu;
@@ -71,7 +72,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Override
     public List<Menu> getAllMenuTree() {
-        List<Menu> menus = menuMapper.selectAllMenus();
+        // 使用LambdaQueryWrapper替代自定义SQL
+        List<Menu> menus = lambdaQuery()
+                .orderByAsc(Menu::getParentId)
+                .orderByAsc(Menu::getOrderNum)
+                .list();
         return buildMenuTree(menus);
     }
 

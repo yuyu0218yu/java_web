@@ -2,8 +2,13 @@ package com.yushuang.demo.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.yushuang.demo.entity.FileInfo;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 文件服务接口
@@ -11,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @author yushuang
  * @since 2025-12-05
  */
-public interface FileService {
+public interface FileService extends IService<FileInfo> {
 
     /**
      * 文件上传
@@ -31,7 +36,7 @@ public interface FileService {
      * @param uploadUsername 上传用户名
      * @return 文件信息列表
      */
-    java.util.List<FileInfo> uploadFiles(MultipartFile[] files, Long uploadUserId, String uploadUsername);
+    List<FileInfo> uploadFiles(MultipartFile[] files, Long uploadUserId, String uploadUsername);
 
     /**
      * 文件下载
@@ -72,7 +77,7 @@ public interface FileService {
      */
     IPage<FileInfo> getFileList(Page<FileInfo> page, String fileName, String originalName,
                                String fileType, String uploadUsername, Integer status,
-                               java.time.LocalDateTime startTime, java.time.LocalDateTime endTime);
+                               LocalDateTime startTime, LocalDateTime endTime);
 
     /**
      * 根据ID获取文件信息
@@ -96,7 +101,7 @@ public interface FileService {
      * @param uploadUserId 用户ID
      * @return 统计信息
      */
-    java.util.Map<String, Object> getFileStatistics(Long uploadUserId);
+    Map<String, Object> getFileStatistics(Long uploadUserId);
 
     /**
      * 获取热门文件列表
@@ -104,7 +109,7 @@ public interface FileService {
      * @param limit 限制数量
      * @return 文件列表
      */
-    java.util.List<FileInfo> getHotFiles(Integer limit);
+    List<FileInfo> getHotFiles(Integer limit);
 
     /**
      * 获取最新文件列表
@@ -112,5 +117,5 @@ public interface FileService {
      * @param limit 限制数量
      * @return 文件列表
      */
-    java.util.List<FileInfo> getLatestFiles(Integer limit);
+    List<FileInfo> getLatestFiles(Integer limit);
 }
