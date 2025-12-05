@@ -9,8 +9,12 @@ import './assets/theme.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
 import router from './router'
+import { setupPermissionDirective } from './directives/permission'
 
 const app = createApp(App)
+
+// 注册权限指令
+setupPermissionDirective(app)
 
 // 注册所有图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

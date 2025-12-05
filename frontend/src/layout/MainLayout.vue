@@ -26,36 +26,8 @@
             :text-color="isDark ? '#a0a0a0' : '#303133'"
             :active-text-color="isDark ? '#1a1a1a' : '#409EFF'"
           >
-            <el-menu-item index="/dashboard" class="menu-item-animated">
-              <el-icon class="menu-icon"><House /></el-icon>
-              <template #title>
-                <span class="menu-title">仪表盘</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item index="/profile" class="menu-item-animated">
-              <el-icon class="menu-icon"><User /></el-icon>
-              <template #title>
-                <span class="menu-title">个人中心</span>
-              </template>
-            </el-menu-item>
-            <el-sub-menu v-if="isAdmin" index="user-management" class="menu-item-animated">
-              <template #title>
-                <el-icon class="menu-icon"><User /></el-icon>
-                <span class="menu-title">用户管理</span>
-              </template>
-              <el-menu-item v-if="canViewUsers" index="/users">
-                <el-icon><UserFilled /></el-icon>
-                <span>用户列表</span>
-              </el-menu-item>
-              <el-menu-item v-if="canManageRoles" index="/roles">
-                <el-icon><Avatar /></el-icon>
-                <span>角色管理</span>
-              </el-menu-item>
-              <el-menu-item v-if="canManagePermissions" index="/permissions">
-                <el-icon><Key /></el-icon>
-                <span>权限管理</span>
-              </el-menu-item>
-            </el-sub-menu>
+            <!-- 动态菜单 -->
+            <menu-item v-for="menu in menuStore.menus" :key="menu.id" :item="menu" />
           </el-menu>
         </el-scrollbar>
         
@@ -164,6 +136,8 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useMenuStore } from '@/stores/menu'
+import MenuItem from '@/components/MenuItem.vue'
 import { 
   House, User, UserFilled, Lock, ArrowDown, Key, Avatar,
   HomeFilled, FullScreen, Bell, Setting, SwitchButton, DArrowLeft,
@@ -173,23 +147,7 @@ import {
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
-
-// 角色权限计算属性
-const isAdmin = computed(() => {
-  return authStore.user?.roleCode === 'ADMIN' || authStore.user?.roleCode === 'SUPER_ADMIN'
-})
-
-const canViewUsers = computed(() => {
-  return isAdmin.value
-})
-
-const canManageRoles = computed(() => {
-  return isAdmin.value
-})
-
-const canManagePermissions = computed(() => {
-  return isAdmin.value
-})
+const menuStore = useMenuStore()
 
 // 主题切换
 const isDark = ref(true)
@@ -205,7 +163,8 @@ const toggleTheme = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // 初始化主题
   const savedTheme = localStorage.getItem('theme')
   const html = document.documentElement
   if (savedTheme === 'light') {
@@ -215,6 +174,9 @@ onMounted(() => {
     isDark.value = true
     html.classList.add('dark')
   }
+  
+  // 初始化动态菜单
+  await menuStore.init()
 })
 
 // 侧边栏折叠状态
