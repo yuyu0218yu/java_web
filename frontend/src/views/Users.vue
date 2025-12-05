@@ -107,7 +107,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="roleName" label="角色" width="120">
+          <el-table-column prop="roleName" label="角色" min-width="120">
             <template #default="scope">
               <el-tag 
                 :type="getRoleTagType(scope.row.roleName)" 
@@ -132,7 +132,7 @@
               />
             </template>
           </el-table-column>
-          <el-table-column prop="createTime" label="创建时间" width="180">
+          <el-table-column prop="createTime" label="创建时间" min-width="180">
             <template #default="scope">
               <div class="time-cell">
                 <el-icon><Clock /></el-icon>
