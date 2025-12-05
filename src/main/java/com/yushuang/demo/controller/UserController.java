@@ -9,12 +9,9 @@ import com.yushuang.demo.dto.CreateUserRequest;
 import com.yushuang.demo.dto.ResetPasswordRequest;
 import com.yushuang.demo.dto.UpdateUserRequest;
 import com.yushuang.demo.dto.UpdateUserStatusRequest;
-import com.yushuang.demo.dto.UserLoginResponse;
-import com.yushuang.demo.dto.LoginRequest;
 import com.yushuang.demo.entity.User;
 import com.yushuang.demo.mapper.UserMapper.UserWithRole;
 import com.yushuang.demo.service.UserService;
-import com.yushuang.demo.util.IpUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +20,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -211,37 +207,6 @@ public class UserController {
             return Result.success("用户删除成功");
         } else {
             return Result.error("用户删除失败");
-        }
-    }
-
-    @PostMapping("/login")
-    @Operation(summary = "用户登录")
-    public Result<UserLoginResponse> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
-        try {
-            String loginIp = IpUtil.getClientIp(httpRequest);
-            User user = userService.login(request.getUsername(), request.getPassword(), loginIp);
-
-            if (user == null) {
-                return Result.error("用户名或密码错误");
-            }
-
-            UserLoginResponse response = new UserLoginResponse();
-            response.setUserId(user.getId());
-            response.setUsername(user.getUsername());
-            response.setRealName(user.getRealName());
-            response.setEmail(user.getEmail());
-            response.setPhone(user.getPhone());
-            response.setAvatar(user.getAvatar());
-            response.setLastLoginTime(user.getLastLoginTime());
-            response.setLastLoginIp(user.getLastLoginIp());
-
-            // 获取用户权限
-            List<String> permissions = userService.getUserPermissions(user.getId());
-            response.setPermissions(permissions);
-
-            return Result.success("登录成功", response);
-        } catch (Exception e) {
-            return Result.error("登录失败: " + e.getMessage());
         }
     }
 
