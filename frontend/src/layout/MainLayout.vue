@@ -32,7 +32,13 @@
                 <span class="menu-title">仪表盘</span>
               </template>
             </el-menu-item>
-            <el-sub-menu v-if="canViewUsers || canManageRoles || canManagePermissions" index="user-management" class="menu-item-animated">
+            <el-menu-item index="/profile" class="menu-item-animated">
+              <el-icon class="menu-icon"><User /></el-icon>
+              <template #title>
+                <span class="menu-title">个人中心</span>
+              </template>
+            </el-menu-item>
+            <el-sub-menu v-if="isAdmin" index="user-management" class="menu-item-animated">
               <template #title>
                 <el-icon class="menu-icon"><User /></el-icon>
                 <span class="menu-title">用户管理</span>
