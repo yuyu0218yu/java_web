@@ -114,7 +114,7 @@
               </div>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item>
+                  <el-dropdown-item @click="$router.push('/profile')">
                     <el-icon><User /></el-icon>
                     个人中心
                   </el-dropdown-item>

@@ -5,6 +5,8 @@ import com.yushuang.demo.common.Result;
 import com.yushuang.demo.dto.LoginRequest;
 import com.yushuang.demo.dto.LoginResponse;
 import com.yushuang.demo.dto.RegisterRequest;
+import com.yushuang.demo.dto.ProfileUpdateRequest;
+import com.yushuang.demo.dto.ChangePasswordRequest;
 import com.yushuang.demo.service.AuthService;
 import com.yushuang.demo.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -77,6 +79,60 @@ public class AuthController {
         } catch (Exception e) {
             log.warn("获取用户信息失败: {}", e.getMessage());
             return Result.error(401, "获取用户信息失败");
+        }
+    }
+
+    /**
+     * 获取当前用户个人信息
+     */
+    @GetMapping("/profile")
+    @Operation(summary = "获取个人信息")
+    public Result<Object> getProfile() {
+        try {
+            return Result.success(authService.getCurrentUserProfile());
+        } catch (Exception e) {
+            log.warn("获取个人信息失败: {}", e.getMessage());
+            return Result.error(400, e.getMessage());
+        }
+    }
+
+    /**
+     * 更新当前用户个人信息
+     */
+    @PutMapping("/profile")
+    @Operation(summary = "更新个人信息")
+    public Result<Void> updateProfile(@Valid @RequestBody ProfileUpdateRequest request) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null) {
+                return Result.error(401, "未登录");
+            }
+            String username = authentication.getName();
+            authService.updateCurrentUserProfile(username, request.getNickname(), request.getPhone(), request.getAvatar());
+            return Result.success("更新成功");
+        } catch (Exception e) {
+            log.warn("更新个人信息失败: {}", e.getMessage());
+            return Result.error(400, e.getMessage());
+        }
+    }
+
+    /**
+     * 修改当前用户密码
+     */
+    @PutMapping("/profile/password")
+    @Operation(summary = "修改密码")
+    public Result<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null) {
+                return Result.error(401, "未登录");
+            }
+            String username = authentication.getName();
+            authService.changePassword(username, request.getOldPassword(), request.getNewPassword());
+            return Result.success("密码修改成功");
+        } catch (Exception e) {
+            log.warn("修改密码失败: {}", e.getMessage());
+            return Result.error(400, e.getMessage());
         }
     }
 

@@ -42,6 +42,12 @@ const routes = [
         name: 'Permissions',
         component: () => import('@/views/Permissions.vue'),
         meta: { title: '权限管理', requiresAuth: true }
+      },
+      {
+        path: 'profile',
+        name: 'Profile',
+        component: () => import('@/views/Profile.vue'),
+        meta: { title: '个人中心', requiresAuth: true }
       }
     ]
   }

@@ -42,6 +42,32 @@ export const authApi = {
       url: '/auth/logout',
       method: 'post'
     })
+  },
+
+  // 获取个人信息
+  getProfile() {
+    return request({
+      url: '/auth/profile',
+      method: 'get'
+    })
+  },
+
+  // 更新个人信息
+  updateProfile(data) {
+    return request({
+      url: '/auth/profile',
+      method: 'put',
+      data
+    })
+  },
+
+  // 修改密码
+  changePassword(data) {
+    return request({
+      url: '/auth/profile/password',
+      method: 'put',
+      data
+    })
   }
 }
 

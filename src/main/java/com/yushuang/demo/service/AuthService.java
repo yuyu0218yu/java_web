@@ -3,6 +3,7 @@ package com.yushuang.demo.service;
 import com.yushuang.demo.dto.LoginRequest;
 import com.yushuang.demo.dto.LoginResponse;
 import com.yushuang.demo.dto.RegisterRequest;
+import com.yushuang.demo.dto.UserInfo;
 
 /**
  * 认证服务接口
@@ -29,6 +30,21 @@ public interface AuthService {
      * @return 用户信息
      */
     Object getUserInfo(String username);
+
+    /**
+     * 获取当前用户信息（基于上下文）
+     */
+    UserInfo getCurrentUserProfile();
+
+    /**
+     * 更新当前用户信息（头像/昵称/手机号）
+     */
+    void updateCurrentUserProfile(String username, String nickname, String phone, String avatar);
+
+    /**
+     * 修改当前用户密码
+     */
+    void changePassword(String username, String oldPassword, String newPassword);
 
     /**
      * 刷新token

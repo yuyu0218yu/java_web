@@ -24,6 +24,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -118,6 +120,59 @@ public class AuthServiceImpl implements AuthService {
         return convertToUserInfo(user);
     }
 
+    @Override
+    public UserInfo getCurrentUserProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new RuntimeException("未登录");
+        }
+        String username = authentication.getName();
+        // 查询用户及角色信息
+        var userWithRole = userMapper.selectUserWithRoleByUsername(username);
+        if (userWithRole == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        return convertToUserInfoWithRole(userWithRole);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateCurrentUserProfile(String username, String nickname, String phone, String avatar) {
+        User user = userMapper.selectByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        // 手机号唯一性校验（如果传入）
+        if (phone != null && !phone.isBlank()) {
+            int exists = userMapper.checkPhoneExists(phone, user.getId());
+            if (exists > 0) {
+                throw new RuntimeException("手机号已被占用");
+            }
+            user.setPhone(phone);
+        }
+        if (nickname != null) {
+            user.setNickname(nickname);
+        }
+        if (avatar != null) {
+            user.setAvatar(avatar);
+        }
+        userMapper.updateById(user);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void changePassword(String username, String oldPassword, String newPassword) {
+        User user = userMapper.selectByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("旧密码不正确");
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userMapper.updateById(user);
+    }
+
     /**
      * 用户注册（默认普通用户）
      */
@@ -181,6 +236,23 @@ public class AuthServiceImpl implements AuthService {
         userInfo.setPhone(user.getPhone());
         userInfo.setNickname(user.getNickname());
         userInfo.setAvatar(user.getAvatar());
+
+        return userInfo;
+    }
+
+    /**
+     * 将UserWithRole实体转换为UserInfo DTO（包含角色信息）
+     */
+    private UserInfo convertToUserInfoWithRole(UserMapper.UserWithRole userWithRole) {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(userWithRole.getId());
+        userInfo.setUsername(userWithRole.getUsername());
+        userInfo.setEmail(userWithRole.getEmail());
+        userInfo.setPhone(userWithRole.getPhone());
+        userInfo.setNickname(userWithRole.getNickname());
+        userInfo.setAvatar(userWithRole.getAvatar());
+        userInfo.setRoleName(userWithRole.getRoleName());
+        userInfo.setCreatedAt(userWithRole.getCreateTime());
 
         return userInfo;
     }

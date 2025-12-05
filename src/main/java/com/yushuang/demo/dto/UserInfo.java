@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * 用户信息DTO
  */
@@ -18,4 +20,6 @@ public class UserInfo {
     private String phone;
     private String nickname;
     private String avatar;
+    private String roleName;
+    private LocalDateTime createdAt;
 }
