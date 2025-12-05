@@ -56,7 +56,7 @@ public class FileController {
     @PostMapping("/upload")
     @Operation(summary = "文件上传", description = "单个文件上传")
     @AuditLog(operation = "文件上传", module = "文件管理", saveRequestData = false)
-    @PreAuthorize("hasAuthority('file:upload') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('file:upload') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<FileInfo> uploadFile(@RequestParam("file") MultipartFile file,
                                      HttpServletRequest request) {
         try {
@@ -80,7 +80,7 @@ public class FileController {
     @PostMapping("/batch-upload")
     @Operation(summary = "批量文件上传", description = "多个文件上传")
     @AuditLog(operation = "批量文件上传", module = "文件管理", saveRequestData = false)
-    @PreAuthorize("hasAuthority('file:upload') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('file:upload') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<List<FileInfo>> uploadFiles(@RequestParam("files") MultipartFile[] files,
                                             HttpServletRequest request) {
         try {
@@ -210,7 +210,7 @@ public class FileController {
     @DeleteMapping("/{fileId}")
     @Operation(summary = "删除文件", description = "根据文件ID删除文件")
     @AuditLog(operation = "文件删除", module = "文件管理")
-    @PreAuthorize("hasAuthority('file:delete') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('file:delete') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<String> deleteFile(@PathVariable Long fileId) {
         try {
             boolean success = fileService.deleteFile(fileId);
@@ -231,7 +231,7 @@ public class FileController {
     @GetMapping("/list")
     @Operation(summary = "获取文件列表", description = "分页查询文件列表")
     @AuditLog(operation = "查询文件列表", module = "文件管理")
-    @PreAuthorize("hasAuthority('file:view') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('file:view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<IPage<FileInfo>> getFileList(
             @Parameter(description = "页码") @RequestParam(defaultValue = "1") @Min(1) Integer current,
             @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size,

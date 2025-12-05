@@ -47,7 +47,7 @@ public class UserController {
 
     @GetMapping("/page")
     @Operation(summary = "分页查询用户列表")
-    @PreAuthorize("hasAuthority('user:view') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('user:view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<PageResult<UserWithRole>> getUserPage(
             @Parameter(description = "页码") @RequestParam(defaultValue = "1") @Min(1) Integer current,
             @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size) {
@@ -67,7 +67,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @Operation(summary = "根据ID查询用户")
-    @PreAuthorize("hasAuthority('user:view') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('user:view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<User> getUserById(@Parameter(description = "用户ID") @PathVariable Long id) {
         User user = userService.getById(id);
         if (user == null) {
@@ -80,7 +80,7 @@ public class UserController {
 
     @GetMapping("/username/{username}")
     @Operation(summary = "根据用户名查询用户")
-    @PreAuthorize("hasAuthority('user:view') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('user:view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<UserWithRole> getUserByUsername(@Parameter(description = "用户名") @PathVariable String username) {
         UserWithRole user = userService.getUserWithRoleByUsername(username);
         if (user == null) {
@@ -93,7 +93,7 @@ public class UserController {
 
     @PostMapping
     @Operation(summary = "创建用户")
-    @PreAuthorize("hasAuthority('user:create') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('user:create') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<Void> createUser(@Valid @RequestBody CreateUserRequest request) {
         try {
             User user = new User();
@@ -120,7 +120,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     @Operation(summary = "更新用户")
-    @PreAuthorize("hasAuthority('user:update') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('user:update') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<Void> updateUser(
             @Parameter(description = "用户ID") @PathVariable Long id,
             @Valid @RequestBody UpdateUserRequest request) {
@@ -149,7 +149,7 @@ public class UserController {
 
     @PutMapping("/{id}/status")
     @Operation(summary = "更新用户状态")
-    @PreAuthorize("hasAuthority('user:update') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('user:update') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<Void> updateUserStatus(
             @Parameter(description = "用户ID") @PathVariable Long id,
             @Valid @RequestBody UpdateUserStatusRequest request) {
@@ -168,7 +168,7 @@ public class UserController {
 
     @PutMapping("/{id}/password")
     @Operation(summary = "修改密码")
-    @PreAuthorize("hasAuthority('user:update') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('user:update') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<Void> changePassword(
             @Parameter(description = "用户ID") @PathVariable Long id,
             @Valid @RequestBody ChangePasswordRequest request) {
@@ -186,7 +186,7 @@ public class UserController {
 
     @PutMapping("/{id}/reset-password")
     @Operation(summary = "重置密码")
-    @PreAuthorize("hasAuthority('user:update') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('user:update') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<Void> resetPassword(
             @Parameter(description = "用户ID") @PathVariable Long id,
             @Valid @RequestBody ResetPasswordRequest request) {
@@ -204,7 +204,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "删除用户")
-    @PreAuthorize("hasAuthority('user:delete') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('user:delete') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<Void> deleteUser(@Parameter(description = "用户ID") @PathVariable Long id) {
         boolean success = userService.removeById(id);
         if (success) {

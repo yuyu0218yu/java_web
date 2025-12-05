@@ -31,7 +31,7 @@ public class PermissionController {
      */
     @GetMapping
     @Operation(summary = "获取权限列表", description = "获取所有权限列表")
-    @PreAuthorize("hasAuthority('permission:view') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('permission:view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<List<Permission>> getPermissionList() {
         try {
             List<Permission> permissions = permissionService.getAllPermissions();
@@ -47,7 +47,7 @@ public class PermissionController {
      */
     @GetMapping("/tree")
     @Operation(summary = "获取权限树", description = "获取权限树形结构")
-    @PreAuthorize("hasAuthority('permission:view') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('permission:view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<List<Map<String, Object>>> getPermissionTree() {
         try {
             List<Map<String, Object>> tree = permissionService.getPermissionTree();
@@ -63,7 +63,7 @@ public class PermissionController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "获取权限详情", description = "根据ID获取权限详情")
-    @PreAuthorize("hasAuthority('permission:view') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('permission:view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<Permission> getPermissionById(@PathVariable Long id) {
         try {
             Permission permission = permissionService.getPermissionById(id);
@@ -79,7 +79,7 @@ public class PermissionController {
      */
     @PostMapping
     @Operation(summary = "创建权限", description = "创建新的权限")
-    @PreAuthorize("hasAuthority('permission:create') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('permission:create') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<Void> createPermission(@Valid @RequestBody Permission permission) {
         try {
             permissionService.createPermission(permission);
@@ -95,7 +95,7 @@ public class PermissionController {
      */
     @PutMapping("/{id}")
     @Operation(summary = "更新权限", description = "更新指定权限信息")
-    @PreAuthorize("hasAuthority('permission:update') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('permission:update') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<Void> updatePermission(@PathVariable Long id, @Valid @RequestBody Permission permission) {
         try {
             permissionService.updatePermission(id, permission);
@@ -111,7 +111,7 @@ public class PermissionController {
      */
     @DeleteMapping("/{id}")
     @Operation(summary = "删除权限", description = "删除指定权限")
-    @PreAuthorize("hasAuthority('permission:delete') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('permission:delete') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<Void> deletePermission(@PathVariable Long id) {
         try {
             permissionService.deletePermission(id);

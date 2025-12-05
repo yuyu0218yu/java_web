@@ -29,7 +29,7 @@ public class RoleController {
      */
     @GetMapping
     @Operation(summary = "获取角色列表", description = "返回所有启用状态的角色")
-    @PreAuthorize("hasAuthority('role:view') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('role:view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<List<Role>> listEnabledRoles() {
         List<Role> roles = roleMapper.selectEnabledRoles();
         return Result.success(roles);

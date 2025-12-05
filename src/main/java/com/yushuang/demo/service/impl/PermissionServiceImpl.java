@@ -52,7 +52,7 @@ public class PermissionServiceImpl implements PermissionService {
                     node.put("label", p.getPermissionName());
                     node.put("permissionName", p.getPermissionName());
                     node.put("permissionCode", p.getPermissionCode());
-                    node.put("permissionType", p.getPermissionType());
+                    node.put("resourceType", p.getResourceType());
                     node.put("parentId", p.getParentId());
                     node.put("path", p.getPath());
                     node.put("component", p.getComponent());

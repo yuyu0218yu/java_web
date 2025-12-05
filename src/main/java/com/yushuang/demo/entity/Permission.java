@@ -41,10 +41,10 @@ public class Permission implements Serializable {
     private String permissionCode;
 
     /**
-     * 权限类型：1-菜单，2-按钮，3-接口
+     * 资源类型：1-菜单，2-按钮，3-接口
      */
-    @TableField("permission_type")
-    private Integer permissionType;
+    @TableField("resource_type")
+    private Integer resourceType;
 
     /**
      * 父级权限ID
