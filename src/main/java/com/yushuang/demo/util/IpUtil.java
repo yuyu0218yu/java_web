@@ -9,29 +9,38 @@ import java.net.UnknownHostException;
  */
 public class IpUtil {
 
+    private static final String UNKNOWN = "unknown";
+    
+    /**
+     * IP请求头列表，按优先级排序
+     */
+    private static final String[] IP_HEADERS = {
+        "X-Forwarded-For",
+        "Proxy-Client-IP",
+        "WL-Proxy-Client-IP",
+        "HTTP_CLIENT_IP",
+        "HTTP_X_FORWARDED_FOR"
+    };
+
     /**
      * 获取客户端IP地址
      */
     public static String getClientIp() {
-        HttpServletRequest request = WebUtil.getRequest();
+        return getClientIp(WebUtil.getRequest());
+    }
+
+    /**
+     * 获取客户端IP地址（从HttpServletRequest）
+     */
+    public static String getClientIp(HttpServletRequest request) {
         if (request == null) {
-            return "unknown";
+            return UNKNOWN;
         }
 
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_CLIENT_IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        String ip = extractIpFromHeaders(request);
+        
+        // 如果从请求头未获取到，使用远程地址
+        if (isEmptyOrUnknown(ip)) {
             ip = request.getRemoteAddr();
         }
 
@@ -42,38 +51,25 @@ public class IpUtil {
 
         return ip;
     }
-
+    
     /**
-     * 获取客户端IP地址（从HttpServletRequest）
+     * 从请求头中提取IP地址
      */
-    public static String getClientIp(HttpServletRequest request) {
-        if (request == null) {
-            return "unknown";
+    private static String extractIpFromHeaders(HttpServletRequest request) {
+        for (String header : IP_HEADERS) {
+            String ip = request.getHeader(header);
+            if (!isEmptyOrUnknown(ip)) {
+                return ip;
+            }
         }
-
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_CLIENT_IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-
-        // 如果是多个IP地址，取第一个
-        if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim();
-        }
-
-        return ip;
+        return null;
+    }
+    
+    /**
+     * 判断IP是否为空或unknown
+     */
+    private static boolean isEmptyOrUnknown(String ip) {
+        return ip == null || ip.isEmpty() || UNKNOWN.equalsIgnoreCase(ip);
     }
 
     /**

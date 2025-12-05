@@ -1,6 +1,9 @@
 package com.yushuang.demo.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.yushuang.demo.common.enums.CodeEnum;
+import com.yushuang.demo.common.enums.EnableStatus;
+import com.yushuang.demo.util.FileSizeUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -119,10 +122,11 @@ public class FileInfo implements Serializable {
 
     /**
      * 状态枚举
+     * 使用通用启用状态枚举，保留此内部类以维持向后兼容
      */
-    public enum Status {
-        DISABLED(0, "禁用"),
-        ENABLED(1, "启用");
+    public enum Status implements CodeEnum<Integer> {
+        DISABLED(EnableStatus.DISABLED.getCode(), EnableStatus.DISABLED.getDesc()),
+        ENABLED(EnableStatus.ENABLED.getCode(), EnableStatus.ENABLED.getDesc());
 
         private final Integer code;
         private final String desc;
@@ -132,21 +136,18 @@ public class FileInfo implements Serializable {
             this.desc = desc;
         }
 
+        @Override
         public Integer getCode() {
             return code;
         }
 
+        @Override
         public String getDesc() {
             return desc;
         }
 
         public static Status getByCode(Integer code) {
-            for (Status status : values()) {
-                if (status.code.equals(code)) {
-                    return status;
-                }
-            }
-            return DISABLED;
+            return CodeEnum.getByCode(Status.class, code, DISABLED);
         }
     }
 
@@ -154,19 +155,6 @@ public class FileInfo implements Serializable {
      * 获取文件大小的友好显示
      */
     public String getFileSizeDisplay() {
-        if (fileSize == null) {
-            return "0 B";
-        }
-
-        long size = fileSize;
-        String[] units = {"B", "KB", "MB", "GB", "TB"};
-        int unitIndex = 0;
-
-        while (size >= 1024 && unitIndex < units.length - 1) {
-            size /= 1024;
-            unitIndex++;
-        }
-
-        return String.format("%.2f %s", (double) size, units[unitIndex]);
+        return FileSizeUtil.formatFileSize(fileSize);
     }
 }

@@ -6,6 +6,7 @@ import com.yushuang.demo.config.FileUploadConfig;
 import com.yushuang.demo.entity.FileInfo;
 import com.yushuang.demo.mapper.FileInfoMapper;
 import com.yushuang.demo.service.FileService;
+import com.yushuang.demo.util.FileSizeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +15,6 @@ import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -306,21 +306,9 @@ public class FileServiceImpl implements FileService {
 
     /**
      * 格式化文件大小
+     * 委托给FileSizeUtil处理，避免重复代码
      */
     private String formatFileSize(Long size) {
-        if (size == null || size == 0) {
-            return "0 B";
-        }
-
-        String[] units = {"B", "KB", "MB", "GB", "TB"};
-        int unitIndex = 0;
-        double fileSize = size.doubleValue();
-
-        while (fileSize >= 1024 && unitIndex < units.length - 1) {
-            fileSize /= 1024;
-            unitIndex++;
-        }
-
-        return String.format("%.2f %s", fileSize, units[unitIndex]);
+        return FileSizeUtil.formatFileSize(size);
     }
 }
