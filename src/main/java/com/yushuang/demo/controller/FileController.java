@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yushuang.demo.annotation.AuditLog;
 import com.yushuang.demo.common.Result;
 import com.yushuang.demo.entity.FileInfo;
+import com.yushuang.demo.exception.ResourceNotFoundException;
 import com.yushuang.demo.service.FileService;
-import com.yushuang.demo.util.WebUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,18 +15,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +54,7 @@ public class FileController {
     @PostMapping("/upload")
     @Operation(summary = "文件上传", description = "单个文件上传")
     @AuditLog(operation = "文件上传", module = "文件管理", saveRequestData = false)
+    @PreAuthorize("hasAuthority('file:upload') or hasRole('ADMIN')")
     public Result<FileInfo> uploadFile(@RequestParam("file") MultipartFile file,
                                      HttpServletRequest request) {
         try {
@@ -74,6 +78,7 @@ public class FileController {
     @PostMapping("/batch-upload")
     @Operation(summary = "批量文件上传", description = "多个文件上传")
     @AuditLog(operation = "批量文件上传", module = "文件管理", saveRequestData = false)
+    @PreAuthorize("hasAuthority('file:upload') or hasRole('ADMIN')")
     public Result<List<FileInfo>> uploadFiles(@RequestParam("files") MultipartFile[] files,
                                             HttpServletRequest request) {
         try {
@@ -97,15 +102,23 @@ public class FileController {
     @GetMapping("/{fileId}/download")
     @Operation(summary = "文件下载", description = "根据文件ID下载文件")
     @AuditLog(operation = "文件下载", module = "文件管理")
-    public ResponseEntity<Resource> downloadFile(@PathVariable Long fileId,
+    public ResponseEntity<?> downloadFile(@PathVariable Long fileId,
                                                 HttpServletRequest request) {
         try {
             FileInfo fileInfo = fileService.downloadFile(fileId);
+            if (fileInfo == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Result.notFound("文件不存在"));
+            }
+            
             Resource resource = loadFileAsResource(fileInfo.getFilePath());
 
             // 检查文件是否存在
             if (!resource.exists()) {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Result.notFound("文件不存在或已被删除"));
             }
 
             // 确定Content-Type
@@ -132,7 +145,9 @@ public class FileController {
 
         } catch (Exception e) {
             log.error("文件下载失败: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Result.error("文件下载失败: " + e.getMessage()));
         }
     }
 
@@ -142,15 +157,23 @@ public class FileController {
     @GetMapping("/{fileId}/preview")
     @Operation(summary = "文件预览", description = "根据文件ID预览文件")
     @AuditLog(operation = "文件预览", module = "文件管理")
-    public ResponseEntity<Resource> previewFile(@PathVariable Long fileId,
+    public ResponseEntity<?> previewFile(@PathVariable Long fileId,
                                               HttpServletRequest request) {
         try {
             FileInfo fileInfo = fileService.previewFile(fileId);
+            if (fileInfo == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Result.notFound("文件不存在"));
+            }
+            
             Resource resource = loadFileAsResource(fileInfo.getFilePath());
 
             // 检查文件是否存在
             if (!resource.exists()) {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Result.notFound("文件不存在或已被删除"));
             }
 
             // 确定Content-Type
@@ -173,7 +196,9 @@ public class FileController {
 
         } catch (Exception e) {
             log.error("文件预览失败: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Result.error("文件预览失败: " + e.getMessage()));
         }
     }
 
@@ -183,6 +208,7 @@ public class FileController {
     @DeleteMapping("/{fileId}")
     @Operation(summary = "删除文件", description = "根据文件ID删除文件")
     @AuditLog(operation = "文件删除", module = "文件管理")
+    @PreAuthorize("hasAuthority('file:delete') or hasRole('ADMIN')")
     public Result<String> deleteFile(@PathVariable Long fileId) {
         try {
             boolean success = fileService.deleteFile(fileId);
@@ -203,9 +229,10 @@ public class FileController {
     @GetMapping("/list")
     @Operation(summary = "获取文件列表", description = "分页查询文件列表")
     @AuditLog(operation = "查询文件列表", module = "文件管理")
+    @PreAuthorize("hasAuthority('file:view') or hasRole('ADMIN')")
     public Result<IPage<FileInfo>> getFileList(
-            @Parameter(description = "页码") @RequestParam(defaultValue = "1") Integer current,
-            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Integer size,
+            @Parameter(description = "页码") @RequestParam(defaultValue = "1") @Min(1) Integer current,
+            @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size,
             @Parameter(description = "文件名") @RequestParam(required = false) String fileName,
             @Parameter(description = "原始文件名") @RequestParam(required = false) String originalName,
             @Parameter(description = "文件类型") @RequestParam(required = false) String fileType,
@@ -215,6 +242,11 @@ public class FileController {
             @Parameter(description = "结束时间") @RequestParam(required = false) String endTime) {
 
         try {
+            // 兜底限制
+            if (current < 1) current = 1;
+            if (size < 1) size = 10;
+            if (size > 100) size = 100;
+            
             Page<FileInfo> page = new Page<>(current, size);
 
             LocalDateTime start = null;
