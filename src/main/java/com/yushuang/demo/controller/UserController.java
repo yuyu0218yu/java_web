@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yushuang.demo.common.PageResult;
 import com.yushuang.demo.common.Result;
+import com.yushuang.demo.dto.ChangePasswordRequest;
 import com.yushuang.demo.dto.CreateUserRequest;
 import com.yushuang.demo.dto.ResetPasswordRequest;
 import com.yushuang.demo.dto.UpdateUserRequest;
@@ -19,6 +20,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +39,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "用户管理", description = "用户管理相关接口")
 public class UserController {
 
@@ -48,11 +51,6 @@ public class UserController {
     public Result<PageResult<UserWithRole>> getUserPage(
             @Parameter(description = "页码") @RequestParam(defaultValue = "1") @Min(1) Integer current,
             @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") @Min(1) @Max(100) Integer size) {
-
-        // 兜底限制
-        if (current < 1) current = 1;
-        if (size < 1) size = 10;
-        if (size > 100) size = 100;
 
         Page<UserWithRole> page = new Page<>(current, size);
         IPage<UserWithRole> result = userService.getUserPageWithRole(page);
@@ -173,7 +171,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('user:update') or hasRole('ADMIN')")
     public Result<Void> changePassword(
             @Parameter(description = "用户ID") @PathVariable Long id,
-            @Valid @RequestBody com.yushuang.demo.dto.ChangePasswordRequest request) {
+            @Valid @RequestBody ChangePasswordRequest request) {
         try {
             boolean success = userService.changePassword(id, request.getOldPassword(), request.getNewPassword());
             if (success) {

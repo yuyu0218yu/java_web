@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,6 +44,7 @@ import java.util.Map;
 @RequestMapping("/api/files")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 @Tag(name = "文件管理", description = "文件上传下载相关接口")
 public class FileController {
 
@@ -242,11 +244,6 @@ public class FileController {
             @Parameter(description = "结束时间") @RequestParam(required = false) String endTime) {
 
         try {
-            // 兜底限制
-            if (current < 1) current = 1;
-            if (size < 1) size = 10;
-            if (size > 100) size = 100;
-            
             Page<FileInfo> page = new Page<>(current, size);
 
             LocalDateTime start = null;
