@@ -1,5 +1,7 @@
 package com.yushuang.demo.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yushuang.demo.entity.Permission;
 import com.yushuang.demo.mapper.PermissionMapper;
 import com.yushuang.demo.service.PermissionService;
@@ -7,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,19 +22,19 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PermissionServiceImpl implements PermissionService {
+public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permission> implements PermissionService {
 
     private final PermissionMapper permissionMapper;
 
     @Override
     public List<Permission> getAllPermissions() {
-        return permissionMapper.selectList(null);
+        return list();
     }
 
     @Override
     public List<Map<String, Object>> getPermissionTree() {
         // 查询所有权限
-        List<Permission> allPermissions = permissionMapper.selectList(null);
+        List<Permission> allPermissions = list();
 
         // 构建树形结构
         return buildTree(allPermissions, 0L);
@@ -74,7 +77,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public Permission getPermissionById(Long id) {
-        Permission permission = permissionMapper.selectById(id);
+        Permission permission = getById(id);
         if (permission == null) {
             throw new RuntimeException("权限不存在");
         }
@@ -82,15 +85,36 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
+    public boolean checkPermissionCodeExists(String permissionCode, Long excludeId) {
+        if (!StringUtils.hasText(permissionCode)) {
+            return false;
+        }
+        LambdaQueryWrapper<Permission> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Permission::getPermissionCode, permissionCode);
+        if (excludeId != null) {
+            wrapper.ne(Permission::getId, excludeId);
+        }
+        return count(wrapper) > 0;
+    }
+
+    @Override
+    public List<Permission> getPermissionsByParentId(Long parentId) {
+        return lambdaQuery()
+                .eq(Permission::getParentId, parentId)
+                .orderByAsc(Permission::getSortOrder)
+                .list();
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void createPermission(Permission permission) {
         // 检查权限编码是否重复
-        if (permissionMapper.checkPermissionCodeExists(permission.getPermissionCode(), null) > 0) {
+        if (checkPermissionCodeExists(permission.getPermissionCode(), null)) {
             throw new RuntimeException("权限编码已存在");
         }
 
-        int result = permissionMapper.insert(permission);
-        if (result != 1) {
+        boolean result = save(permission);
+        if (!result) {
             throw new RuntimeException("创建权限失败");
         }
 
@@ -101,19 +125,19 @@ public class PermissionServiceImpl implements PermissionService {
     @Transactional(rollbackFor = Exception.class)
     public void updatePermission(Long id, Permission permission) {
         // 检查权限是否存在
-        Permission existPermission = permissionMapper.selectById(id);
+        Permission existPermission = getById(id);
         if (existPermission == null) {
             throw new RuntimeException("权限不存在");
         }
 
         // 检查权限编码是否重复
-        if (permissionMapper.checkPermissionCodeExists(permission.getPermissionCode(), id) > 0) {
+        if (checkPermissionCodeExists(permission.getPermissionCode(), id)) {
             throw new RuntimeException("权限编码已存在");
         }
 
         permission.setId(id);
-        int result = permissionMapper.updateById(permission);
-        if (result != 1) {
+        boolean result = updateById(permission);
+        if (!result) {
             throw new RuntimeException("更新权限失败");
         }
 
@@ -124,19 +148,19 @@ public class PermissionServiceImpl implements PermissionService {
     @Transactional(rollbackFor = Exception.class)
     public void deletePermission(Long id) {
         // 检查权限是否存在
-        Permission permission = permissionMapper.selectById(id);
+        Permission permission = getById(id);
         if (permission == null) {
             throw new RuntimeException("权限不存在");
         }
 
         // 检查是否有子权限
-        List<Permission> children = permissionMapper.selectPermissionsByParentId(id);
+        List<Permission> children = getPermissionsByParentId(id);
         if (!children.isEmpty()) {
             throw new RuntimeException("该权限下有子权限，无法删除");
         }
 
-        int result = permissionMapper.deleteById(id);
-        if (result != 1) {
+        boolean result = removeById(id);
+        if (!result) {
             throw new RuntimeException("删除权限失败");
         }
 

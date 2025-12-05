@@ -1,7 +1,8 @@
 package com.yushuang.demo.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yushuang.demo.entity.Role;
@@ -233,7 +234,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!StringUtils.hasText(username)) {
             return false;
         }
-        return userMapper.checkUsernameExists(username, excludeId) > 0;
+        return checkFieldExists(User::getUsername, username, excludeId);
     }
 
     @Override
@@ -241,7 +242,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!StringUtils.hasText(email)) {
             return false;
         }
-        return userMapper.checkEmailExists(email, excludeId) > 0;
+        return checkFieldExists(User::getEmail, email, excludeId);
     }
 
     @Override
@@ -249,7 +250,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!StringUtils.hasText(phone)) {
             return false;
         }
-        return userMapper.checkPhoneExists(phone, excludeId) > 0;
+        return checkFieldExists(User::getPhone, phone, excludeId);
+    }
+
+    /**
+     * 通用字段唯一性检查方法
+     * 使用LambdaQueryWrapper替换自定义SQL
+     * 
+     * @param field 要检查的字段
+     * @param value 字段值
+     * @param excludeId 要排除的ID（用于更新时排除自身，传null则不排除任何记录）
+     * @return 是否存在
+     */
+    private <V> boolean checkFieldExists(SFunction<User, V> field, V value, Long excludeId) {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(field, value);
+        if (excludeId != null) {
+            wrapper.ne(User::getId, excludeId);
+        }
+        return count(wrapper) > 0;
     }
 
     @Override

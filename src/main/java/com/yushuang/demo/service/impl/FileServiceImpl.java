@@ -1,7 +1,9 @@
 package com.yushuang.demo.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yushuang.demo.config.FileUploadConfig;
 import com.yushuang.demo.entity.FileInfo;
 import com.yushuang.demo.mapper.FileInfoMapper;
@@ -36,7 +38,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class FileServiceImpl implements FileService {
+public class FileServiceImpl extends ServiceImpl<FileInfoMapper, FileInfo> implements FileService {
 
     private final FileInfoMapper fileInfoMapper;
     private final FileUploadConfig fileUploadConfig;
@@ -69,7 +71,7 @@ public class FileServiceImpl implements FileService {
             String fileHash = calculateFileHash(file.getInputStream());
 
             // 检查文件是否已存在
-            FileInfo existingFile = fileInfoMapper.selectByFileHash(fileHash);
+            FileInfo existingFile = checkFileExists(fileHash);
             if (existingFile != null) {
                 log.info("文件已存在，返回现有文件信息: {}", existingFile.getOriginalName());
                 return existingFile;
@@ -103,7 +105,7 @@ public class FileServiceImpl implements FileService {
             fileInfo.setDownloadCount(0);
             fileInfo.setStatus(FileInfo.Status.ENABLED.getCode());
 
-            fileInfoMapper.insert(fileInfo);
+            save(fileInfo);
 
             log.info("文件上传成功: {}", file.getOriginalFilename());
             return fileInfo;
@@ -133,7 +135,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public FileInfo downloadFile(Long fileId) {
-        FileInfo fileInfo = fileInfoMapper.selectById(fileId);
+        FileInfo fileInfo = getById(fileId);
         if (fileInfo == null || fileInfo.getDeleted() == 1) {
             throw new RuntimeException("文件不存在");
         }
@@ -150,7 +152,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public FileInfo previewFile(Long fileId) {
-        FileInfo fileInfo = fileInfoMapper.selectById(fileId);
+        FileInfo fileInfo = getById(fileId);
         if (fileInfo == null || fileInfo.getDeleted() == 1) {
             throw new RuntimeException("文件不存在");
         }
@@ -164,20 +166,14 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public boolean deleteFile(Long fileId) {
-        FileInfo fileInfo = fileInfoMapper.selectById(fileId);
+        FileInfo fileInfo = getById(fileId);
         if (fileInfo == null) {
             return false;
         }
 
         try {
             // 逻辑删除数据库记录
-            int result = fileInfoMapper.deleteById(fileId);
-
-            // 可选：物理删除文件
-            // Path filePath = Paths.get(fileUploadConfig.getUploadPath(), fileInfo.getFilePath());
-            // Files.deleteIfExists(filePath);
-
-            return result > 0;
+            return removeById(fileId);
         } catch (Exception e) {
             log.error("删除文件失败: {}", e.getMessage(), e);
             return false;
@@ -188,13 +184,23 @@ public class FileServiceImpl implements FileService {
     public IPage<FileInfo> getFileList(Page<FileInfo> page, String fileName, String originalName,
                                       String fileType, String uploadUsername, Integer status,
                                       LocalDateTime startTime, LocalDateTime endTime) {
-        return fileInfoMapper.selectFileInfoPage(page, fileName, originalName, fileType,
-                                               uploadUsername, status, startTime, endTime);
+        // 使用LambdaQueryWrapper构建查询条件
+        LambdaQueryWrapper<FileInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(StringUtils.hasText(fileName), FileInfo::getFileName, fileName)
+               .like(StringUtils.hasText(originalName), FileInfo::getOriginalName, originalName)
+               .eq(StringUtils.hasText(fileType), FileInfo::getFileType, fileType)
+               .like(StringUtils.hasText(uploadUsername), FileInfo::getUploadUsername, uploadUsername)
+               .eq(status != null, FileInfo::getStatus, status)
+               .ge(startTime != null, FileInfo::getCreateTime, startTime)
+               .le(endTime != null, FileInfo::getCreateTime, endTime)
+               .orderByDesc(FileInfo::getCreateTime);
+        
+        return page(page, wrapper);
     }
 
     @Override
     public FileInfo getFileById(Long fileId) {
-        FileInfo fileInfo = fileInfoMapper.selectById(fileId);
+        FileInfo fileInfo = getById(fileId);
         if (fileInfo != null && fileInfo.getDeleted() == 0) {
             return fileInfo;
         }
@@ -203,7 +209,16 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public FileInfo checkFileExists(String fileHash) {
-        return fileInfoMapper.selectByFileHash(fileHash);
+        if (!StringUtils.hasText(fileHash)) {
+            return null;
+        }
+        // 使用分页方式获取第一条记录，避免使用raw SQL
+        Page<FileInfo> page = new Page<>(1, 1);
+        LambdaQueryWrapper<FileInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(FileInfo::getFileHash, fileHash)
+               .orderByDesc(FileInfo::getCreateTime);
+        IPage<FileInfo> result = page(page, wrapper);
+        return result.getRecords().isEmpty() ? null : result.getRecords().get(0);
     }
 
     @Override
@@ -211,7 +226,9 @@ public class FileServiceImpl implements FileService {
         Map<String, Object> statistics = new HashMap<>();
 
         // 文件总数
-        Long fileCount = fileInfoMapper.countFiles(uploadUserId, null, null, null);
+        LambdaQueryWrapper<FileInfo> countWrapper = new LambdaQueryWrapper<>();
+        countWrapper.eq(uploadUserId != null, FileInfo::getUploadUserId, uploadUserId);
+        long fileCount = count(countWrapper);
         statistics.put("fileCount", fileCount);
 
         // 总存储大小
@@ -228,12 +245,24 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public List<FileInfo> getHotFiles(Integer limit) {
-        return fileInfoMapper.selectHotFiles(limit != null ? limit : 10);
+        int effectiveLimit = limit != null ? limit : 10;
+        // 使用分页方式替代raw SQL的LIMIT
+        Page<FileInfo> page = new Page<>(1, effectiveLimit);
+        LambdaQueryWrapper<FileInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(FileInfo::getStatus, FileInfo.Status.ENABLED.getCode())
+               .orderByDesc(FileInfo::getDownloadCount);
+        return page(page, wrapper).getRecords();
     }
 
     @Override
     public List<FileInfo> getLatestFiles(Integer limit) {
-        return fileInfoMapper.selectLatestFiles(limit != null ? limit : 10);
+        int effectiveLimit = limit != null ? limit : 10;
+        // 使用分页方式替代raw SQL的LIMIT
+        Page<FileInfo> page = new Page<>(1, effectiveLimit);
+        LambdaQueryWrapper<FileInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(FileInfo::getStatus, FileInfo.Status.ENABLED.getCode())
+               .orderByDesc(FileInfo::getCreateTime);
+        return page(page, wrapper).getRecords();
     }
 
     /**

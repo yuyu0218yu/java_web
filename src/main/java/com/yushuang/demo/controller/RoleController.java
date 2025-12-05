@@ -2,8 +2,8 @@ package com.yushuang.demo.controller;
 
 import com.yushuang.demo.common.Result;
 import com.yushuang.demo.entity.Role;
-import com.yushuang.demo.mapper.RoleMapper;
 import com.yushuang.demo.service.MenuService;
+import com.yushuang.demo.service.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -24,7 +24,7 @@ import java.util.List;
 @Tag(name = "角色管理", description = "角色相关接口")
 public class RoleController {
 
-    private final RoleMapper roleMapper;
+    private final RoleService roleService;
     private final MenuService menuService;
 
     /**
@@ -34,7 +34,7 @@ public class RoleController {
     @Operation(summary = "获取角色列表", description = "返回所有启用状态的角色")
     @PreAuthorize("hasAuthority('role:view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<List<Role>> listEnabledRoles() {
-        List<Role> roles = roleMapper.selectEnabledRoles();
+        List<Role> roles = roleService.getEnabledRoles();
         return Result.success(roles);
     }
 
@@ -45,7 +45,7 @@ public class RoleController {
     @Operation(summary = "获取所有角色")
     @PreAuthorize("hasAuthority('role:view') or hasRole('SUPER_ADMIN')")
     public Result<List<Role>> listAllRoles() {
-        List<Role> roles = roleMapper.selectList(null);
+        List<Role> roles = roleService.list();
         return Result.success(roles);
     }
 
@@ -56,7 +56,7 @@ public class RoleController {
     @Operation(summary = "获取角色详情")
     @PreAuthorize("hasAuthority('role:view') or hasRole('SUPER_ADMIN')")
     public Result<Role> getRoleById(@PathVariable Long id) {
-        Role role = roleMapper.selectById(id);
+        Role role = roleService.getById(id);
         if (role == null) {
             return Result.error("角色不存在");
         }
@@ -71,7 +71,7 @@ public class RoleController {
     @PreAuthorize("hasAuthority('role:create') or hasRole('SUPER_ADMIN')")
     public Result<Void> createRole(@Valid @RequestBody Role role) {
         try {
-            roleMapper.insert(role);
+            roleService.createRole(role);
             return Result.success("角色创建成功");
         } catch (Exception e) {
             log.error("角色创建失败", e);
@@ -87,8 +87,7 @@ public class RoleController {
     @PreAuthorize("hasAuthority('role:update') or hasRole('SUPER_ADMIN')")
     public Result<Void> updateRole(@PathVariable Long id, @Valid @RequestBody Role role) {
         try {
-            role.setId(id);
-            roleMapper.updateById(role);
+            roleService.updateRole(id, role);
             return Result.success("角色更新成功");
         } catch (Exception e) {
             log.error("角色更新失败", e);
@@ -104,11 +103,7 @@ public class RoleController {
     @PreAuthorize("hasAuthority('role:delete') or hasRole('SUPER_ADMIN')")
     public Result<Void> deleteRole(@PathVariable Long id) {
         try {
-            // 不允许删除超级管理员角色
-            if (id == 1L) {
-                return Result.error("不能删除超级管理员角色");
-            }
-            roleMapper.deleteById(id);
+            roleService.deleteRole(id);
             return Result.success("角色删除成功");
         } catch (Exception e) {
             log.error("角色删除失败", e);

@@ -9,9 +9,10 @@ import com.yushuang.demo.entity.Role;
 import com.yushuang.demo.entity.UserRole;
 import com.yushuang.demo.event.LoginEvent;
 import com.yushuang.demo.mapper.UserMapper;
-import com.yushuang.demo.mapper.RoleMapper;
 import com.yushuang.demo.mapper.UserRoleMapper;
 import com.yushuang.demo.service.AuthService;
+import com.yushuang.demo.service.RoleService;
+import com.yushuang.demo.service.UserService;
 import com.yushuang.demo.util.IpUtil;
 import com.yushuang.demo.util.JwtUtil;
 import com.yushuang.demo.util.WebUtil;
@@ -42,8 +43,9 @@ public class AuthServiceImpl implements AuthService {
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
     private final UserMapper userMapper;
-    private final RoleMapper roleMapper;
     private final UserRoleMapper userRoleMapper;
+    private final UserService userService;
+    private final RoleService roleService;
     private final ApplicationEventPublisher eventPublisher;
     private final PasswordEncoder passwordEncoder;
 
@@ -142,10 +144,9 @@ public class AuthServiceImpl implements AuthService {
         if (user == null) {
             throw new RuntimeException("用户不存在");
         }
-        // 手机号唯一性校验（如果传入）
+        // 手机号唯一性校验（如果传入）- 使用UserService的检查方法
         if (phone != null && !phone.isBlank()) {
-            int exists = userMapper.checkPhoneExists(phone, user.getId());
-            if (exists > 0) {
+            if (userService.checkPhoneExists(phone, user.getId())) {
                 throw new RuntimeException("手机号已被占用");
             }
             user.setPhone(phone);
@@ -184,13 +185,13 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("用户名已存在");
         }
 
-        // 校验用户名是否重复
-        if (userMapper.checkUsernameExists(registerRequest.getUsername(), null) > 0) {
+        // 校验用户名是否重复 - 使用UserService的检查方法
+        if (userService.checkUsernameExists(registerRequest.getUsername(), null)) {
             throw new RuntimeException("用户名已存在");
         }
 
-        // 查找普通用户角色
-        Role userRole = roleMapper.selectByRoleCode("USER");
+        // 查找普通用户角色 - 使用RoleService
+        Role userRole = roleService.getByRoleCode("USER");
         if (userRole == null || (userRole.getDeleted() != null && userRole.getDeleted() == 1)) {
             throw new RuntimeException("普通用户角色不存在，请先初始化角色数据");
         }
