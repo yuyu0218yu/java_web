@@ -51,8 +51,8 @@
             <template #default="scope">
               <div class="menu-name-cell">
                 <div class="menu-icon" :class="getTypeClass(scope.row.menuType)">
-                  <el-icon v-if="scope.row.icon && scope.row.icon !== '#'">
-                    <component :is="scope.row.icon" />
+                  <el-icon v-if="getSafeIcon(scope.row.icon)">
+                    <component :is="getSafeIcon(scope.row.icon)" />
                   </el-icon>
                   <el-icon v-else-if="scope.row.menuType === 'M'"><Folder /></el-icon>
                   <el-icon v-else-if="scope.row.menuType === 'C'"><Document /></el-icon>
@@ -266,9 +266,31 @@ import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   Plus, Expand, Fold, Refresh, Edit, Delete, Menu, Pointer, 
-  Folder, Document, CircleCheck, CircleClose, Close, Check
+  Folder, Document, CircleCheck, CircleClose, Close, Check,
+  House, User, Setting, UserFilled, Avatar, Key
 } from '@element-plus/icons-vue'
 import { menuApi } from '@/api'
+
+// 允许的图标白名单
+const allowedIcons = [
+  'House', 'User', 'Setting', 'UserFilled', 'Avatar', 'Key', 'Menu',
+  'Folder', 'Document', 'Pointer', 'Plus', 'Edit', 'Delete', 'Refresh',
+  'CircleCheck', 'CircleClose', 'Close', 'Check', 'Expand', 'Fold'
+]
+
+// 验证并获取安全的图标名称
+const getSafeIcon = (iconName) => {
+  if (!iconName || iconName === '#') return null
+  return allowedIcons.includes(iconName) ? iconName : null
+}
+
+// HTML实体编码，防止XSS
+const escapeHtml = (text) => {
+  if (!text) return ''
+  const div = document.createElement('div')
+  div.textContent = text
+  return div.innerHTML
+}
 
 // 响应式数据
 const loading = ref(false)
@@ -451,9 +473,10 @@ const handleSubmit = async () => {
 const handleDelete = async (row) => {
   try {
     const hasChildren = row.children && row.children.length > 0
+    const safeMenuName = escapeHtml(row.menuName)
     await ElMessageBox.confirm(
       `<div style="text-align: center;">
-        <p style="font-size: 16px; margin-bottom: 10px;">确定要删除菜单 <strong>${row.menuName}</strong> 吗？</p>
+        <p style="font-size: 16px; margin-bottom: 10px;">确定要删除菜单 <strong>${safeMenuName}</strong> 吗？</p>
         ${hasChildren ? '<p style="color: #F56C6C; font-size: 13px;">⚠️ 该菜单存在子菜单，将一并删除</p>' : ''}
       </div>`,
       '删除确认',

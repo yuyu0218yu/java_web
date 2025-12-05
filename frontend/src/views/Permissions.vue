@@ -332,6 +332,14 @@ const getTypeClass = (resourceType) => {
   return classMap[resourceType] || ''
 }
 
+// HTML实体编码，防止XSS
+const escapeHtml = (text) => {
+  if (!text) return ''
+  const div = document.createElement('div')
+  div.textContent = text
+  return div.innerHTML
+}
+
 // 获取权限总数
 const getTotalPermissions = () => {
   const countNodes = (nodes) => {
@@ -455,9 +463,10 @@ const handleSubmit = async () => {
 const handleDelete = async (row) => {
   try {
     const hasChildren = row.children && row.children.length > 0
+    const safePermissionName = escapeHtml(row.permissionName)
     await ElMessageBox.confirm(
       `<div style="text-align: center;">
-        <p style="font-size: 16px; margin-bottom: 10px;">确定要删除权限 <strong>${row.name}</strong> 吗？</p>
+        <p style="font-size: 16px; margin-bottom: 10px;">确定要删除权限 <strong>${safePermissionName}</strong> 吗？</p>
         ${hasChildren ? '<p style="color: #F56C6C; font-size: 13px;">⚠️ 该权限存在子权限，将一并删除</p>' : ''}
       </div>`,
       '删除确认',
