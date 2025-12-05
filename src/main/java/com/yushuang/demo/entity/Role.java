@@ -1,6 +1,8 @@
 package com.yushuang.demo.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.yushuang.demo.common.enums.CodeEnum;
+import com.yushuang.demo.common.enums.EnableStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -77,10 +79,11 @@ public class Role implements Serializable {
 
     /**
      * 状态枚举
+     * 使用通用启用状态枚举，保留此内部类以维持向后兼容
      */
-    public enum Status {
-        DISABLED(0, "禁用"),
-        ENABLED(1, "启用");
+    public enum Status implements CodeEnum<Integer> {
+        DISABLED(EnableStatus.DISABLED.getCode(), EnableStatus.DISABLED.getDesc()),
+        ENABLED(EnableStatus.ENABLED.getCode(), EnableStatus.ENABLED.getDesc());
 
         private final Integer code;
         private final String desc;
@@ -90,21 +93,18 @@ public class Role implements Serializable {
             this.desc = desc;
         }
 
+        @Override
         public Integer getCode() {
             return code;
         }
 
+        @Override
         public String getDesc() {
             return desc;
         }
 
         public static Status getByCode(Integer code) {
-            for (Status status : values()) {
-                if (status.code.equals(code)) {
-                    return status;
-                }
-            }
-            return DISABLED;
+            return CodeEnum.getByCode(Status.class, code, DISABLED);
         }
     }
 }

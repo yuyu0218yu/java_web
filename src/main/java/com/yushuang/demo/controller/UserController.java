@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yushuang.demo.common.PageResult;
 import com.yushuang.demo.common.Result;
+import com.yushuang.demo.dto.LoginRequest;
 import com.yushuang.demo.entity.User;
 import com.yushuang.demo.mapper.UserMapper.UserWithRole;
 import com.yushuang.demo.service.UserService;
@@ -12,7 +13,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -354,15 +354,7 @@ public class UserController {
         public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
     }
 
-    public static class LoginRequest {
-        private String username;
-        private String password;
-
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
-    }
+    // 注：LoginRequest 已移至 com.yushuang.demo.dto.LoginRequest，不再重复定义
 
     public static class LoginResponse {
         private Long userId;

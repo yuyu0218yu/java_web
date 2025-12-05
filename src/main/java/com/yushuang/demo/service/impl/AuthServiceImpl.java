@@ -62,12 +62,7 @@ public class AuthServiceImpl implements AuthService {
 
             // 获取用户信息
             User user = userMapper.selectByUsername(loginRequest.getUsername());
-            UserInfo userInfo = new UserInfo();
-            userInfo.setId(user.getId());
-            userInfo.setUsername(user.getUsername());
-            userInfo.setEmail(user.getEmail());
-            userInfo.setPhone(user.getPhone());
-            userInfo.setNickname(user.getNickname());
+            UserInfo userInfo = convertToUserInfo(user);
 
             // 获取用户权限（这里简化处理，实际应该从数据库获取）
             List<String> permissions = getUserPermissions(user.getId());
@@ -111,6 +106,14 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("用户不存在");
         }
 
+        return convertToUserInfo(user);
+    }
+
+    /**
+     * 将User实体转换为UserInfo DTO
+     * 提取公共的转换逻辑，避免重复代码
+     */
+    private UserInfo convertToUserInfo(User user) {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(user.getId());
         userInfo.setUsername(user.getUsername());
@@ -118,7 +121,6 @@ public class AuthServiceImpl implements AuthService {
         userInfo.setPhone(user.getPhone());
         userInfo.setNickname(user.getNickname());
         userInfo.setAvatar(user.getAvatar());
-
         return userInfo;
     }
 

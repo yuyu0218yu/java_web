@@ -1,6 +1,8 @@
 package com.yushuang.demo.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.yushuang.demo.common.enums.CodeEnum;
+import com.yushuang.demo.common.enums.ResultStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -113,10 +115,11 @@ public class OperationLog implements Serializable {
 
     /**
      * 操作状态枚举
+     * 使用通用结果状态枚举，保留此内部类以维持向后兼容
      */
-    public enum Status {
-        FAILURE(0, "失败"),
-        SUCCESS(1, "成功");
+    public enum Status implements CodeEnum<Integer> {
+        FAILURE(ResultStatus.FAILURE.getCode(), ResultStatus.FAILURE.getDesc()),
+        SUCCESS(ResultStatus.SUCCESS.getCode(), ResultStatus.SUCCESS.getDesc());
 
         private final Integer code;
         private final String desc;
@@ -126,21 +129,18 @@ public class OperationLog implements Serializable {
             this.desc = desc;
         }
 
+        @Override
         public Integer getCode() {
             return code;
         }
 
+        @Override
         public String getDesc() {
             return desc;
         }
 
         public static Status getByCode(Integer code) {
-            for (Status status : values()) {
-                if (status.code.equals(code)) {
-                    return status;
-                }
-            }
-            return FAILURE;
+            return CodeEnum.getByCode(Status.class, code, FAILURE);
         }
     }
 }
