@@ -215,12 +215,11 @@ public class AuthServiceImpl implements AuthService {
      * 获取用户权限列表
      */
     private List<String> getUserPermissions(Long userId) {
-        // 这里简化处理，实际应该从数据库查询用户的角色和权限
-        List<String> permissions = new ArrayList<>();
-        permissions.add("user:view");
-        permissions.add("user:create");
-        permissions.add("role:view");
-        permissions.add("*"); // 超级管理员权限
-        return permissions;
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+        // 从数据库查询真实权限
+        List<String> permissions = userMapper.selectUserPermissions(userId);
+        return permissions != null ? permissions : new ArrayList<>();
     }
 }
