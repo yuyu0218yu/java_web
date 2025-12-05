@@ -212,11 +212,13 @@ public class FileServiceImpl extends ServiceImpl<FileInfoMapper, FileInfo> imple
         if (!StringUtils.hasText(fileHash)) {
             return null;
         }
-        return lambdaQuery()
-                .eq(FileInfo::getFileHash, fileHash)
-                .orderByDesc(FileInfo::getCreateTime)
-                .last("LIMIT 1")
-                .one();
+        // 使用分页方式获取第一条记录，避免使用raw SQL
+        Page<FileInfo> page = new Page<>(1, 1);
+        LambdaQueryWrapper<FileInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(FileInfo::getFileHash, fileHash)
+               .orderByDesc(FileInfo::getCreateTime);
+        IPage<FileInfo> result = page(page, wrapper);
+        return result.getRecords().isEmpty() ? null : result.getRecords().get(0);
     }
 
     @Override
@@ -244,21 +246,23 @@ public class FileServiceImpl extends ServiceImpl<FileInfoMapper, FileInfo> imple
     @Override
     public List<FileInfo> getHotFiles(Integer limit) {
         int effectiveLimit = limit != null ? limit : 10;
-        return lambdaQuery()
-                .eq(FileInfo::getStatus, FileInfo.Status.ENABLED.getCode())
-                .orderByDesc(FileInfo::getDownloadCount)
-                .last("LIMIT " + effectiveLimit)
-                .list();
+        // 使用分页方式替代raw SQL的LIMIT
+        Page<FileInfo> page = new Page<>(1, effectiveLimit);
+        LambdaQueryWrapper<FileInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(FileInfo::getStatus, FileInfo.Status.ENABLED.getCode())
+               .orderByDesc(FileInfo::getDownloadCount);
+        return page(page, wrapper).getRecords();
     }
 
     @Override
     public List<FileInfo> getLatestFiles(Integer limit) {
         int effectiveLimit = limit != null ? limit : 10;
-        return lambdaQuery()
-                .eq(FileInfo::getStatus, FileInfo.Status.ENABLED.getCode())
-                .orderByDesc(FileInfo::getCreateTime)
-                .last("LIMIT " + effectiveLimit)
-                .list();
+        // 使用分页方式替代raw SQL的LIMIT
+        Page<FileInfo> page = new Page<>(1, effectiveLimit);
+        LambdaQueryWrapper<FileInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(FileInfo::getStatus, FileInfo.Status.ENABLED.getCode())
+               .orderByDesc(FileInfo::getCreateTime);
+        return page(page, wrapper).getRecords();
     }
 
     /**
