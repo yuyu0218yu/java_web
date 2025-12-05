@@ -1,6 +1,7 @@
 package com.yushuang.demo.event;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.context.ApplicationEvent;
 
 /**
@@ -11,6 +12,7 @@ import org.springframework.context.ApplicationEvent;
  * @since 2025-12-05
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class LoginEvent extends ApplicationEvent {
 
     /**
