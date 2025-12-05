@@ -28,11 +28,11 @@ export const authApi = {
   },
 
   // 刷新Token
-  refreshToken(refreshToken) {
+  // 注意: 后端从 Authorization header 获取当前 token，无需在 body 中发送
+  refreshToken() {
     return request({
       url: '/auth/refresh',
-      method: 'post',
-      data: { refreshToken }
+      method: 'post'
     })
   },
 
