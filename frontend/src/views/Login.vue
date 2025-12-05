@@ -186,9 +186,6 @@ const handleLogin = async () => {
   }
 }
 
-// 监听系统主题变化
-let mediaQuery = null
-
 // 生命周期
 onMounted(() => {
   if (authStore.isAuthenticated) {
