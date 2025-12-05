@@ -108,7 +108,7 @@
                 </el-avatar>
                 <div class="user-details">
                   <span class="user-name">{{ authStore.user?.username || '管理员' }}</span>
-                  <span class="user-role">超级管理员</span>
+                  <span class="user-role">{{ authStore.user?.roleName || '普通用户' }}</span>
                 </div>
                 <el-icon class="dropdown-icon"><ArrowDown /></el-icon>
               </div>
@@ -174,15 +174,15 @@ const isAdmin = computed(() => {
 })
 
 const canViewUsers = computed(() => {
-  return authStore.permissions.includes('user:view') || isAdmin.value
+  return isAdmin.value
 })
 
 const canManageRoles = computed(() => {
-  return authStore.permissions.includes('role:manage') || isAdmin.value
+  return isAdmin.value
 })
 
 const canManagePermissions = computed(() => {
-  return authStore.permissions.includes('permission:manage') || isAdmin.value
+  return isAdmin.value
 })
 
 // 主题切换
