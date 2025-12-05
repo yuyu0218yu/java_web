@@ -1,11 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(./mvnw exec:java:*)",
-      "Bash(javac:*)",
-      "Bash(java:*)",
-      "Bash(mysql:*)",
-      "Bash(./mvnw test:*)"
+      "Bash(Select-Object -First 30 -ExpandProperty FullName)",
+      "Bash(ls src/main/java/com/yushuang/demo/util/*.java)"
     ],
     "deny": [],
     "ask": []

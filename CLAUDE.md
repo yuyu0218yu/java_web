@@ -4,61 +4,89 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a comprehensive Spring Boot 3.2.5 enterprise application using Java 21 and Maven with MyBatis-Plus for data persistence. It features a complete JWT-based authentication system, operation logging/auditing functionality, file management module, and user management with RBAC (Role-Based Access Control). The project demonstrates enterprise-grade architecture with security, logging, and file handling capabilities.
+This is a full-stack user management system with Spring Boot 3.2.5 backend and Vue 3 frontend. The backend uses Java 21 and Maven with MyBatis-Plus for data persistence. It features a complete JWT-based authentication system, operation logging/auditing functionality, file management module, and user management with RBAC (Role-Based Access Control). The project demonstrates enterprise-grade architecture with security, logging, and file handling capabilities.
 
 ## Development Commands
 
-### Build and Run
+### Backend (Spring Boot)
 ```bash
 # Build the project
-./mvnw clean compile
+mvn clean compile
 
 # Run the application
-./mvnw spring-boot:run
+mvn spring-boot:run
 
 # Run tests
-./mvnw test
-
-# Clean build artifacts
-./mvnw clean
+mvn test
 
 # Package the application
-./mvnw package
+mvn package
 
 # Skip tests during build
-./mvnw package -DskipTests
+mvn package -DskipTests
 
 # Run a single test class
-./mvnw test -Dtest=DemoApplicationTests
+mvn test -Dtest=DemoApplicationTests
 
 # Run a single test method
-./mvnw test -Dtest=DemoApplicationTests#contextLoads
+mvn test -Dtest=DemoApplicationTests#contextLoads
+```
+
+### Frontend (Vue 3)
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Run development server (http://localhost:3000)
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
 ### Application Access
-- Default port: 8080
-- Application URL: `http://localhost:8080`
-- Default Spring Security will require authentication for most endpoints
+- **Backend**: http://localhost:8080
+- **Frontend**: http://localhost:3000
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **OpenAPI Spec**: http://localhost:8080/v3/api-docs
 
 ## Architecture
 
 ### Technology Stack
+
+#### Backend
 - **Framework**: Spring Boot 3.2.5
 - **Java**: Java 21 (LTS)
-- **Build**: Apache Maven (with Maven wrapper)
+- **Build**: Apache Maven
 - **Security**: Spring Security with JWT authentication
 - **Database**: MyBatis-Plus 3.5.14 (Spring Boot 3 compatible)
 - **Database Driver**: MySQL Connector (runtime), H2 (test)
 - **JWT**: io.jsonwebtoken (JJWT) 0.12.3 for token handling
 - **AOP**: Spring AOP for logging and cross-cutting concerns
-- **API Documentation**: SpringDoc OpenAPI 3 (Swagger)
+- **API Documentation**: SpringDoc OpenAPI 3 (Swagger 2.3.0)
 - **Testing**: JUnit 5 with Spring Boot Test
 - **Code Generation**: Lombok for reduced boilerplate
 
+#### Frontend
+- **Framework**: Vue 3.3.11 (Composition API)
+- **UI Library**: Element Plus 2.4.4
+- **Routing**: Vue Router 4.2.5
+- **State Management**: Pinia 2.1.7
+- **HTTP Client**: Axios 1.6.2
+- **Build Tool**: Vite 5.0.8
+- **Icons**: @element-plus/icons-vue 2.3.1
+
 ### Package Structure
+
+#### Backend Structure
 - Main package: `com.yushuang.demo`
-- Standard Maven project structure
-- Layered architecture: Controllers → Services → Mappers
+- Standard Maven project structure with layered architecture: Controllers → Services → Mappers
 - `com.yushuang.demo.common`: Common response and pagination components
 - `com.yushuang.demo.util`: Comprehensive utility library
 - `com.yushuang.demo.entity`: Entity classes (User, Role, Permission, UserRole, RolePermission, OperationLog, LoginLog, FileInfo)
@@ -66,12 +94,21 @@ This is a comprehensive Spring Boot 3.2.5 enterprise application using Java 21 a
 - `com.yushuang.demo.service`: Business logic services
 - `com.yushuang.demo.controller`: REST controllers
 - `com.yushuang.demo.dto`: Data transfer objects (LoginRequest, LoginResponse, UserInfo)
-- `com.yushuang.demo.security`: JWT authentication and security components
+- `com.yushuang.demo.security`: JWT authentication and security components (JwtAuthenticationFilter, UserDetailsServiceImpl)
 - `com.yushuang.demo.annotation`: Custom annotations (@AuditLog)
-- `com.yushuang.demo.aspect`: AOP aspects for logging
+- `com.yushuang.demo.aspect`: AOP aspects for logging (AuditLogAspect)
 - `com.yushuang.demo.event`: Application events (LoginEvent)
-- `com.yushuang.demo.listener`: Event listeners for logging
-- `com.yushuang.demo.config`: Configuration classes
+- `com.yushuang.demo.listener`: Event listeners for logging (LoginEventListener)
+- `com.yushuang.demo.config`: Configuration classes (SecurityConfig, AsyncConfig, FileUploadConfig)
+
+#### Frontend Structure
+- `frontend/src/api/`: API service layer with Axios requests
+- `frontend/src/components/`: Reusable Vue components
+- `frontend/src/router/`: Vue Router configuration with auth guards
+- `frontend/src/stores/`: Pinia stores for state management
+- `frontend/src/views/`: Page components (Login, Dashboard, User Management, etc.)
+- `frontend/src/utils/`: Frontend utilities (auth helpers, formatters)
+- `frontend/vite.config.js`: Vite configuration with proxy settings for backend API
 
 ### Key Components
 - `DemoApplication.java`: Main Spring Boot application class with `@MapperScan("com.yushuang.demo.mapper")`
@@ -92,6 +129,7 @@ This is a comprehensive Spring Boot 3.2.5 enterprise application using Java 21 a
   - Encoding: UTF-8MB4 with Asia/Shanghai timezone
   - No SSL configuration
 - **Testing**: H2 in-memory database
+- **Initialization Script**: `src/main/resources/sql/init.sql` contains complete database schema (users, roles, permissions, logs, files)
 - **MyBatis-Plus Features**:
   - Automatic camel case mapping (`user_name` → `userName`)
   - Logical delete support (`deleted` field: 1=deleted, 0=active)
@@ -186,14 +224,14 @@ return Result.success(PageResult.of(records, total, current, size));
 - **JwtUtil**: JWT token generation, validation, and refresh functionality
 - **UserAgentUtil**: Browser and operating system parsing from user agents
 
-### Extended Utilities
+### Extended Utilities (9 utility classes total)
 - **QueryWrapperUtil**: MyBatis-Plus query builder with simplified API
 - **WebUtil**: HTTP request/response utilities, parameter handling
-- **PasswordUtil**: Password hashing, salt generation, strength validation
 - **IpUtil**: IP address utilities, validation, network calculations
 - **JsonUtil**: JSON serialization/deserialization with Jackson
 - **DateUtil**: Comprehensive date/time operations and formatting
 - **StringUtil**: String manipulation, validation, format conversion
+- **FileSizeUtil**: File size formatting and conversion utilities
 
 ## Enterprise Features
 
@@ -220,13 +258,33 @@ return Result.success(PageResult.of(records, total, current, size));
 
 ## Project State
 The codebase includes a complete enterprise-grade foundation:
-- ✅ JWT authentication system with role-based permissions
-- ✅ Operation logging and auditing with async processing
-- ✅ File management system with security controls
+
+### Backend (Fully Implemented)
+- ✅ JWT authentication system with login/register/refresh endpoints
+- ✅ Spring Security configuration with role-based access control
+- ✅ Operation logging and auditing with @AuditLog annotation and AOP
+- ✅ File management system with upload/download/security controls
 - ✅ User management with RBAC structure (User, Role, Permission entities)
-- ✅ Database schemas for authentication, logging, and file management
-- ✅ Comprehensive utility library (12+ utility classes)
-- ✅ Standard API response patterns with Result wrapper
+- ✅ Database schemas with init scripts for all features
+- ✅ Comprehensive utility library (9 utility classes)
+- ✅ Standard API response patterns with Result<T> wrapper
 - ✅ Swagger/OpenAPI 3 documentation
 - ✅ Async configuration for background processing
 - ✅ CORS and security configuration
+
+### Frontend (Fully Implemented)
+- ✅ Vue 3 with Composition API
+- ✅ Element Plus UI components
+- ✅ Pinia state management
+- ✅ Vue Router with navigation guards
+- ✅ Axios HTTP client with interceptors
+- ✅ Login/Register pages
+- ✅ Dashboard with statistics
+- ✅ User/Role/Permission management pages
+- ✅ Dark mode theme support
+
+### Getting Started
+1. **Initialize Database**: Run `src/main/resources/sql/init.sql` on MySQL
+2. **Start Backend**: `mvn spring-boot:run`
+3. **Start Frontend**: `cd frontend && npm install && npm run dev`
+4. **Login**: Use default admin credentials (username: `admin`, password: `123456`)

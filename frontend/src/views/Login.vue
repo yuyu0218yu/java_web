@@ -1,127 +1,114 @@
 <template>
-  <div class="login-container" :class="{ 'dark-mode': isDarkMode }">
-    <div class="login-background">
-      <div class="grid-pattern"></div>
+  <AuthLayout>
+    <div class="login-header">
+      <div class="logo-icon">
+        <el-icon><Lock /></el-icon>
+      </div>
+      <h2>权限管理系统</h2>
+      <p class="welcome-text">Enterprise Management Platform</p>
+      <div class="typing-effect">
+        <span>{{ typingText }}</span>
+        <span class="cursor">|</span>
+      </div>
     </div>
     
-    <transition name="zoom-in" appear>
-      <div class="login-box">
-        <!-- 主题切换按钮 -->
-        <div class="theme-toggle" @click="toggleTheme">
-          <el-icon v-if="isDarkMode"><Moon /></el-icon>
-          <el-icon v-else><Sunny /></el-icon>
+    <el-form
+      ref="loginFormRef"
+      :model="loginForm"
+      :rules="loginRules"
+      class="login-form"
+      size="large"
+    >
+      <transition name="slide-right" appear>
+        <el-form-item prop="username">
+          <el-input
+            v-model="loginForm.username"
+            placeholder="请输入用户名"
+            :prefix-icon="User"
+            clearable
+            class="input-with-animation"
+          />
+        </el-form-item>
+      </transition>
+      
+      <transition name="slide-right" appear style="animation-delay: 0.1s">
+        <el-form-item prop="password">
+          <el-input
+            v-model="loginForm.password"
+            type="password"
+            placeholder="请输入密码"
+            :prefix-icon="Lock"
+            show-password
+            clearable
+            class="input-with-animation"
+            @keyup.enter="handleLogin"
+          />
+        </el-form-item>
+      </transition>
+      
+      <transition name="slide-right" appear style="animation-delay: 0.2s">
+        <div class="form-options">
+          <el-checkbox v-model="loginForm.remember">记住我</el-checkbox>
+          <a href="#" class="forgot-password">忘记密码？</a>
         </div>
-
-        <div class="login-header">
-          <div class="logo-icon">
-            <el-icon><Lock /></el-icon>
-          </div>
-          <h2>权限管理系统</h2>
-          <p class="welcome-text">Enterprise Management Platform</p>
-          <div class="typing-effect">
-            <span>{{ typingText }}</span>
-            <span class="cursor">|</span>
-          </div>
-        </div>
-        
-        <el-form
-          ref="loginFormRef"
-          :model="loginForm"
-          :rules="loginRules"
-          class="login-form"
-          size="large"
-        >
-          <transition name="slide-right" appear>
-            <el-form-item prop="username">
-              <el-input
-                v-model="loginForm.username"
-                placeholder="请输入用户名"
-                :prefix-icon="User"
-                clearable
-                class="input-with-animation"
-              />
-            </el-form-item>
-          </transition>
-          
-          <transition name="slide-right" appear style="animation-delay: 0.1s">
-            <el-form-item prop="password">
-              <el-input
-                v-model="loginForm.password"
-                type="password"
-                placeholder="请输入密码"
-                :prefix-icon="Lock"
-                show-password
-                clearable
-                class="input-with-animation"
-                @keyup.enter="handleLogin"
-              />
-            </el-form-item>
-          </transition>
-          
-          <transition name="slide-right" appear style="animation-delay: 0.2s">
-            <div class="form-options">
-              <el-checkbox v-model="loginForm.remember">记住我</el-checkbox>
-              <a href="#" class="forgot-password">忘记密码？</a>
-            </div>
-          </transition>
-          
-          <transition name="slide-up" appear style="animation-delay: 0.3s">
-            <el-form-item>
-              <el-button
-                type="primary"
-                class="login-button"
-                :class="{ 'is-loading': loading }"
-                :loading="loading"
-                @click="handleLogin"
-              >
-                <template v-if="!loading">
-                  <el-icon class="button-icon"><Unlock /></el-icon>
-                  <span>登 录</span>
-                </template>
-                <template v-else>
-                  <span>登录中...</span>
-                </template>
-              </el-button>
-            </el-form-item>
-          </transition>
-        </el-form>
-        
-        <div class="login-footer">
-          <p class="register-link">
-            还没有账号？ <router-link to="/register">立即注册</router-link>
-          </p>
-          <div class="divider">
-            <span>其他登录方式</span>
-          </div>
-          <div class="social-login">
-            <el-tooltip content="微信登录" placement="top">
-              <div class="social-icon wechat">
-                <el-icon><ChatDotRound /></el-icon>
-              </div>
-            </el-tooltip>
-            <el-tooltip content="企业微信" placement="top">
-              <div class="social-icon work-wechat">
-                <el-icon><OfficeBuilding /></el-icon>
-              </div>
-            </el-tooltip>
-            <el-tooltip content="钉钉登录" placement="top">
-              <div class="social-icon dingtalk">
-                <el-icon><Message /></el-icon>
-              </div>
-            </el-tooltip>
-          </div>
-          <p class="copyright">© 2025 用户权限管理系统 v1.0.0</p>
-        </div>
+      </transition>
+      
+      <transition name="slide-up" appear style="animation-delay: 0.3s">
+        <el-form-item>
+          <el-button
+            type="primary"
+            class="login-button"
+            :class="{ 'is-loading': loading }"
+            :loading="loading"
+            @click="handleLogin"
+          >
+            <template v-if="!loading">
+              <el-icon class="button-icon"><Unlock /></el-icon>
+              <span>登 录</span>
+            </template>
+            <template v-else>
+              <span>登录中...</span>
+            </template>
+          </el-button>
+        </el-form-item>
+      </transition>
+    </el-form>
+    
+    <div class="login-footer">
+      <p class="register-link">
+        还没有账号？ <router-link to="/register">立即注册</router-link>
+      </p>
+      <div class="divider">
+        <span>其他登录方式</span>
       </div>
-    </transition>
-  </div>
+      <div class="social-login">
+        <el-tooltip content="微信登录" placement="top">
+          <div class="social-icon wechat">
+            <el-icon><ChatDotRound /></el-icon>
+          </div>
+        </el-tooltip>
+        <el-tooltip content="企业微信" placement="top">
+          <div class="social-icon work-wechat">
+            <el-icon><OfficeBuilding /></el-icon>
+          </div>
+        </el-tooltip>
+        <el-tooltip content="钉钉登录" placement="top">
+          <div class="social-icon dingtalk">
+            <el-icon><Message /></el-icon>
+          </div>
+        </el-tooltip>
+      </div>
+      <p class="copyright">© 2025 用户权限管理系统 v1.0.0</p>
+    </div>
+  </AuthLayout>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { User, Lock, Unlock, ChatDotRound, OfficeBuilding, Message, Moon, Sunny } from '@element-plus/icons-vue'
+import AuthLayout from '@/layout/AuthLayout.vue'
+import { User, Lock, Unlock, ChatDotRound, OfficeBuilding, Message } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -130,41 +117,11 @@ const authStore = useAuthStore()
 const loading = ref(false)
 const loginFormRef = ref()
 const typingText = ref('')
-const isDarkMode = ref(false)
 
 // 打字机效果文字
 const fullText = '安全 · 高效 · 便捷'
 let typingIndex = 0
 let typingTimer = null
-
-// 切换主题
-const toggleTheme = () => {
-  isDarkMode.value = !isDarkMode.value
-  const html = document.documentElement
-  if (isDarkMode.value) {
-    html.classList.add('dark')
-    localStorage.setItem('theme', 'dark')
-  } else {
-    html.classList.remove('dark')
-    localStorage.setItem('theme', 'light')
-  }
-}
-
-// 检测系统暗色模式
-const checkDarkMode = () => {
-  const savedTheme = localStorage.getItem('theme')
-  if (savedTheme) {
-    isDarkMode.value = savedTheme === 'dark'
-    const html = document.documentElement
-    if (isDarkMode.value) {
-      html.classList.add('dark')
-    } else {
-      html.classList.remove('dark')
-    }
-  } else {
-    isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches
-  }
-}
 
 // 登录表单
 const loginForm = reactive({
@@ -238,9 +195,6 @@ onMounted(() => {
     router.push('/dashboard')
   }
   startTyping()
-  
-  // 初始化暗色模式检测
-  checkDarkMode()
 })
 
 onUnmounted(() => {
@@ -251,154 +205,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 浅色模式（默认） */
-.login-container {
-  --bg-primary: #f5f7fa;
-  --bg-secondary: #ffffff;
-  --text-primary: #1a1a1a;
-  --text-secondary: #606266;
-  --text-muted: #909399;
-  --border-color: #e4e7ed;
-  --accent-color: #1a1a1a;
-  --accent-hover: #333333;
-  --shadow-color: rgba(0, 0, 0, 0.08);
-  --grid-color: rgba(0, 0, 0, 0.03);
-}
-
-/* 暗色模式 */
-.login-container.dark-mode {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #1a1a1a;
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-  --text-muted: #666666;
-  --border-color: #333333;
-  --accent-color: #ffffff;
-  --accent-hover: #e0e0e0;
-  --shadow-color: rgba(0, 0, 0, 0.3);
-  --grid-color: rgba(255, 255, 255, 0.03);
-}
-
-.login-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  background: var(--bg-primary);
-  overflow: hidden;
-  transition: background 0.3s ease;
-}
-
-.login-background {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  z-index: 0;
-}
-
-/* 网格背景 */
-.grid-pattern {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    linear-gradient(var(--grid-color) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-  background-size: 50px 50px;
-  animation: gridMove 20s linear infinite;
-}
-
-@keyframes gridMove {
-  0% {
-    transform: translate(0, 0);
-  }
-  100% {
-    transform: translate(50px, 50px);
-  }
-}
-
-/* 缩放入场动画 */
-.zoom-in-enter-active {
-  animation: zoomIn 0.5s ease-out;
-}
-
-@keyframes zoomIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* 滑动动画 */
-.slide-right-enter-active {
-  animation: slideRight 0.5s ease-out both;
-}
-
-@keyframes slideRight {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.slide-up-enter-active {
-  animation: slideUp 0.5s ease-out both;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.login-box {
-  width: 420px;
-  background: var(--bg-secondary);
-  border-radius: 16px;
-  box-shadow: 0 4px 24px var(--shadow-color);
-  z-index: 1;
-  padding: 48px 40px;
-  border: 1px solid var(--border-color);
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.theme-toggle {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  transition: all 0.3s;
-}
-
-.theme-toggle:hover {
-  background: var(--bg-primary);
-  color: var(--accent-color);
-}
-
 .login-header {
   text-align: center;
   margin-bottom: 40px;
@@ -647,12 +453,6 @@ onUnmounted(() => {
 
 /* 响应式设计 */
 @media (max-width: 480px) {
-  .login-box {
-    width: 100%;
-    margin: 0 20px;
-    padding: 36px 24px;
-  }
-  
   .login-header h2 {
     font-size: 22px;
   }
