@@ -1,7 +1,22 @@
+-- 设置MySQL连接字符集
+SET NAMES utf8mb4;
+SET character_set_client = utf8mb4;
+SET character_set_connection = utf8mb4;
+
 -- 创建数据库（如果不存在）
 CREATE DATABASE IF NOT EXISTS java_web DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE java_web;
+
+-- 删除已存在的表，确保重新创建
+DROP TABLE IF EXISTS sys_user_role;
+DROP TABLE IF EXISTS sys_role_permission;
+DROP TABLE IF EXISTS sys_operation_log;
+DROP TABLE IF EXISTS sys_login_log;
+DROP TABLE IF EXISTS sys_file_info;
+DROP TABLE IF EXISTS sys_user;
+DROP TABLE IF EXISTS sys_role;
+DROP TABLE IF EXISTS sys_permission;
 
 -- 用户表
 CREATE TABLE IF NOT EXISTS sys_user (
@@ -28,7 +43,7 @@ CREATE TABLE IF NOT EXISTS sys_user (
 -- 角色表
 CREATE TABLE IF NOT EXISTS sys_role (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '角色ID',
-    role_name VARCHAR(50) NOT NULL COMMENT '角色名称',
+    role_name VARCHAR(100) NOT NULL COMMENT '角色名称',
     role_code VARCHAR(50) NOT NULL UNIQUE COMMENT '角色编码',
     description TEXT COMMENT '角色描述',
     sort_order INT DEFAULT 0 COMMENT '排序',
@@ -83,9 +98,9 @@ CREATE TABLE IF NOT EXISTS sys_role_permission (
 
 -- 插入系统角色
 INSERT INTO sys_role (role_name, role_code, description, sort_order) VALUES
-('超级管理员', 'SUPER_ADMIN', '系统超级管理员，拥有所有权限', 1),
-('管理员', 'ADMIN', '系统管理员，拥有大部分权限', 2),
-('普通用户', 'USER', '普通用户，拥有基本权限', 3)
+('Super Admin', 'SUPER_ADMIN', 'System super administrator with all permissions', 1),
+('Admin', 'ADMIN', 'System administrator with most permissions', 2),
+('User', 'USER', 'Regular user with basic permissions', 3)
 ON DUPLICATE KEY UPDATE role_name = VALUES(role_name);
 
 -- 插入系统权限
@@ -151,3 +166,68 @@ ON DUPLICATE KEY UPDATE role_id = VALUES(role_id);
 INSERT INTO sys_role_permission (role_id, permission_id) VALUES
 (@user_role_id, (SELECT id FROM sys_permission WHERE permission_code = 'user:view' LIMIT 1))
 ON DUPLICATE KEY UPDATE role_id = VALUES(role_id);
+
+-- ================================================================================
+-- 操作日志表
+-- ================================================================================
+CREATE TABLE IF NOT EXISTS sys_operation_log (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    user_id BIGINT COMMENT '操作用户ID',
+    username VARCHAR(50) COMMENT '操作用户名',
+    operation VARCHAR(100) COMMENT '操作类型',
+    method VARCHAR(255) COMMENT '请求方法',
+    params TEXT COMMENT '请求参数',
+    time BIGINT COMMENT '执行时长(毫秒)',
+    ip VARCHAR(45) COMMENT '操作IP',
+    user_agent VARCHAR(500) COMMENT '用户代理',
+    status INT DEFAULT 1 COMMENT '操作状态：0-失败，1-成功',
+    error_msg TEXT COMMENT '错误信息',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted INT DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
+    remark TEXT COMMENT '备注'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='操作日志表';
+
+-- ================================================================================
+-- 登录日志表
+-- ================================================================================
+CREATE TABLE IF NOT EXISTS sys_login_log (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    username VARCHAR(50) COMMENT '登录用户名',
+    ip VARCHAR(45) COMMENT '登录IP',
+    location VARCHAR(100) COMMENT '登录地点',
+    browser VARCHAR(100) COMMENT '浏览器',
+    os VARCHAR(100) COMMENT '操作系统',
+    user_agent VARCHAR(500) COMMENT '用户代理',
+    status INT DEFAULT 1 COMMENT '登录状态：0-失败，1-成功',
+    error_msg TEXT COMMENT '错误信息',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted INT DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
+    remark TEXT COMMENT '备注'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='登录日志表';
+
+-- ================================================================================
+-- 文件信息表
+-- ================================================================================
+CREATE TABLE IF NOT EXISTS sys_file_info (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    file_name VARCHAR(255) NOT NULL COMMENT '文件名',
+    original_name VARCHAR(255) COMMENT '原始文件名',
+    file_path VARCHAR(500) NOT NULL COMMENT '文件路径',
+    file_size BIGINT COMMENT '文件大小(字节)',
+    file_type VARCHAR(50) COMMENT '文件类型',
+    mime_type VARCHAR(100) COMMENT 'MIME类型',
+    file_hash VARCHAR(64) COMMENT '文件哈希值(SHA256)',
+    upload_user_id BIGINT COMMENT '上传用户ID',
+    upload_username VARCHAR(50) COMMENT '上传用户名',
+    download_count INT DEFAULT 0 COMMENT '下载次数',
+    status INT DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted INT DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
+    remark TEXT COMMENT '备注',
+    KEY idx_file_hash (file_hash),
+    KEY idx_upload_user_id (upload_user_id),
+    KEY idx_create_time (create_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文件信息表';
