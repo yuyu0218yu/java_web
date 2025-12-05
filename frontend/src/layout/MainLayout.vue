@@ -32,20 +32,20 @@
                 <span class="menu-title">仪表盘</span>
               </template>
             </el-menu-item>
-            <el-sub-menu index="user-management" class="menu-item-animated">
+            <el-sub-menu v-if="canViewUsers || canManageRoles || canManagePermissions" index="user-management" class="menu-item-animated">
               <template #title>
                 <el-icon class="menu-icon"><User /></el-icon>
                 <span class="menu-title">用户管理</span>
               </template>
-              <el-menu-item index="/users">
+              <el-menu-item v-if="canViewUsers" index="/users">
                 <el-icon><UserFilled /></el-icon>
                 <span>用户列表</span>
               </el-menu-item>
-              <el-menu-item index="/roles">
+              <el-menu-item v-if="canManageRoles" index="/roles">
                 <el-icon><Avatar /></el-icon>
                 <span>角色管理</span>
               </el-menu-item>
-              <el-menu-item index="/permissions">
+              <el-menu-item v-if="canManagePermissions" index="/permissions">
                 <el-icon><Key /></el-icon>
                 <span>权限管理</span>
               </el-menu-item>
@@ -167,6 +167,23 @@ import {
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+
+// 角色权限计算属性
+const isAdmin = computed(() => {
+  return authStore.user?.roleCode === 'ADMIN' || authStore.user?.roleCode === 'SUPER_ADMIN'
+})
+
+const canViewUsers = computed(() => {
+  return authStore.permissions.includes('user:view') || isAdmin.value
+})
+
+const canManageRoles = computed(() => {
+  return authStore.permissions.includes('role:manage') || isAdmin.value
+})
+
+const canManagePermissions = computed(() => {
+  return authStore.permissions.includes('permission:manage') || isAdmin.value
+})
 
 // 主题切换
 const isDark = ref(true)

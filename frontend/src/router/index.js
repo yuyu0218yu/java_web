@@ -29,19 +29,19 @@ const routes = [
         path: 'users',
         name: 'Users',
         component: () => import('@/views/Users.vue'),
-        meta: { title: '用户列表', requiresAuth: true }
+        meta: { title: '用户列表', requiresAuth: true, requiredPermissions: ['user:view'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
       },
       {
         path: 'roles',
         name: 'Roles',
         component: () => import('@/views/Roles.vue'),
-        meta: { title: '角色管理', requiresAuth: true }
+        meta: { title: '角色管理', requiresAuth: true, requiredPermissions: ['role:manage'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
       },
       {
         path: 'permissions',
         name: 'Permissions',
         component: () => import('@/views/Permissions.vue'),
-        meta: { title: '权限管理', requiresAuth: true }
+        meta: { title: '权限管理', requiresAuth: true, requiredPermissions: ['permission:manage'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
       },
       {
         path: 'profile',
@@ -72,6 +72,37 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/login')
     return
+  }
+  
+  // 检查角色权限
+  if (to.meta.requiresAuth && authStore.isAuthenticated) {
+    const userRole = authStore.user?.roleCode
+    const userPermissions = authStore.permissions || []
+    
+    let hasAccess = false
+    
+    // 检查角色权限（如果配置了）
+    if (to.meta.requiredRoles && to.meta.requiredRoles.length > 0) {
+      hasAccess = hasAccess || to.meta.requiredRoles.includes(userRole)
+    }
+    
+    // 检查具体权限（如果配置了）
+    if (to.meta.requiredPermissions && to.meta.requiredPermissions.length > 0) {
+      hasAccess = hasAccess || to.meta.requiredPermissions.some(perm => 
+        userPermissions.includes(perm) || userPermissions.includes('*')
+      )
+    }
+    
+    // 如果既没有配置角色要求也没有配置权限要求，默认允许访问
+    if (!to.meta.requiredRoles && !to.meta.requiredPermissions) {
+      hasAccess = true
+    }
+    
+    if (!hasAccess) {
+      // 可以重定向到403页面或仪表盘
+      next('/dashboard')
+      return
+    }
   }
   
   next()

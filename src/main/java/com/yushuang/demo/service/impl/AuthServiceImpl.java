@@ -54,8 +54,8 @@ public class AuthServiceImpl implements AuthService {
         String userAgent = request != null ? request.getHeader("User-Agent") : "";
 
         try {
-            // 加载用户信息并验证密码
-            User user = userMapper.selectByUsername(loginRequest.getUsername());
+            // 加载用户信息并验证密码（包含角色信息）
+            UserMapper.UserWithRole user = userMapper.selectUserWithRoleByUsername(loginRequest.getUsername());
             if (user == null) {
                 throw new RuntimeException("用户不存在");
             }
@@ -72,10 +72,10 @@ public class AuthServiceImpl implements AuthService {
             // 生成JWT token
             String token = jwtUtil.generateToken(userDetails);
 
-            // 获取用户信息
-            UserInfo userInfo = convertToUserInfo(user);
+            // 获取用户信息（包含角色）
+            UserInfo userInfo = convertToUserInfoWithRole(user);
 
-            // 获取用户权限（这里简化处理，实际应该从数据库获取）
+            // 获取用户权限
             List<String> permissions = getUserPermissions(user.getId());
 
             LoginResponse response = new LoginResponse(token, userInfo);
@@ -236,7 +236,6 @@ public class AuthServiceImpl implements AuthService {
         userInfo.setPhone(user.getPhone());
         userInfo.setNickname(user.getNickname());
         userInfo.setAvatar(user.getAvatar());
-
         return userInfo;
     }
 
@@ -252,8 +251,8 @@ public class AuthServiceImpl implements AuthService {
         userInfo.setNickname(userWithRole.getNickname());
         userInfo.setAvatar(userWithRole.getAvatar());
         userInfo.setRoleName(userWithRole.getRoleName());
+        userInfo.setRoleCode(userWithRole.getRoleCode());
         userInfo.setCreatedAt(userWithRole.getCreateTime());
-
         return userInfo;
     }
 

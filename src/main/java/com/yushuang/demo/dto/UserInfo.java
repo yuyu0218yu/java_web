@@ -21,5 +21,6 @@ public class UserInfo {
     private String nickname;
     private String avatar;
     private String roleName;
+    private String roleCode;
     private LocalDateTime createdAt;
 }
