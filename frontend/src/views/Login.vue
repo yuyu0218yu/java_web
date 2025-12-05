@@ -1,12 +1,7 @@
 <template>
-  <div class="login-container">
+  <div class="login-container" :class="{ 'dark-mode': isDarkMode }">
     <div class="login-background">
-      <div class="shape shape-1"></div>
-      <div class="shape shape-2"></div>
-      <div class="shape shape-3"></div>
-      <div class="particles">
-        <div v-for="n in 20" :key="n" class="particle" :style="getParticleStyle(n)"></div>
-      </div>
+      <div class="grid-pattern"></div>
     </div>
     
     <transition name="zoom-in" appear>
@@ -16,7 +11,7 @@
             <el-icon><Lock /></el-icon>
           </div>
           <h2>权限管理系统</h2>
-          <p class="welcome-text">Welcome Back</p>
+          <p class="welcome-text">Enterprise Management Platform</p>
           <div class="typing-effect">
             <span>{{ typingText }}</span>
             <span class="cursor">|</span>
@@ -126,11 +121,17 @@ const authStore = useAuthStore()
 const loading = ref(false)
 const loginFormRef = ref()
 const typingText = ref('')
+const isDarkMode = ref(false)
 
 // 打字机效果文字
 const fullText = '安全 · 高效 · 便捷'
 let typingIndex = 0
 let typingTimer = null
+
+// 检测系统暗色模式
+const checkDarkMode = () => {
+  isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+}
 
 // 登录表单
 const loginForm = reactive({
@@ -148,19 +149,6 @@ const loginRules = {
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
   ]
-}
-
-// 获取粒子样式
-const getParticleStyle = (index) => {
-  const size = Math.random() * 8 + 3
-  return {
-    width: `${size}px`,
-    height: `${size}px`,
-    left: `${Math.random() * 100}%`,
-    top: `${Math.random() * 100}%`,
-    animationDelay: `${Math.random() * 5}s`,
-    animationDuration: `${Math.random() * 10 + 10}s`
-  }
 }
 
 // 打字机效果
@@ -208,30 +196,70 @@ const handleLogin = async () => {
   }
 }
 
+// 监听系统主题变化
+let mediaQuery = null
+
 // 生命周期
 onMounted(() => {
   if (authStore.isAuthenticated) {
     router.push('/dashboard')
   }
   startTyping()
+  
+  // 初始化暗色模式检测
+  checkDarkMode()
+  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  mediaQuery.addEventListener('change', checkDarkMode)
 })
 
 onUnmounted(() => {
   if (typingTimer) {
     clearInterval(typingTimer)
   }
+  if (mediaQuery) {
+    mediaQuery.removeEventListener('change', checkDarkMode)
+  }
 })
 </script>
 
 <style scoped>
+/* 浅色模式（默认） */
+.login-container {
+  --bg-primary: #f5f7fa;
+  --bg-secondary: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #606266;
+  --text-muted: #909399;
+  --border-color: #e4e7ed;
+  --accent-color: #1a1a1a;
+  --accent-hover: #333333;
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --grid-color: rgba(0, 0, 0, 0.03);
+}
+
+/* 暗色模式 */
+.login-container.dark-mode {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --text-muted: #666666;
+  --border-color: #333333;
+  --accent-color: #ffffff;
+  --accent-hover: #e0e0e0;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --grid-color: rgba(255, 255, 255, 0.03);
+}
+
 .login-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--bg-primary);
   overflow: hidden;
+  transition: background 0.3s ease;
 }
 
 .login-background {
@@ -243,88 +271,24 @@ onUnmounted(() => {
   z-index: 0;
 }
 
-.shape {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  animation: float 20s infinite ease-in-out;
-}
-
-.shape-1 {
-  top: -100px;
-  left: -100px;
-  width: 500px;
-  height: 500px;
-  background: linear-gradient(to right, #8e2de2, #4a00e0);
-  opacity: 0.7;
-  animation-delay: 0s;
-}
-
-.shape-2 {
-  bottom: -150px;
-  right: -100px;
-  width: 600px;
-  height: 600px;
-  background: linear-gradient(to left, #00c6ff, #0072ff);
-  opacity: 0.6;
-  animation-delay: -5s;
-}
-
-.shape-3 {
-  top: 40%;
-  left: 40%;
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(to bottom, #ff0099, #493240);
-  opacity: 0.4;
-  transform: translate(-50%, -50%);
-  animation-delay: -10s;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  25% {
-    transform: translate(50px, -50px) rotate(5deg);
-  }
-  50% {
-    transform: translate(-30px, 30px) rotate(-5deg);
-  }
-  75% {
-    transform: translate(20px, 20px) rotate(3deg);
-  }
-}
-
-/* 粒子效果 */
-.particles {
+/* 网格背景 */
+.grid-pattern {
   position: absolute;
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  background-image: 
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: gridMove 20s linear infinite;
 }
 
-.particle {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  animation: particleFloat linear infinite;
-}
-
-@keyframes particleFloat {
+@keyframes gridMove {
   0% {
-    transform: translateY(100vh) rotate(0deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
+    transform: translate(0, 0);
   }
   100% {
-    transform: translateY(-100vh) rotate(720deg);
-    opacity: 0;
+    transform: translate(50px, 50px);
   }
 }
 
@@ -336,7 +300,7 @@ onUnmounted(() => {
 @keyframes zoomIn {
   from {
     opacity: 0;
-    transform: scale(0.8);
+    transform: scale(0.95);
   }
   to {
     opacity: 1;
@@ -352,7 +316,7 @@ onUnmounted(() => {
 @keyframes slideRight {
   from {
     opacity: 0;
-    transform: translateX(-30px);
+    transform: translateX(-20px);
   }
   to {
     opacity: 1;
@@ -376,14 +340,14 @@ onUnmounted(() => {
 }
 
 .login-box {
-  width: 440px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  width: 420px;
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px var(--shadow-color);
   z-index: 1;
-  padding: 50px 40px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 48px 40px;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
 }
 
 .login-header {
@@ -392,48 +356,47 @@ onUnmounted(() => {
 }
 
 .logo-icon {
-  width: 72px;
-  height: 72px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 20px;
+  width: 64px;
+  height: 64px;
+  background: var(--accent-color);
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 24px;
-  color: white;
-  font-size: 36px;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-  animation: logoFloat 3s ease-in-out infinite;
+  margin: 0 auto 20px;
+  color: var(--bg-secondary);
+  font-size: 32px;
+  transition: all 0.3s ease;
 }
 
-@keyframes logoFloat {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+.logo-icon:hover {
+  transform: scale(1.05);
 }
 
 .login-header h2 {
   margin: 0 0 8px 0;
-  font-size: 28px;
-  color: #303133;
-  font-weight: 700;
-  letter-spacing: 2px;
+  font-size: 26px;
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
 }
 
 .welcome-text {
   margin: 0 0 8px 0;
-  font-size: 14px;
-  color: #909399;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: color 0.3s ease;
 }
 
 .typing-effect {
   height: 20px;
   font-size: 13px;
-  color: #667eea;
-  letter-spacing: 4px;
+  color: var(--text-secondary);
+  letter-spacing: 3px;
+  transition: color 0.3s ease;
 }
 
 .cursor {
@@ -455,15 +418,31 @@ onUnmounted(() => {
 
 .input-with-animation :deep(.el-input__wrapper) {
   transition: all 0.3s ease;
-  border-radius: 10px;
+  border-radius: 8px;
+  background: var(--bg-primary);
+  box-shadow: none;
+  border: 1px solid var(--border-color);
 }
 
 .input-with-animation :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px #667eea inset;
+  border-color: var(--accent-color);
 }
 
 .input-with-animation :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3) inset;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.1);
+}
+
+.dark-mode .input-with-animation :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.input-with-animation :deep(.el-input__inner) {
+  color: var(--text-primary);
+}
+
+.input-with-animation :deep(.el-input__inner::placeholder) {
+  color: var(--text-muted);
 }
 
 .form-options {
@@ -473,50 +452,38 @@ onUnmounted(() => {
   margin-bottom: 24px;
 }
 
+.form-options :deep(.el-checkbox__label) {
+  color: var(--text-secondary);
+}
+
 .forgot-password {
-  font-size: 14px;
-  color: #667eea;
+  font-size: 13px;
+  color: var(--text-secondary);
   text-decoration: none;
   transition: color 0.3s;
 }
 
 .forgot-password:hover {
-  color: #764ba2;
-  text-decoration: underline;
+  color: var(--accent-color);
 }
 
 .login-button {
   width: 100%;
   height: 48px;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 12px;
-  letter-spacing: 4px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 8px;
+  letter-spacing: 3px;
+  background: var(--accent-color);
   border: none;
+  color: var(--bg-secondary);
   transition: all 0.3s ease;
-  overflow: hidden;
-  position: relative;
-}
-
-.login-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  transition: left 0.5s;
-}
-
-.login-button:hover::before {
-  left: 100%;
 }
 
 .login-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .login-button.is-loading {
@@ -525,19 +492,6 @@ onUnmounted(() => {
 
 .button-icon {
   margin-right: 8px;
-  animation: shake 0.5s ease-in-out;
-}
-
-@keyframes shake {
-  0%, 100% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(-10deg);
-  }
-  75% {
-    transform: rotate(10deg);
-  }
 }
 
 .login-footer {
@@ -546,7 +500,7 @@ onUnmounted(() => {
 
 .divider {
   position: relative;
-  margin: 20px 0;
+  margin: 24px 0;
 }
 
 .divider::before,
@@ -556,7 +510,7 @@ onUnmounted(() => {
   top: 50%;
   width: 35%;
   height: 1px;
-  background: #e4e7ed;
+  background: var(--border-color);
 }
 
 .divider::before {
@@ -568,55 +522,62 @@ onUnmounted(() => {
 }
 
 .divider span {
-  color: #909399;
+  color: var(--text-muted);
   font-size: 12px;
   padding: 0 12px;
-  background: white;
+  background: var(--bg-secondary);
+  transition: all 0.3s ease;
 }
 
 .social-login {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 16px;
   margin: 20px 0;
 }
 
 .social-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
   transition: all 0.3s ease;
-}
-
-.social-icon.wechat {
-  background: #07c160;
-  color: white;
-}
-
-.social-icon.work-wechat {
-  background: #1890ff;
-  color: white;
-}
-
-.social-icon.dingtalk {
-  background: #0089ff;
-  color: white;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
 }
 
 .social-icon:hover {
-  transform: translateY(-3px) scale(1.1);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+.social-icon.wechat:hover {
+  border-color: #07c160;
+  color: #07c160;
+}
+
+.social-icon.work-wechat:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.social-icon.dingtalk:hover {
+  border-color: #0089ff;
+  color: #0089ff;
 }
 
 .copyright {
-  margin: 16px 0 0 0;
-  color: #c0c4cc;
-  font-size: 12px;
+  margin: 20px 0 0 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
 }
 
 /* 响应式设计 */
@@ -624,11 +585,11 @@ onUnmounted(() => {
   .login-box {
     width: 100%;
     margin: 0 20px;
-    padding: 40px 24px;
+    padding: 36px 24px;
   }
   
   .login-header h2 {
-    font-size: 24px;
+    font-size: 22px;
   }
 }
 </style>
