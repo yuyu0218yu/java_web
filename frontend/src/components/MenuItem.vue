@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { defineProps, markRaw } from 'vue'
+import { markRaw } from 'vue'
 import {
   House, User, UserFilled, Setting, Key, Avatar, Menu, Document,
   HomeFilled, Folder, List, Edit, Delete, Search, Plus, Refresh,
