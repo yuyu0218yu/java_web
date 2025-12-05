@@ -192,7 +192,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { 
   User, UserFilled, Lock, Key, TrendCharts, PieChart, 
   CaretTop, CaretBottom, Bell, ArrowRight, Clock,
@@ -201,6 +201,9 @@ import {
 
 // 图表周期
 const chartPeriod = ref('month')
+
+// 动画帧ID列表，用于清理
+const animationFrameIds = ref([])
 
 // 统计卡片数据
 const statsCards = ref([
@@ -357,10 +360,12 @@ const animateValue = (index, targetValue, duration = 1500) => {
     const eased = 1 - Math.pow(1 - progress, 4)
     animatedValues.value[index] = Math.floor(eased * targetValue)
     if (progress < 1) {
-      requestAnimationFrame(animate)
+      const frameId = requestAnimationFrame(animate)
+      animationFrameIds.value[index] = frameId
     }
   }
-  requestAnimationFrame(animate)
+  const frameId = requestAnimationFrame(animate)
+  animationFrameIds.value[index] = frameId
 }
 
 onMounted(() => {
@@ -369,6 +374,15 @@ onMounted(() => {
     setTimeout(() => {
       animateValue(index, card.value)
     }, index * 100)
+  })
+})
+
+onUnmounted(() => {
+  // 清理动画帧
+  animationFrameIds.value.forEach(frameId => {
+    if (frameId) {
+      cancelAnimationFrame(frameId)
+    }
   })
 })
 </script>

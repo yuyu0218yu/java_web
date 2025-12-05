@@ -535,17 +535,6 @@ const handleStatusChange = async (row) => {
   }
 }
 
-const handleToggleStatus = async (row) => {
-  try {
-    const newStatus = row.status === 1 ? 0 : 1
-    await userApi.updateUserStatus(row.id, newStatus)
-    ElMessage.success(`${newStatus === 1 ? '启用' : '禁用'}用户成功`)
-    loadData()
-  } catch (error) {
-    console.error('更新状态失败:', error)
-  }
-}
-
 const handleExport = () => {
   ElMessage.info('导出功能开发中...')
 }

@@ -165,15 +165,21 @@ const getParticleStyle = (index) => {
 
 // 打字机效果
 const startTyping = () => {
+  if (typingTimer) {
+    clearInterval(typingTimer)
+  }
   typingTimer = setInterval(() => {
     if (typingIndex < fullText.length) {
       typingText.value += fullText[typingIndex]
       typingIndex++
     } else {
-      // 重置开始新一轮
+      // 清除当前定时器，重置后重新开始
+      clearInterval(typingTimer)
+      typingTimer = null
       setTimeout(() => {
         typingText.value = ''
         typingIndex = 0
+        startTyping()
       }, 2000)
     }
   }, 150)

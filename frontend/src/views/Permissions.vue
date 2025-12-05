@@ -499,15 +499,15 @@ const handleStatusChange = async (row) => {
 const handleExpandAll = () => {
   nextTick(() => {
     if (tableRef.value) {
-      const expandRows = (data) => {
-        data.forEach(row => {
-          tableRef.value.toggleRowExpansion(row, true)
-          if (row.children) {
-            expandRows(row.children)
-          }
-        })
+      // 使用迭代方式避免递归深度问题
+      const queue = [...tableData.value]
+      while (queue.length > 0) {
+        const row = queue.shift()
+        tableRef.value.toggleRowExpansion(row, true)
+        if (row.children && row.children.length > 0) {
+          queue.push(...row.children)
+        }
       }
-      expandRows(tableData.value)
     }
   })
 }
@@ -515,15 +515,15 @@ const handleExpandAll = () => {
 const handleCollapseAll = () => {
   nextTick(() => {
     if (tableRef.value) {
-      const collapseRows = (data) => {
-        data.forEach(row => {
-          tableRef.value.toggleRowExpansion(row, false)
-          if (row.children) {
-            collapseRows(row.children)
-          }
-        })
+      // 使用迭代方式避免递归深度问题
+      const queue = [...tableData.value]
+      while (queue.length > 0) {
+        const row = queue.shift()
+        tableRef.value.toggleRowExpansion(row, false)
+        if (row.children && row.children.length > 0) {
+          queue.push(...row.children)
+        }
       }
-      collapseRows(tableData.value)
     }
   })
 }
