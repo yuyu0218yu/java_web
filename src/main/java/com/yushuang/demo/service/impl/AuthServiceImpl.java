@@ -121,6 +121,7 @@ public class AuthServiceImpl implements AuthService {
         userInfo.setPhone(user.getPhone());
         userInfo.setNickname(user.getNickname());
         userInfo.setAvatar(user.getAvatar());
+
         return userInfo;
     }
 

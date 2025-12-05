@@ -41,10 +41,12 @@ public class FileSizeUtil {
     }
 
     /**
-     * 格式化文件大小（使用整数显示）
+     * 格式化文件大小（使用整数显示，用于简单展示）
+     * 注意：此方法使用整数除法，会截断小数部分
+     * 例如：1536字节显示为"1 KB"而非"1.5 KB"
      *
      * @param size 文件大小（字节）
-     * @return 格式化后的字符串
+     * @return 格式化后的字符串（整数显示）
      */
     public static String formatFileSizeSimple(Long size) {
         if (size == null || size == 0) {
