@@ -138,7 +138,7 @@ export const userApi = {
     return request({
       url: `/users/${id}/reset-password`,
       method: 'put',
-      data: { password: newPassword }
+      data: { newPassword }
     })
   },
 
@@ -231,5 +231,133 @@ export const permissionApi = {
       url: `/permissions/${id}`,
       method: 'delete'
     })
+  }
+}
+
+// 文件管理API
+export const fileApi = {
+  // 上传单个文件
+  uploadFile(file) {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request({
+      url: '/files/upload',
+      method: 'post',
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
+  // 批量上传文件
+  uploadFiles(files) {
+    const formData = new FormData()
+    files.forEach(file => {
+      formData.append('files', file)
+    })
+    return request({
+      url: '/files/batch-upload',
+      method: 'post',
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
+  // 获取文件列表
+  getFileList(params) {
+    return request({
+      url: '/files/list',
+      method: 'get',
+      params
+    })
+  },
+
+  // 获取文件信息
+  getFileInfo(fileId) {
+    return request({
+      url: `/files/${fileId}`,
+      method: 'get'
+    })
+  },
+
+  // 删除文件
+  deleteFile(fileId) {
+    return request({
+      url: `/files/${fileId}`,
+      method: 'delete'
+    })
+  },
+
+  // 获取文件统计
+  getFileStatistics() {
+    return request({
+      url: '/files/statistics',
+      method: 'get'
+    })
+  },
+
+  // 获取热门文件
+  getHotFiles(limit = 10) {
+    return request({
+      url: '/files/hot',
+      method: 'get',
+      params: { limit }
+    })
+  },
+
+  // 获取最新文件
+  getLatestFiles(limit = 10) {
+    return request({
+      url: '/files/latest',
+      method: 'get',
+      params: { limit }
+    })
+  },
+
+  // 下载文件
+  downloadFile(fileId) {
+    const token = localStorage.getItem('token')
+    const link = document.createElement('a')
+    link.href = `/api/files/${fileId}/download`
+    // Note: For actual download with auth, you may need to use blob approach
+    link.click()
+  },
+
+  // 下载文件 (blob方式，支持认证)
+  async downloadFileBlob(fileId, fileName) {
+    const token = localStorage.getItem('token')
+    try {
+      const response = await fetch(`/api/files/${fileId}/download`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || '下载失败')
+      }
+      
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = fileName || 'download'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      throw error
+    }
+  },
+
+  // 预览文件URL
+  getPreviewUrl(fileId) {
+    return `/api/files/${fileId}/preview`
   }
 }
