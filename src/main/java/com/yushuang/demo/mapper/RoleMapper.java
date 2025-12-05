@@ -19,6 +19,7 @@ public interface RoleMapper extends BaseMapper<Role> {
 
     /**
      * 根据用户ID查询角色列表
+     * 复杂JOIN查询，无法用LambdaQueryWrapper替代
      */
     @Select("SELECT r.* " +
             "FROM sys_role r " +
@@ -28,25 +29,8 @@ public interface RoleMapper extends BaseMapper<Role> {
 
     /**
      * 根据角色编码查询角色
+     * 用于AuthService注册时查找普通用户角色
      */
     @Select("SELECT * FROM sys_role WHERE deleted = 0 AND role_code = #{roleCode}")
     Role selectByRoleCode(@Param("roleCode") String roleCode);
-
-    /**
-     * 查询所有启用状态的角色
-     */
-    @Select("SELECT * FROM sys_role WHERE deleted = 0 AND status = 1 ORDER BY sort_order ASC")
-    List<Role> selectEnabledRoles();
-
-    /**
-     * 检查角色编码是否存在
-     */
-    @Select("SELECT COUNT(1) FROM sys_role WHERE deleted = 0 AND role_code = #{roleCode} AND id != #{excludeId}")
-    int checkRoleCodeExists(@Param("roleCode") String roleCode, @Param("excludeId") Long excludeId);
-
-    /**
-     * 根据角色ID查询权限数量
-     */
-    @Select("SELECT COUNT(1) FROM sys_role_permission WHERE deleted = 0 AND role_id = #{roleId}")
-    int countPermissionsByRoleId(@Param("roleId") Long roleId);
 }

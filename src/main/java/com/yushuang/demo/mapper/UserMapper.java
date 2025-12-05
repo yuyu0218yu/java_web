@@ -21,6 +21,7 @@ public interface UserMapper extends BaseMapper<User> {
 
     /**
      * 分页查询用户列表（包含角色信息）
+     * 复杂JOIN查询，无法用LambdaQueryWrapper替代
      */
     @Select("SELECT u.*, r.role_name, r.role_code " +
             "FROM sys_user u " +
@@ -32,6 +33,7 @@ public interface UserMapper extends BaseMapper<User> {
 
     /**
      * 根据用户名查询用户（包含角色信息）
+     * 复杂JOIN查询，无法用LambdaQueryWrapper替代
      */
     @Select("SELECT u.id, u.username, u.password, u.salt, u.real_name, u.nickname, " +
             "u.email, u.phone, u.avatar, u.gender, u.birthday, u.status, " +
@@ -45,6 +47,7 @@ public interface UserMapper extends BaseMapper<User> {
 
     /**
      * 根据用户ID查询用户权限列表
+     * 复杂JOIN查询，无法用LambdaQueryWrapper替代
      */
     @Select("SELECT DISTINCT p.permission_code " +
             "FROM sys_user u " +
@@ -54,32 +57,16 @@ public interface UserMapper extends BaseMapper<User> {
             "WHERE u.deleted = 0 AND u.id = #{userId}")
     List<String> selectUserPermissions(@Param("userId") Long userId);
 
-      /**
+    /**
      * 根据用户名查询用户
+     * 用于AuthService登录验证
      */
     @Select("SELECT * FROM sys_user WHERE deleted = 0 AND username = #{username}")
     User selectByUsername(@Param("username") String username);
 
     /**
-     * 检查用户名是否存在
-     */
-    @Select("SELECT COUNT(1) FROM sys_user WHERE deleted = 0 AND username = #{username} AND id != #{excludeId}")
-    int checkUsernameExists(@Param("username") String username, @Param("excludeId") Long excludeId);
-
-    /**
-     * 检查邮箱是否存在
-     */
-    @Select("SELECT COUNT(1) FROM sys_user WHERE deleted = 0 AND email = #{email} AND id != #{excludeId}")
-    int checkEmailExists(@Param("email") String email, @Param("excludeId") Long excludeId);
-
-    /**
-     * 检查手机号是否存在
-     */
-    @Select("SELECT COUNT(1) FROM sys_user WHERE deleted = 0 AND phone = #{phone} AND id != #{excludeId}")
-    int checkPhoneExists(@Param("phone") String phone, @Param("excludeId") Long excludeId);
-
-    /**
      * 更新最后登录信息
+     * UPDATE语句，无法用LambdaQueryWrapper替代
      */
     @Select("UPDATE sys_user SET last_login_time = NOW(), last_login_ip = #{loginIp} WHERE id = #{userId}")
     int updateLastLoginInfo(@Param("userId") Long userId, @Param("loginIp") String loginIp);
