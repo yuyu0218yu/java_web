@@ -29,6 +29,12 @@ import java.util.zip.ZipOutputStream;
 @RequiredArgsConstructor
 public class GeneratorServiceImpl implements GeneratorService {
 
+    /** MySQL 表名最大长度 */
+    private static final int MAX_TABLE_NAME_LENGTH = 64;
+
+    /** 表名验证正则：允许字母、数字、下划线，必须以字母或下划线开头 */
+    private static final String TABLE_NAME_PATTERN = "^[a-zA-Z_][a-zA-Z0-9_]*$";
+
     private final JdbcTemplate jdbcTemplate;
     private final GeneratorConfig config;
     private final TemplateEngine templateEngine;
@@ -642,13 +648,13 @@ public class GeneratorServiceImpl implements GeneratorService {
         if (tableName == null || tableName.isBlank()) {
             throw new GeneratorException("表名不能为空");
         }
-        // 表名只允许字母、数字和下划线
-        if (!tableName.matches("^[a-zA-Z_][a-zA-Z0-9_]*$")) {
-            throw new GeneratorException("表名格式无效，只允许字母、数字和下划线");
+        // 表名验证：必须以字母或下划线开头，只允许字母、数字和下划线
+        if (!tableName.matches(TABLE_NAME_PATTERN)) {
+            throw new GeneratorException("表名格式无效，必须以字母或下划线开头，只允许字母、数字和下划线");
         }
-        // 表名长度限制
-        if (tableName.length() > 64) {
-            throw new GeneratorException("表名长度不能超过64个字符");
+        // 表名长度限制（MySQL标准）
+        if (tableName.length() > MAX_TABLE_NAME_LENGTH) {
+            throw new GeneratorException("表名长度不能超过" + MAX_TABLE_NAME_LENGTH + "个字符");
         }
     }
 
