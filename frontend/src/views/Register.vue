@@ -105,7 +105,7 @@
       <p class="login-link">
         已有账号？ <router-link to="/login">立即登录</router-link>
       </p>
-      <p class="copyright">© 2025 用户权限管理系统 v1.0.0</p>
+      <p class="copyright">© 2025 张家界后台管理系统 v1.0.0</p>
     </div>
   </AuthLayout>
 </template>

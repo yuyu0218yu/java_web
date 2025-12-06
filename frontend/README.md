@@ -1,6 +1,6 @@
-# 用户权限管理系统 - 前端
+# 张家界后台管理系统 - 前端
 
-基于 Vue 3 + Element Plus 构建的现代化用户权限管理前端系统。
+基于 Vue 3 + Element Plus 构建的现代化后台管理前端系统。
 
 ## 🚀 技术栈
 
@@ -104,7 +104,7 @@ proxy: {
 如需配置不同环境，可创建 `.env.development` 和 `.env.production` 文件：
 ```
 VITE_API_BASE_URL=http://localhost:8080
-VITE_APP_TITLE=用户权限管理系统
+VITE_APP_TITLE=张家界后台管理系统
 ```
 
 ## 📝 开发指南

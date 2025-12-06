@@ -9,7 +9,7 @@
               <div class="logo-icon">
                 <el-icon><Lock /></el-icon>
               </div>
-              <h2>权限管理系统</h2>
+              <h2>张家界管理系统</h2>
             </div>
             <div v-else class="logo-mini" key="mini">
               <el-icon><Lock /></el-icon>
@@ -123,7 +123,7 @@
         
         <!-- 页脚 -->
         <el-footer class="footer">
-          <span>© 2025 用户权限管理系统</span>
+          <span>© 2025 张家界后台管理系统</span>
           <span class="divider">|</span>
           <span>Version 1.0.0</span>
         </el-footer>
