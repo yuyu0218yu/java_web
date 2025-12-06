@@ -6,12 +6,12 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -43,15 +43,7 @@ public abstract class BaseController<S extends IService<T>, T> {
     public Result<PageResult<T>> page(@Valid PageRequest request) {
         Page<T> page = request.toMpPageWithSort();
         IPage<T> result = baseService.page(page);
-
-        PageResult<T> pageResult = PageResult.of(
-            result.getRecords(),
-            result.getTotal(),
-            result.getCurrent(),
-            result.getSize()
-        );
-
-        return Result.success(pageResult);
+        return Result.success(PageResult.of(result));
     }
 
     /**
@@ -84,10 +76,7 @@ public abstract class BaseController<S extends IService<T>, T> {
     @Operation(summary = "创建")
     public Result<Void> create(@Valid @RequestBody T entity) {
         boolean success = baseService.save(entity);
-        if (success) {
-            return Result.success("创建成功");
-        }
-        return Result.error("创建失败");
+        return success ? Result.success("创建成功") : Result.error("创建失败");
     }
 
     /**
@@ -98,13 +87,9 @@ public abstract class BaseController<S extends IService<T>, T> {
     public Result<Void> update(
             @Parameter(description = "ID") @PathVariable Serializable id,
             @Valid @RequestBody T entity) {
-        // 通过反射设置ID
         setEntityId(entity, id);
         boolean success = baseService.updateById(entity);
-        if (success) {
-            return Result.success("更新成功");
-        }
-        return Result.error("更新失败");
+        return success ? Result.success("更新成功") : Result.error("更新失败");
     }
 
     /**
@@ -114,10 +99,7 @@ public abstract class BaseController<S extends IService<T>, T> {
     @Operation(summary = "删除")
     public Result<Void> delete(@Parameter(description = "ID") @PathVariable Serializable id) {
         boolean success = baseService.removeById(id);
-        if (success) {
-            return Result.success("删除成功");
-        }
-        return Result.error("删除失败");
+        return success ? Result.success("删除成功") : Result.error("删除失败");
     }
 
     /**
@@ -127,27 +109,57 @@ public abstract class BaseController<S extends IService<T>, T> {
     @Operation(summary = "批量删除")
     public Result<Void> deleteBatch(@RequestBody List<? extends Serializable> ids) {
         boolean success = baseService.removeByIds(ids);
-        if (success) {
-            return Result.success("批量删除成功");
-        }
-        return Result.error("批量删除失败");
+        return success ? Result.success("批量删除成功") : Result.error("批量删除失败");
     }
 
     /**
      * 通过反射设置实体ID
+     * 支持Long、Integer和String类型的ID
      */
     private void setEntityId(T entity, Serializable id) {
-        try {
-            java.lang.reflect.Method setIdMethod = entity.getClass().getMethod("setId", id.getClass());
-            setIdMethod.invoke(entity, id);
-        } catch (Exception e) {
-            // 如果没有setId方法或设置失败，尝试Long类型
+        Class<?> entityClass = entity.getClass();
+        
+        // 尝试常见的ID类型
+        Class<?>[] idTypes = {Long.class, Integer.class, String.class, id.getClass()};
+        
+        for (Class<?> idType : idTypes) {
             try {
-                java.lang.reflect.Method setIdMethod = entity.getClass().getMethod("setId", Long.class);
-                setIdMethod.invoke(entity, Long.parseLong(id.toString()));
-            } catch (Exception ex) {
-                throw new RuntimeException("设置实体ID失败", ex);
+                Method setIdMethod = entityClass.getMethod("setId", idType);
+                Object convertedId = convertId(id, idType);
+                if (convertedId != null) {
+                    setIdMethod.invoke(entity, convertedId);
+                    return;
+                }
+            } catch (NoSuchMethodException ignored) {
+                // 继续尝试下一个类型
+            } catch (Exception e) {
+                throw new RuntimeException("设置实体ID失败", e);
             }
         }
+        
+        throw new RuntimeException("无法找到合适的setId方法");
+    }
+
+    /**
+     * 将ID转换为目标类型
+     */
+    private Object convertId(Serializable id, Class<?> targetType) {
+        if (targetType.isInstance(id)) {
+            return id;
+        }
+        
+        String idStr = id.toString();
+        try {
+            if (targetType == Long.class) {
+                return Long.parseLong(idStr);
+            } else if (targetType == Integer.class) {
+                return Integer.parseInt(idStr);
+            } else if (targetType == String.class) {
+                return idStr;
+            }
+        } catch (NumberFormatException ignored) {
+            // 转换失败，返回null
+        }
+        return null;
     }
 }

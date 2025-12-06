@@ -1,10 +1,8 @@
 package com.yushuang.demo.generator;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
+import static com.yushuang.demo.generator.GeneratorHelper.*;
 
 /**
  * DTO转换器生成器
@@ -16,10 +14,6 @@ import java.time.format.DateTimeFormatter;
  * @author yushuang
  */
 public class DtoConverterGenerator {
-
-    private static final String BASE_PACKAGE = "com.yushuang.demo";
-    private static final String BASE_PATH = System.getProperty("user.dir") + "/src/main/java/com/yushuang/demo";
-    private static final String AUTHOR = "yushuang";
 
     public static void main(String[] args) {
         // 示例：生成User实体的DTO转换器
@@ -38,18 +32,13 @@ public class DtoConverterGenerator {
             generateRequestDTO(entityName, entityCnName);
             generateResponseDTO(entityName, entityCnName);
 
-            System.out.println("========================================");
-            System.out.println("DTO转换器代码生成完成！");
-            System.out.println("实体: " + entityName);
-            System.out.println("生成文件:");
-            System.out.println("  - " + entityName + "Converter.java");
-            System.out.println("  - Create" + entityName + "Request.java");
-            System.out.println("  - Update" + entityName + "Request.java");
-            System.out.println("  - " + entityName + "Response.java");
-            System.out.println("========================================");
+            printSuccess("DTO转换器代码生成", entityName,
+                entityName + "Converter.java",
+                "Create" + entityName + "Request.java",
+                "Update" + entityName + "Request.java",
+                entityName + "Response.java");
         } catch (IOException e) {
-            System.err.println("生成失败: " + e.getMessage());
-            e.printStackTrace();
+            printError(e.getMessage(), e);
         }
     }
 
@@ -66,7 +55,12 @@ public class DtoConverterGenerator {
             import %s.entity.%s;
             import org.springframework.beans.BeanUtils;
 
+            import java.beans.BeanInfo;
+            import java.beans.Introspector;
+            import java.beans.PropertyDescriptor;
+            import java.lang.reflect.Method;
             import java.util.ArrayList;
+            import java.util.Arrays;
             import java.util.List;
             import java.util.stream.Collectors;
 
@@ -77,7 +71,10 @@ public class DtoConverterGenerator {
              * @author %s
              * @since %s
              */
-            public class %sConverter {
+            public final class %sConverter {
+
+                private %sConverter() {
+                }
 
                 /**
                  * CreateRequest转Entity
@@ -134,7 +131,6 @@ public class DtoConverterGenerator {
                     if (entity == null || request == null) {
                         return;
                     }
-                    // 使用BeanUtils只复制非空属性
                     BeanUtils.copyProperties(request, entity, getNullPropertyNames(request));
                 }
 
@@ -142,30 +138,29 @@ public class DtoConverterGenerator {
                  * 获取对象中值为null的属性名
                  */
                 private static String[] getNullPropertyNames(Object source) {
-                    final java.beans.BeanInfo beanInfo;
                     try {
-                        beanInfo = java.beans.Introspector.getBeanInfo(source.getClass());
-                    } catch (java.beans.IntrospectionException e) {
+                        BeanInfo beanInfo = Introspector.getBeanInfo(source.getClass());
+                        return Arrays.stream(beanInfo.getPropertyDescriptors())
+                                .filter(pd -> {
+                                    Method readMethod = pd.getReadMethod();
+                                    if (readMethod == null) return false;
+                                    try {
+                                        return readMethod.invoke(source) == null;
+                                    } catch (Exception e) {
+                                        return false;
+                                    }
+                                })
+                                .map(PropertyDescriptor::getName)
+                                .toArray(String[]::new);
+                    } catch (Exception e) {
                         return new String[0];
                     }
-
-                    return java.util.Arrays.stream(beanInfo.getPropertyDescriptors())
-                            .filter(pd -> {
-                                try {
-                                    java.lang.reflect.Method readMethod = pd.getReadMethod();
-                                    return readMethod != null && readMethod.invoke(source) == null;
-                                } catch (Exception e) {
-                                    return false;
-                                }
-                            })
-                            .map(java.beans.PropertyDescriptor::getName)
-                            .toArray(String[]::new);
                 }
             }
             """,
             BASE_PACKAGE, BASE_PACKAGE, entityName, BASE_PACKAGE, entityName,
             BASE_PACKAGE, entityName, BASE_PACKAGE, entityName,
-            entityCnName, AUTHOR, getCurrentDateTime(), entityName,
+            entityCnName, AUTHOR, getCurrentDate(), entityName, entityName,
             entityName, entityName, entityName, entityName,
             entityName, entityName, entityName, entityName,
             entityName, entityName, entityName, entityName,
@@ -173,7 +168,7 @@ public class DtoConverterGenerator {
             entityName, entityName
         );
 
-        writeToFile("converter", entityName + "Converter.java", content);
+        writeToFile(getMainJavaPath(), "converter", entityName + "Converter.java", content);
     }
 
     /**
@@ -187,8 +182,6 @@ public class DtoConverterGenerator {
             import io.swagger.v3.oas.annotations.media.Schema;
             import lombok.Data;
 
-            import jakarta.validation.constraints.NotBlank;
-            import jakarta.validation.constraints.NotNull;
             import java.io.Serializable;
 
             /**
@@ -204,16 +197,12 @@ public class DtoConverterGenerator {
                 private static final long serialVersionUID = 1L;
 
                 // TODO: 根据实际业务需求添加字段
-                // 示例字段：
-                // @Schema(description = "名称", requiredMode = Schema.RequiredMode.REQUIRED)
-                // @NotBlank(message = "名称不能为空")
-                // private String name;
 
             }
             """,
-            BASE_PACKAGE, entityCnName, AUTHOR, getCurrentDateTime(), entityCnName, entityName
+            BASE_PACKAGE, entityCnName, AUTHOR, getCurrentDate(), entityCnName, entityName
         );
-        writeToFile("dto", "Create" + entityName + "Request.java", createContent);
+        writeToFile(getMainJavaPath(), "dto", "Create" + entityName + "Request.java", createContent);
 
         // Update Request
         String updateContent = String.format("""
@@ -242,16 +231,13 @@ public class DtoConverterGenerator {
                 private Long id;
 
                 // TODO: 根据实际业务需求添加字段
-                // 示例字段：
-                // @Schema(description = "名称")
-                // private String name;
 
             }
             """,
-            BASE_PACKAGE, entityCnName, AUTHOR, getCurrentDateTime(), entityCnName, entityName,
+            BASE_PACKAGE, entityCnName, AUTHOR, getCurrentDate(), entityCnName, entityName,
             entityCnName, entityCnName
         );
-        writeToFile("dto", "Update" + entityName + "Request.java", updateContent);
+        writeToFile(getMainJavaPath(), "dto", "Update" + entityName + "Request.java", updateContent);
     }
 
     /**
@@ -283,9 +269,6 @@ public class DtoConverterGenerator {
                 private Long id;
 
                 // TODO: 根据实际业务需求添加字段
-                // 示例字段：
-                // @Schema(description = "名称")
-                // private String name;
 
                 @Schema(description = "创建时间")
                 private LocalDateTime createTime;
@@ -294,32 +277,9 @@ public class DtoConverterGenerator {
                 private LocalDateTime updateTime;
             }
             """,
-            BASE_PACKAGE, entityCnName, AUTHOR, getCurrentDateTime(), entityCnName, entityName, entityCnName
+            BASE_PACKAGE, entityCnName, AUTHOR, getCurrentDate(), entityCnName, entityName, entityCnName
         );
 
-        writeToFile("dto", entityName + "Response.java", content);
-    }
-
-    /**
-     * 将内容写入文件
-     */
-    private static void writeToFile(String packageName, String fileName, String content) throws IOException {
-        String dirPath = BASE_PATH + "/" + packageName.replace(".", "/");
-        File dir = new File(dirPath);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        File file = new File(dir, fileName);
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write(content);
-        }
-    }
-
-    /**
-     * 获取当前日期时间
-     */
-    private static String getCurrentDateTime() {
-        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        writeToFile(getMainJavaPath(), "dto", entityName + "Response.java", content);
     }
 }

@@ -20,10 +20,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,122 +39,106 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AuditLogAspect {
 
+    private static final int MAX_PARAM_LENGTH = 2000;
+    private static final String TRUNCATION_SUFFIX = "...";
+    private static final String MASKED_VALUE = "******";
+    private static final String SERIALIZATION_ERROR_PREFIX = "序列化失败: ";
+
     private final OperationLogMapper operationLogMapper;
     private final ObjectMapper objectMapper;
 
-    /**
-     * 定义切点：标记了@AuditLog注解的方法
-     */
     @Pointcut("@annotation(com.yushuang.demo.annotation.AuditLog)")
     public void auditLogPointCut() {}
 
-    /**
-     * 环绕通知
-     */
     @Around("auditLogPointCut()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
         OperationLog operationLog = new OperationLog();
 
         try {
-            // 执行方法前准备日志信息
             prepareLogBefore(joinPoint, operationLog);
-
-            // 执行方法
             Object result = joinPoint.proceed();
 
-            // 执行成功后更新日志
-            long endTime = System.currentTimeMillis();
-            operationLog.setTime(endTime - startTime);
-            operationLog.setStatus(OperationLog.Status.SUCCESS.getCode());
-
-            if (getAuditLogAnnotation(joinPoint).saveResponseData()) {
-                operationLog.setParams(serializeResponse(result));
-            }
-
+            updateLogOnSuccess(joinPoint, operationLog, result, startTime);
             return result;
 
         } catch (Exception e) {
-            // 执行失败后更新日志
-            long endTime = System.currentTimeMillis();
-            operationLog.setTime(endTime - startTime);
-            operationLog.setStatus(OperationLog.Status.FAILURE.getCode());
-            operationLog.setErrorMsg(e.getMessage());
-
-            log.error("操作执行失败: {}", e.getMessage(), e);
+            updateLogOnFailure(operationLog, e, startTime);
             throw e;
         } finally {
-            // 异步保存日志
             saveLogAsync(operationLog);
         }
     }
 
-    /**
-     * 准备日志信息
-     */
     private void prepareLogBefore(ProceedingJoinPoint joinPoint, OperationLog operationLog) {
-        // 获取注解信息
         AuditLog auditLog = getAuditLogAnnotation(joinPoint);
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
 
-        // 基本信息
         operationLog.setOperation(getOperationDescription(auditLog, method));
         operationLog.setMethod(method.getDeclaringClass().getName() + "." + method.getName());
 
-        // 用户信息
+        setUserInfo(operationLog);
+        setRequestInfo(joinPoint, operationLog, auditLog);
+    }
+
+    private void setUserInfo(OperationLog operationLog) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             operationLog.setUsername(authentication.getName());
-            // 如果能获取到用户ID，也可以设置
-            // operationLog.setUserId(getUserIdFromAuthentication(authentication));
         }
+    }
 
-        // 请求信息
+    private void setRequestInfo(ProceedingJoinPoint joinPoint, OperationLog operationLog, AuditLog auditLog) {
         HttpServletRequest request = WebUtil.getRequest();
         if (request != null) {
             operationLog.setIp(IpUtil.getClientIp(request));
             operationLog.setUserAgent(request.getHeader("User-Agent"));
 
             if (auditLog.saveRequestData()) {
-                operationLog.setParams(serializeRequest(joinPoint.getArgs(), auditLog));
+                operationLog.setParams(serializeArgs(joinPoint.getArgs(), auditLog));
             }
         }
     }
 
-    /**
-     * 获取注解信息
-     */
-    private AuditLog getAuditLogAnnotation(ProceedingJoinPoint joinPoint) {
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Method method = signature.getMethod();
-        return method.getAnnotation(AuditLog.class);
+    private void updateLogOnSuccess(ProceedingJoinPoint joinPoint, OperationLog operationLog, 
+                                     Object result, long startTime) {
+        operationLog.setTime(System.currentTimeMillis() - startTime);
+        operationLog.setStatus(OperationLog.Status.SUCCESS.getCode());
+
+        if (getAuditLogAnnotation(joinPoint).saveResponseData()) {
+            operationLog.setParams(serializeObject(result));
+        }
     }
 
-    /**
-     * 获取操作描述
-     */
+    private void updateLogOnFailure(OperationLog operationLog, Exception e, long startTime) {
+        operationLog.setTime(System.currentTimeMillis() - startTime);
+        operationLog.setStatus(OperationLog.Status.FAILURE.getCode());
+        operationLog.setErrorMsg(e.getMessage());
+        log.error("操作执行失败: {}", e.getMessage(), e);
+    }
+
+    private AuditLog getAuditLogAnnotation(ProceedingJoinPoint joinPoint) {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        return signature.getMethod().getAnnotation(AuditLog.class);
+    }
+
     private String getOperationDescription(AuditLog auditLog, Method method) {
         if (auditLog != null && !auditLog.operation().isEmpty()) {
             return auditLog.operation();
         }
-
         if (auditLog != null && !auditLog.module().isEmpty()) {
             return auditLog.module();
         }
-
         return method.getName();
     }
 
-    /**
-     * 序列化请求参数
-     */
-    private String serializeRequest(Object[] args, AuditLog auditLog) {
-        try {
-            if (args == null || args.length == 0) {
-                return "";
-            }
+    private String serializeArgs(Object[] args, AuditLog auditLog) {
+        if (args == null || args.length == 0) {
+            return "";
+        }
 
+        try {
             List<Object> filteredArgs = Arrays.stream(args)
                     .filter(arg -> !isExcludeType(arg, auditLog))
                     .collect(Collectors.toList());
@@ -166,93 +148,67 @@ public class AuditLogAspect {
             }
 
             String json = objectMapper.writeValueAsString(filteredArgs);
-
-            // 敏感信息脱敏
-            if (auditLog.sensitiveFields() != null && auditLog.sensitiveFields().length > 0) {
-                json = maskSensitiveFields(json, auditLog.sensitiveFields());
-            }
-
-            // 限制长度
-            if (json.length() > 2000) {
-                json = json.substring(0, 2000) + "...";
-            }
-
-            return json;
+            json = maskSensitiveFields(json, auditLog.sensitiveFields());
+            return truncateIfNeeded(json);
 
         } catch (Exception e) {
             log.warn("序列化请求参数失败: {}", e.getMessage());
-            return "序列化失败: " + e.getMessage();
+            return SERIALIZATION_ERROR_PREFIX + e.getMessage();
         }
     }
 
-    /**
-     * 序列化响应数据
-     */
-    private String serializeResponse(Object response) {
+    private String serializeObject(Object obj) {
+        if (obj == null) {
+            return "";
+        }
+
         try {
-            if (response == null) {
-                return "";
-            }
-
-            String json = objectMapper.writeValueAsString(response);
-
-            // 限制长度
-            if (json.length() > 2000) {
-                json = json.substring(0, 2000) + "...";
-            }
-
-            return json;
-
+            return truncateIfNeeded(objectMapper.writeValueAsString(obj));
         } catch (Exception e) {
             log.warn("序列化响应数据失败: {}", e.getMessage());
-            return "序列化失败: " + e.getMessage();
+            return SERIALIZATION_ERROR_PREFIX + e.getMessage();
         }
     }
 
-    /**
-     * 判断是否为排除的类型
-     */
+    private String truncateIfNeeded(String str) {
+        if (str.length() > MAX_PARAM_LENGTH) {
+            return str.substring(0, MAX_PARAM_LENGTH) + TRUNCATION_SUFFIX;
+        }
+        return str;
+    }
+
     private boolean isExcludeType(Object arg, AuditLog auditLog) {
-        if (arg == null) {
+        if (arg == null || arg instanceof MultipartFile) {
             return true;
         }
 
-        Class<?>[] excludeTypes = auditLog.excludeTypes();
-        for (Class<?> excludeType : excludeTypes) {
+        for (Class<?> excludeType : auditLog.excludeTypes()) {
             if (excludeType.isInstance(arg)) {
                 return true;
             }
         }
-
-        // 特殊处理文件上传
-        if (arg instanceof MultipartFile) {
-            return true;
-        }
-
         return false;
     }
 
-    /**
-     * 敏感信息脱敏
-     */
     private String maskSensitiveFields(String json, String[] sensitiveFields) {
+        if (sensitiveFields == null || sensitiveFields.length == 0) {
+            return json;
+        }
+
         String maskedJson = json;
         for (String field : sensitiveFields) {
-            // 简单的正则替换，更复杂的脱敏逻辑可以根据需要扩展
             String regex = "\"" + field + "\"\\s*:\\s*\"[^\"]*\"";
-            maskedJson = maskedJson.replaceAll(regex, "\"" + field + "\":\"******\"");
+            maskedJson = maskedJson.replaceAll(regex, "\"" + field + "\":\"" + MASKED_VALUE + "\"");
         }
         return maskedJson;
     }
 
-    /**
-     * 异步保存日志
-     */
     @Async("logExecutor")
     public void saveLogAsync(OperationLog operationLog) {
         try {
-            operationLog.setCreateTime(LocalDateTime.now());
-            operationLog.setUpdateTime(LocalDateTime.now());
+            LocalDateTime now = LocalDateTime.now();
+            operationLog.setCreateTime(now);
+            operationLog.setUpdateTime(now);
             operationLogMapper.insert(operationLog);
             log.debug("操作日志记录成功: {}", operationLog.getOperation());
         } catch (Exception e) {

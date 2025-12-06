@@ -35,14 +35,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    private static final String FIELD_ERROR_SEPARATOR = "; ";
+
     /**
      * 处理业务异常
      */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Result<Void>> handleBusinessException(BusinessException e) {
         log.warn("业务异常: {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Result.error(e.getCode(), e.getMessage()));
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, Result.error(e.getCode(), e.getMessage()));
     }
 
     /**
@@ -50,13 +51,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Result<Void>> handleValidationException(MethodArgumentNotValidException e) {
-        List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
-        String message = fieldErrors.stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.joining("; "));
+        String message = buildFieldErrorMessage(e.getBindingResult().getFieldErrors());
         log.warn("参数校验失败: {}", message);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Result.paramError(message));
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, Result.paramError(message));
     }
 
     /**
@@ -64,13 +61,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BindException.class)
     public ResponseEntity<Result<Void>> handleBindException(BindException e) {
-        List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
-        String message = fieldErrors.stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.joining("; "));
+        String message = buildFieldErrorMessage(e.getBindingResult().getFieldErrors());
         log.warn("参数绑定失败: {}", message);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Result.paramError(message));
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, Result.paramError(message));
     }
 
     /**
@@ -78,13 +71,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Result<Void>> handleConstraintViolationException(ConstraintViolationException e) {
-        Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
-        String message = violations.stream()
-                .map(ConstraintViolation::getMessage)
-                .collect(Collectors.joining("; "));
+        String message = buildConstraintViolationMessage(e.getConstraintViolations());
         log.warn("约束校验失败: {}", message);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Result.paramError(message));
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, Result.paramError(message));
     }
 
     /**
@@ -95,8 +84,7 @@ public class GlobalExceptionHandler {
             MissingServletRequestParameterException e) {
         String message = "缺少必需参数: " + e.getParameterName();
         log.warn("缺少请求参数: {}", message);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Result.paramError(message));
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, Result.paramError(message));
     }
 
     /**
@@ -107,8 +95,7 @@ public class GlobalExceptionHandler {
             MethodArgumentTypeMismatchException e) {
         String message = "参数类型错误: " + e.getName();
         log.warn("参数类型不匹配: {}", message);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Result.paramError(message));
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, Result.paramError(message));
     }
 
     /**
@@ -117,8 +104,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Result<Void>> handleAuthenticationException(AuthenticationException e) {
         log.warn("认证失败: {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Result.unauthorized("认证失败: " + e.getMessage()));
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, Result.unauthorized("认证失败: " + e.getMessage()));
     }
 
     /**
@@ -127,8 +113,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Result<Void>> handleBadCredentialsException(BadCredentialsException e) {
         log.warn("用户名或密码错误");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Result.unauthorized("用户名或密码错误"));
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, Result.unauthorized("用户名或密码错误"));
     }
 
     /**
@@ -137,8 +122,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Result<Void>> handleAccessDeniedException(AccessDeniedException e) {
         log.warn("访问被拒绝: {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Result.forbidden("没有权限访问此资源"));
+        return buildErrorResponse(HttpStatus.FORBIDDEN, Result.forbidden("没有权限访问此资源"));
     }
 
     /**
@@ -148,8 +132,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Result<Void>> handleHttpRequestMethodNotSupportedException(
             HttpRequestMethodNotSupportedException e) {
         log.warn("请求方法不支持: {}", e.getMethod());
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(Result.error(405, "请求方法 " + e.getMethod() + " 不支持"));
+        return buildErrorResponse(HttpStatus.METHOD_NOT_ALLOWED, 
+                Result.error(405, "请求方法 " + e.getMethod() + " 不支持"));
     }
 
     /**
@@ -158,8 +142,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<Result<Void>> handleNoHandlerFoundException(NoHandlerFoundException e) {
         log.warn("资源不存在: {}", e.getRequestURL());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Result.notFound("资源不存在: " + e.getRequestURL()));
+        return buildErrorResponse(HttpStatus.NOT_FOUND, Result.notFound("资源不存在: " + e.getRequestURL()));
     }
 
     /**
@@ -168,8 +151,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Result<Void>> handleResourceNotFoundException(ResourceNotFoundException e) {
         log.warn("资源不存在: {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Result.notFound(e.getMessage()));
+        return buildErrorResponse(HttpStatus.NOT_FOUND, Result.notFound(e.getMessage()));
     }
 
     /**
@@ -178,8 +160,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Result<Void>> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
         log.warn("文件上传大小超限: {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Result.paramError("文件大小超过限制"));
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, Result.paramError("文件大小超过限制"));
     }
 
     /**
@@ -188,7 +169,31 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Result<Void>> handleException(Exception e) {
         log.error("系统异常: ", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Result.error("系统异常，请稍后重试"));
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, Result.error("系统异常，请稍后重试"));
+    }
+
+    /**
+     * 构建错误响应
+     */
+    private ResponseEntity<Result<Void>> buildErrorResponse(HttpStatus status, Result<Void> result) {
+        return ResponseEntity.status(status).body(result);
+    }
+
+    /**
+     * 构建字段错误信息
+     */
+    private String buildFieldErrorMessage(List<FieldError> fieldErrors) {
+        return fieldErrors.stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining(FIELD_ERROR_SEPARATOR));
+    }
+
+    /**
+     * 构建约束违反信息
+     */
+    private String buildConstraintViolationMessage(Set<ConstraintViolation<?>> violations) {
+        return violations.stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.joining(FIELD_ERROR_SEPARATOR));
     }
 }

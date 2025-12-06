@@ -1,7 +1,9 @@
 package com.yushuang.demo.common;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.Data;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,7 +46,7 @@ public class PageResult<T> {
         this.total = total;
         this.current = current;
         this.size = size;
-        this.pages = (total + size - 1) / size; // 计算总页数
+        this.pages = size > 0 ? (total + size - 1) / size : 0; // 防止除以零
     }
 
     /**
@@ -55,10 +57,17 @@ public class PageResult<T> {
     }
 
     /**
+     * 从MyBatis-Plus的IPage创建分页结果
+     */
+    public static <T> PageResult<T> of(IPage<T> page) {
+        return new PageResult<>(page.getRecords(), page.getTotal(), page.getCurrent(), page.getSize());
+    }
+
+    /**
      * 创建空的分页结果
      */
     public static <T> PageResult<T> empty(Long current, Long size) {
-        return new PageResult<>(null, 0L, current, size);
+        return new PageResult<>(Collections.emptyList(), 0L, current, size);
     }
 
     /**
@@ -79,7 +88,7 @@ public class PageResult<T> {
      * 判断是否为第一页
      */
     public boolean isFirstPage() {
-        return current == null || current == 1;
+        return current == null || current <= 1;
     }
 
     /**

@@ -1,10 +1,8 @@
 package com.yushuang.demo.generator;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
+import static com.yushuang.demo.generator.GeneratorHelper.*;
 
 /**
  * CRUD模板代码生成器
@@ -16,10 +14,6 @@ import java.time.format.DateTimeFormatter;
  * @author yushuang
  */
 public class CrudTemplateGenerator {
-
-    private static final String BASE_PACKAGE = "com.yushuang.demo";
-    private static final String BASE_PATH = System.getProperty("user.dir") + "/src/main/java/com/yushuang/demo";
-    private static final String AUTHOR = "yushuang";
 
     public static void main(String[] args) {
         // 示例：生成Product实体的CRUD代码
@@ -39,17 +33,12 @@ public class CrudTemplateGenerator {
             generateService(entityName, entityCnName);
             generateServiceImpl(entityName, entityCnName);
 
-            System.out.println("========================================");
-            System.out.println("CRUD代码生成完成！");
-            System.out.println("实体: " + entityName);
-            System.out.println("生成文件:");
-            System.out.println("  - " + entityName + "Controller.java");
-            System.out.println("  - " + entityName + "Service.java");
-            System.out.println("  - " + entityName + "ServiceImpl.java");
-            System.out.println("========================================");
+            printSuccess("CRUD代码生成", entityName, 
+                entityName + "Controller.java",
+                entityName + "Service.java",
+                entityName + "ServiceImpl.java");
         } catch (IOException e) {
-            System.err.println("生成失败: " + e.getMessage());
-            e.printStackTrace();
+            printError(e.getMessage(), e);
         }
     }
 
@@ -109,15 +98,7 @@ public class CrudTemplateGenerator {
 
                     Page<%s> page = new Page<>(current, size);
                     IPage<%s> result = %sService.page(page);
-
-                    PageResult<%s> pageResult = PageResult.of(
-                            result.getRecords(),
-                            result.getTotal(),
-                            result.getCurrent(),
-                            result.getSize()
-                    );
-
-                    return Result.success(pageResult);
+                    return Result.success(PageResult.of(result));
                 }
 
                 /**
@@ -129,7 +110,7 @@ public class CrudTemplateGenerator {
                 public Result<%s> getById(@Parameter(description = "%sID") @PathVariable Long id) {
                     %s entity = %sService.getById(id);
                     if (entity == null) {
-                        return Result.error("%s不存在");
+                        return Result.notFound("%s不存在");
                     }
                     return Result.success(entity);
                 }
@@ -141,8 +122,7 @@ public class CrudTemplateGenerator {
                 @Operation(summary = "查询所有%s")
                 @PreAuthorize("hasAuthority('%s:view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
                 public Result<List<%s>> list() {
-                    List<%s> list = %sService.list();
-                    return Result.success(list);
+                    return Result.success(%sService.list());
                 }
 
                 /**
@@ -152,11 +132,7 @@ public class CrudTemplateGenerator {
                 @Operation(summary = "创建%s")
                 @PreAuthorize("hasAuthority('%s:create') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
                 public Result<Void> create(@Valid @RequestBody %s entity) {
-                    boolean success = %sService.save(entity);
-                    if (success) {
-                        return Result.success("创建成功");
-                    }
-                    return Result.error("创建失败");
+                    return %sService.save(entity) ? Result.success("创建成功") : Result.error("创建失败");
                 }
 
                 /**
@@ -169,11 +145,7 @@ public class CrudTemplateGenerator {
                         @Parameter(description = "%sID") @PathVariable Long id,
                         @Valid @RequestBody %s entity) {
                     entity.setId(id);
-                    boolean success = %sService.updateById(entity);
-                    if (success) {
-                        return Result.success("更新成功");
-                    }
-                    return Result.error("更新失败");
+                    return %sService.updateById(entity) ? Result.success("更新成功") : Result.error("更新失败");
                 }
 
                 /**
@@ -183,11 +155,7 @@ public class CrudTemplateGenerator {
                 @Operation(summary = "删除%s")
                 @PreAuthorize("hasAuthority('%s:delete') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
                 public Result<Void> delete(@Parameter(description = "%sID") @PathVariable Long id) {
-                    boolean success = %sService.removeById(id);
-                    if (success) {
-                        return Result.success("删除成功");
-                    }
-                    return Result.error("删除失败");
+                    return %sService.removeById(id) ? Result.success("删除成功") : Result.error("删除失败");
                 }
 
                 /**
@@ -197,28 +165,24 @@ public class CrudTemplateGenerator {
                 @Operation(summary = "批量删除%s")
                 @PreAuthorize("hasAuthority('%s:delete') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
                 public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
-                    boolean success = %sService.removeByIds(ids);
-                    if (success) {
-                        return Result.success("批量删除成功");
-                    }
-                    return Result.error("批量删除失败");
+                    return %sService.removeByIds(ids) ? Result.success("批量删除成功") : Result.error("批量删除失败");
                 }
             }
             """,
             BASE_PACKAGE, BASE_PACKAGE, BASE_PACKAGE, BASE_PACKAGE, entityName, BASE_PACKAGE, entityName,
-            entityCnName, AUTHOR, getCurrentDateTime(), urlPath, moduleName, moduleName, entityName,
+            entityCnName, AUTHOR, getCurrentDate(), urlPath, moduleName, moduleName, entityName,
             entityName, lowerEntityName, entityCnName, entityCnName, lowerEntityName,
-            entityName, entityName, entityName, lowerEntityName, entityName,
+            entityName, entityName, entityName, lowerEntityName,
             entityCnName, entityCnName, lowerEntityName, entityName, entityCnName,
             entityName, lowerEntityName, entityCnName,
-            entityCnName, entityCnName, lowerEntityName, entityName, entityName, lowerEntityName,
+            entityCnName, entityCnName, lowerEntityName, entityName, lowerEntityName,
             entityCnName, entityCnName, lowerEntityName, entityName, lowerEntityName,
             entityCnName, entityCnName, lowerEntityName, entityCnName, entityName, lowerEntityName,
             entityCnName, entityCnName, lowerEntityName, entityCnName, lowerEntityName,
             entityCnName, entityCnName, lowerEntityName, lowerEntityName
         );
 
-        writeToFile("controller", entityName + "Controller.java", content);
+        writeToFile(getMainJavaPath(), "controller", entityName + "Controller.java", content);
     }
 
     /**
@@ -243,10 +207,10 @@ public class CrudTemplateGenerator {
 
             }
             """,
-            BASE_PACKAGE, BASE_PACKAGE, entityName, entityCnName, AUTHOR, getCurrentDateTime(), entityName, entityName
+            BASE_PACKAGE, BASE_PACKAGE, entityName, entityCnName, AUTHOR, getCurrentDate(), entityName, entityName
         );
 
-        writeToFile("service", entityName + "Service.java", content);
+        writeToFile(getMainJavaPath(), "service", entityName + "Service.java", content);
     }
 
     /**
@@ -278,64 +242,9 @@ public class CrudTemplateGenerator {
             }
             """,
             BASE_PACKAGE, BASE_PACKAGE, entityName, BASE_PACKAGE, entityName, BASE_PACKAGE, entityName,
-            entityCnName, AUTHOR, getCurrentDateTime(), entityName, entityName, entityName, entityName
+            entityCnName, AUTHOR, getCurrentDate(), entityName, entityName, entityName, entityName
         );
 
-        writeToFile("service/impl", entityName + "ServiceImpl.java", content);
-    }
-
-    /**
-     * 将内容写入文件
-     */
-    private static void writeToFile(String packageName, String fileName, String content) throws IOException {
-        String dirPath = BASE_PATH + "/" + packageName.replace(".", "/");
-        File dir = new File(dirPath);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        File file = new File(dir, fileName);
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write(content);
-        }
-    }
-
-    /**
-     * 转换为小驼峰命名
-     */
-    private static String toLowerCamelCase(String str) {
-        if (str == null || str.isEmpty()) {
-            return str;
-        }
-        return str.substring(0, 1).toLowerCase() + str.substring(1);
-    }
-
-    /**
-     * 转换为kebab-case命名（用于URL）
-     */
-    private static String toKebabCase(String str) {
-        if (str == null || str.isEmpty()) {
-            return str;
-        }
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < str.length(); i++) {
-            char c = str.charAt(i);
-            if (Character.isUpperCase(c)) {
-                if (i > 0) {
-                    result.append('-');
-                }
-                result.append(Character.toLowerCase(c));
-            } else {
-                result.append(c);
-            }
-        }
-        return result.toString();
-    }
-
-    /**
-     * 获取当前日期时间
-     */
-    private static String getCurrentDateTime() {
-        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        writeToFile(getMainJavaPath(), "service/impl", entityName + "ServiceImpl.java", content);
     }
 }
