@@ -408,9 +408,7 @@ const fetchDashboardData = async (period = 'month') => {
       }
       
       // 更新图表数据
-      if (data.userGrowthData && data.userGrowthData.length > 0) {
-        chartData.value = data.userGrowthData
-      }
+      updateChartData(data)
       
       // 更新权限分布数据
       if (data.permissionDistribution && data.permissionDistribution.length > 0) {
@@ -437,18 +435,20 @@ const fetchDashboardData = async (period = 'month') => {
   }
 }
 
+// 更新图表数据（共享方法）
+const updateChartData = (data) => {
+  if (data.userGrowthData && data.userGrowthData.length > 0) {
+    chartData.value = data.userGrowthData
+  }
+}
+
 // 仅获取图表数据（用于切换周期时）
 const fetchChartData = async (period) => {
   try {
     const res = await dashboardApi.getStatistics(period)
     
     if (res.code === 200 && res.data) {
-      const data = res.data
-      
-      // 仅更新图表数据
-      if (data.userGrowthData && data.userGrowthData.length > 0) {
-        chartData.value = data.userGrowthData
-      }
+      updateChartData(res.data)
     }
   } catch (error) {
     console.error('获取图表数据失败:', error)
