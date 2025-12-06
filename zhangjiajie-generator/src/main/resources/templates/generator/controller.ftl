@@ -1,6 +1,6 @@
 package ${basePackage}.controller;
 
-import ${basePackage}.common.BaseController;
+import com.zhangjiajie.common.core.BaseController;
 import ${basePackage}.entity.${className};
 import ${basePackage}.service.${className}Service;
 <#if enableSwagger>

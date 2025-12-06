@@ -16,16 +16,16 @@ import org.springframework.stereotype.Component;
 public class GeneratorConfig {
 
     /** 基础包名 */
-    private String basePackage = "com.yushuang.demo";
+    private String basePackage = "com.zhangjiajie.system";
 
     /** 作者 */
-    private String author = "yushuang";
+    private String author = "zhangjiajie";
 
     /** 输出路径 */
-    private String outputPath = System.getProperty("user.dir") + "/src/main/java";
+    private String outputPath = System.getProperty("user.dir") + "/zhangjiajie-system/src/main/java";
 
     /** Mapper XML 输出路径 */
-    private String mapperXmlPath = System.getProperty("user.dir") + "/src/main/resources/mapper";
+    private String mapperXmlPath = System.getProperty("user.dir") + "/zhangjiajie-system/src/main/resources/mapper";
 
     /** 是否覆盖已有文件 */
     private boolean overwrite = true;
