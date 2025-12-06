@@ -52,7 +52,7 @@ public interface OperationLogMapper extends BaseMapper<OperationLog> {
     /**
      * 删除指定日期之前的日志（日志清理）
      */
-    @Select("UPDATE sys_operation_log SET deleted = 1 WHERE deleted = 0 AND create_time &lt; #{beforeDate}")
+    @org.apache.ibatis.annotations.Update("UPDATE sys_operation_log SET deleted = 1 WHERE deleted = 0 AND create_time &lt; #{beforeDate}")
     int deleteLogsBeforeDate(@Param("beforeDate") LocalDateTime beforeDate);
 
     /**

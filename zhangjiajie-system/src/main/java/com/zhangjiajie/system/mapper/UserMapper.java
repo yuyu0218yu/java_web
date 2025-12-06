@@ -68,7 +68,7 @@ public interface UserMapper extends BaseMapper<User> {
      * 更新最后登录信息
      * UPDATE语句，无法用LambdaQueryWrapper替代
      */
-    @Select("UPDATE sys_user SET last_login_time = NOW(), last_login_ip = #{loginIp} WHERE id = #{userId}")
+    @org.apache.ibatis.annotations.Update("UPDATE sys_user SET last_login_time = NOW(), last_login_ip = #{loginIp} WHERE id = #{userId}")
     int updateLastLoginInfo(@Param("userId") Long userId, @Param("loginIp") String loginIp);
 
     /**
