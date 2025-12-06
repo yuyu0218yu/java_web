@@ -17,13 +17,19 @@ const routes = [
   {
     path: '/',
     component: () => import('@/layout/MainLayout.vue'),
-    redirect: '/dashboard',
+    redirect: '/welcome',
     children: [
+      {
+        path: 'welcome',
+        name: 'Welcome',
+        component: () => import('@/views/Welcome.vue'),
+        meta: { title: '欢迎页', requiresAuth: false }
+      },
       {
         path: 'dashboard',
         name: 'Dashboard',
         component: () => import('@/views/Dashboard.vue'),
-        meta: { title: '仪表盘', requiresAuth: true }
+        meta: { title: '仪表盘', requiresAuth: true, requiredPermissions: ['dashboard:view'], requiredRoles: ['SUPER_ADMIN'] }
       },
       {
         path: 'users',
@@ -70,7 +76,11 @@ router.beforeEach((to, from, next) => {
   
   // 如果访问登录/注册页面且已登录，重定向到仪表盘
   if ((to.name === 'Login' || to.name === 'Register') && authStore.isAuthenticated) {
-    next('/dashboard')
+    if (canAccessDashboard(authStore)) {
+      next('/dashboard')
+    } else {
+      next('/welcome')
+    }
     return
   }
   
@@ -85,33 +95,50 @@ router.beforeEach((to, from, next) => {
     const userRole = authStore.user?.roleCode
     const userPermissions = authStore.permissions || []
     
-    let hasAccess = false
-    
-    // 检查角色权限（如果配置了）
-    if (to.meta.requiredRoles && to.meta.requiredRoles.length > 0) {
-      hasAccess = hasAccess || to.meta.requiredRoles.includes(userRole)
-    }
-    
-    // 检查具体权限（如果配置了）
-    if (to.meta.requiredPermissions && to.meta.requiredPermissions.length > 0) {
-      hasAccess = hasAccess || to.meta.requiredPermissions.some(perm => 
-        userPermissions.includes(perm) || userPermissions.includes('*')
-      )
-    }
-    
-    // 如果既没有配置角色要求也没有配置权限要求，默认允许访问
-    if (!to.meta.requiredRoles && !to.meta.requiredPermissions) {
-      hasAccess = true
-    }
-    
+    const hasAccess = checkAccess(to.meta, userRole, userPermissions)
     if (!hasAccess) {
-      // 可以重定向到403页面或仪表盘
-      next('/dashboard')
+      // 无权限：如果能进仪表盘则去仪表盘，否则去欢迎页
+      if (canAccessDashboard(authStore)) {
+        next('/dashboard')
+      } else {
+        next('/welcome')
+      }
       return
     }
   }
   
   next()
 })
+
+function checkAccess(meta, userRole, userPermissions) {
+  let hasAccess = false
+
+  if (meta.requiredRoles && meta.requiredRoles.length > 0) {
+    hasAccess = hasAccess || meta.requiredRoles.includes(userRole)
+  }
+
+  if (meta.requiredPermissions && meta.requiredPermissions.length > 0) {
+    hasAccess = hasAccess || meta.requiredPermissions.some(perm =>
+      userPermissions.includes(perm) || userPermissions.includes('*')
+    )
+  }
+
+  if (!meta.requiredRoles && !meta.requiredPermissions) {
+    hasAccess = true
+  }
+
+  return hasAccess
+}
+
+function canAccessDashboard(authStore) {
+  if (!authStore?.user) return false
+  const userRole = authStore.user?.roleCode
+  const userPermissions = authStore.permissions || []
+  return checkAccess(
+    { requiredRoles: ['SUPER_ADMIN'], requiredPermissions: ['dashboard:view'] },
+    userRole,
+    userPermissions
+  )
+}
 
 export default router
