@@ -40,6 +40,7 @@
           v-loading="loading"
           :data="tableData"
           style="width: 100%"
+          table-layout="auto"
           row-key="id"
           :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
           :default-expand-all="false"
@@ -114,7 +115,7 @@
               />
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="180" fixed="right">
+          <el-table-column label="操作" width="180">
             <template #default="scope">
               <div class="operation-buttons">
                 <el-tooltip content="新增子权限" placement="top">

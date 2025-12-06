@@ -32,6 +32,7 @@
           v-loading="loading" 
           :data="tableData" 
           style="width: 100%"
+          table-layout="auto"
           :row-class-name="tableRowClassName"
           highlight-current-row
           stripe
@@ -90,7 +91,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="220" fixed="right">
+          <el-table-column label="操作" width="220">
             <template #default="scope">
               <div class="operation-buttons">
                 <el-tooltip content="编辑角色" placement="top">

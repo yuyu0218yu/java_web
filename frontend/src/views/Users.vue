@@ -71,6 +71,7 @@
           v-loading="loading"
           :data="tableData"
           style="width: 100%"
+          table-layout="auto"
           @selection-change="handleSelectionChange"
           :row-class-name="tableRowClassName"
           highlight-current-row
@@ -140,7 +141,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="280" fixed="right">
+          <el-table-column label="操作" width="280">
             <template #default="scope">
               <div class="operation-buttons">
                 <el-tooltip content="编辑用户" placement="top">
