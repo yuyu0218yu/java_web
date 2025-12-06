@@ -29,6 +29,12 @@ import java.util.zip.ZipOutputStream;
 @RequiredArgsConstructor
 public class GeneratorServiceImpl implements GeneratorService {
 
+    /** MySQL 表名最大长度 */
+    private static final int MAX_TABLE_NAME_LENGTH = 64;
+
+    /** 表名验证正则：允许字母、数字、下划线，必须以字母或下划线开头 */
+    private static final String TABLE_NAME_PATTERN = "^[a-zA-Z_][a-zA-Z0-9_]*$";
+
     private final JdbcTemplate jdbcTemplate;
     private final GeneratorConfig config;
     private final TemplateEngine templateEngine;
@@ -50,6 +56,7 @@ public class GeneratorServiceImpl implements GeneratorService {
 
     @Override
     public List<Map<String, Object>> getTableColumns(String tableName) {
+        validateTableName(tableName);
         String sql = """
             SELECT
                 COLUMN_NAME as columnName,
@@ -68,6 +75,7 @@ public class GeneratorServiceImpl implements GeneratorService {
 
     @Override
     public Map<String, String> previewCode(String tableName, GenerateOptions options) {
+        validateTableName(tableName);
         Map<String, String> codeMap = new LinkedHashMap<>();
         Map<String, Object> dataModel = buildDataModel(tableName, options);
         String className = (String) dataModel.get("className");
@@ -111,6 +119,7 @@ public class GeneratorServiceImpl implements GeneratorService {
 
     @Override
     public void generateCode(String tableName, GenerateOptions options) {
+        validateTableName(tableName);
         Map<String, Object> dataModel = buildDataModel(tableName, options);
         String className = (String) dataModel.get("className");
 
@@ -364,7 +373,7 @@ public class GeneratorServiceImpl implements GeneratorService {
         if (fileName.contains("Converter")) {
             return "main/converter/" + fileName;
         }
-        if (fileName.endsWith(" (Entity)")) {
+        if (fileName.endsWith(".java (Entity)")) {
             return "main/entity/" + fileName.replace(" (Entity)", "");
         }
         return fileName;
@@ -631,6 +640,23 @@ public class GeneratorServiceImpl implements GeneratorService {
     }
 
     // ==================== 辅助方法 ====================
+
+    /**
+     * 验证表名格式（防止SQL注入和无效输入）
+     */
+    private void validateTableName(String tableName) {
+        if (tableName == null || tableName.isBlank()) {
+            throw new GeneratorException("表名不能为空");
+        }
+        // 表名验证：必须以字母或下划线开头，只允许字母、数字和下划线
+        if (!tableName.matches(TABLE_NAME_PATTERN)) {
+            throw new GeneratorException("表名格式无效，必须以字母或下划线开头，只允许字母、数字和下划线");
+        }
+        // 表名长度限制（MySQL标准）
+        if (tableName.length() > MAX_TABLE_NAME_LENGTH) {
+            throw new GeneratorException("表名长度不能超过" + MAX_TABLE_NAME_LENGTH + "个字符");
+        }
+    }
 
     private String getBasePackage(GenerateOptions options) {
         if (options.getModuleName() != null && !options.getModuleName().isEmpty()) {
