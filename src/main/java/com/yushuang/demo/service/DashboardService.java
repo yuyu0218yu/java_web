@@ -12,6 +12,7 @@ public interface DashboardService {
 
     /**
      * 获取仪表板统计数据
+     * @param period 图表周期：week（周）、month（月）、year（年）
      */
-    DashboardStatistics getStatistics();
+    DashboardStatistics getStatistics(String period);
 }
