@@ -1,5 +1,7 @@
 package com.yushuang.demo.generator;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,6 +15,7 @@ import java.time.format.DateTimeFormatter;
  * @author yushuang
  * @since 2025-12-06
  */
+@Slf4j
 public final class GeneratorHelper {
 
     public static final String BASE_PACKAGE = "com.yushuang.demo";
@@ -109,21 +112,20 @@ public final class GeneratorHelper {
      * @param files       生成的文件列表
      */
     public static void printSuccess(String title, String entityName, String... files) {
-        System.out.println("========================================");
-        System.out.println(title + "完成！");
-        System.out.println("实体: " + entityName);
-        System.out.println("生成文件:");
+        log.info("========================================");
+        log.info("{}完成！", title);
+        log.info("实体: {}", entityName);
+        log.info("生成文件:");
         for (String file : files) {
-            System.out.println("  - " + file);
+            log.info("  - {}", file);
         }
-        System.out.println("========================================");
+        log.info("========================================");
     }
 
     /**
      * 打印生成失败信息
      */
     public static void printError(String message, Exception e) {
-        System.err.println("生成失败: " + message);
-        e.printStackTrace();
+        log.error("生成失败: {}", message, e);
     }
 }
