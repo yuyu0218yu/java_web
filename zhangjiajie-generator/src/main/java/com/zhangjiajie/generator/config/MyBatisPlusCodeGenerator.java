@@ -18,9 +18,8 @@ import java.util.Collections;
  *   MyBatisPlusCodeGenerator.configure(config); // 可选
  *   MyBatisPlusCodeGenerator.generateCode("table_name");
  *
- * 方式二：Spring环境（自动读取application.yml配置）
- *   @Autowired GeneratorService generatorService;
- *   generatorService.generateCode("table_name", options);
+ * 方式二：通过代码生成器Web界面使用（推荐）
+ *   访问系统的代码生成器页面，导入表后进行可视化配置和生成
  *
  * @author yushuang
  */

@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author zhangjiajie
  */
 @SpringBootApplication(scanBasePackages = {"com.zhangjiajie"})
-@MapperScan({"com.zhangjiajie.system.mapper"})
+@MapperScan({"com.zhangjiajie.system.mapper", "com.zhangjiajie.generator.mapper"})
 public class ZhangjiajieAdminApplication {
 
     public static void main(String[] args) {
