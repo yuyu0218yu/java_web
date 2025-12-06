@@ -1,7 +1,6 @@
 package com.yushuang.demo.controller;
 
 import com.yushuang.demo.common.Result;
-import com.yushuang.demo.dto.GenerateOptions;
 import com.yushuang.demo.dto.GenerateRequest;
 import com.yushuang.demo.service.GeneratorService;
 import io.swagger.v3.oas.annotations.Operation;
