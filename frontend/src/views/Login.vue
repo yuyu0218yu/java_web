@@ -4,7 +4,7 @@
       <div class="logo-icon">
         <el-icon><Lock /></el-icon>
       </div>
-      <h2>权限管理系统</h2>
+      <h2>张家界管理系统</h2>
       <p class="welcome-text">Enterprise Management Platform</p>
       <div class="typing-effect">
         <span>{{ typingText }}</span>
@@ -98,7 +98,7 @@
           </div>
         </el-tooltip>
       </div>
-      <p class="copyright">© 2025 用户权限管理系统 v1.0.0</p>
+      <p class="copyright">© 2025 张家界后台管理系统 v1.0.0</p>
     </div>
   </AuthLayout>
 </template>

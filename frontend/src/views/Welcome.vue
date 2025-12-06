@@ -1,7 +1,7 @@
 <template>
   <div class="welcome-page">
     <div class="hero">
-      <h1>欢迎使用用户权限管理系统</h1>
+      <h1>欢迎使用张家界后台管理系统</h1>
       <p class="subtitle">
         这是公共欢迎页，登录后将根据权限展示可访问的功能。
       </p>
