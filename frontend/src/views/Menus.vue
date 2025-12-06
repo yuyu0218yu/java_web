@@ -40,6 +40,7 @@
           v-loading="loading"
           :data="tableData"
           style="width: 100%"
+          table-layout="auto"
           row-key="id"
           :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
           :default-expand-all="false"
@@ -62,19 +63,19 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="path" label="路由地址" width="150">
+          <el-table-column prop="path" label="路由地址" min-width="150">
             <template #default="scope">
               <span v-if="scope.row.path" class="path-text">{{ scope.row.path }}</span>
               <span v-else class="no-path">-</span>
             </template>
           </el-table-column>
-          <el-table-column prop="component" label="组件路径" width="140">
+          <el-table-column prop="component" label="组件路径" min-width="140">
             <template #default="scope">
               <span v-if="scope.row.component" class="component-text">{{ scope.row.component }}</span>
               <span v-else class="no-component">-</span>
             </template>
           </el-table-column>
-          <el-table-column prop="perms" label="权限标识" width="140">
+          <el-table-column prop="perms" label="权限标识" min-width="140">
             <template #default="scope">
               <el-tag v-if="scope.row.perms" effect="plain" size="small" type="info">
                 {{ scope.row.perms }}
@@ -116,7 +117,7 @@
               />
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="180" fixed="right">
+          <el-table-column label="操作" width="180">
             <template #default="scope">
               <div class="operation-buttons">
                 <el-tooltip content="新增子菜单" placement="top">

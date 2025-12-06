@@ -75,13 +75,13 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="path" label="路径" width="160">
+          <el-table-column prop="path" label="路径" min-width="160">
             <template #default="scope">
               <span v-if="scope.row.path" class="path-text">{{ scope.row.path }}</span>
               <span v-else class="no-path">-</span>
             </template>
           </el-table-column>
-          <el-table-column prop="component" label="组件" width="160">
+          <el-table-column prop="component" label="组件" min-width="160">
             <template #default="scope">
               <span v-if="scope.row.component" class="component-text">{{ scope.row.component }}</span>
               <span v-else class="no-component">-</span>

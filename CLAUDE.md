@@ -221,10 +221,11 @@ return Result.success(PageResult.of(records, total, current, size));
 ### Core Utilities
 - **Result<T>**: Standard API response wrapper with HTTP status codes
 - **PageResult<T>**: Pagination utility with navigation helpers
+- **PageRequest**: Common pagination request parameter with sort support
 - **JwtUtil**: JWT token generation, validation, and refresh functionality
 - **UserAgentUtil**: Browser and operating system parsing from user agents
 
-### Extended Utilities (9 utility classes total)
+### Extended Utilities (11 utility classes total)
 - **QueryWrapperUtil**: MyBatis-Plus query builder with simplified API
 - **WebUtil**: HTTP request/response utilities, parameter handling
 - **IpUtil**: IP address utilities, validation, network calculations
@@ -232,6 +233,8 @@ return Result.success(PageResult.of(records, total, current, size));
 - **DateUtil**: Comprehensive date/time operations and formatting
 - **StringUtil**: String manipulation, validation, format conversion
 - **FileSizeUtil**: File size formatting and conversion utilities
+- **ValidationUtil**: Common validation methods (email, phone, ID card, password strength, etc.)
+- **ExcelUtil**: Excel import/export based on EasyExcel
 
 ## Enterprise Features
 
