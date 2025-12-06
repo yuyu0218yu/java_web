@@ -436,71 +436,85 @@ export const dashboardApi = {
   }
 }
 
-// 代码生成器API
+// 代码生成器API (RuoYi风格)
 export const generatorApi = {
-  // 获取数据库表列表
-  getTableList() {
+  // 分页查询已导入的表列表
+  getTablePage(params) {
     return request({
-      url: '/generator/tables',
+      url: '/gen/table/page',
+      method: 'get',
+      params
+    })
+  },
+
+  // 查询数据库表列表（未导入的）
+  getDbTableList(params) {
+    return request({
+      url: '/gen/db/list',
+      method: 'get',
+      params
+    })
+  },
+
+  // 获取表详情
+  getTableById(tableId) {
+    return request({
+      url: `/gen/table/${tableId}`,
       method: 'get'
     })
   },
 
-  // 获取表列信息
-  getTableColumns(tableName) {
+  // 导入表结构
+  importTable(tableNames) {
     return request({
-      url: `/generator/tables/${tableName}/columns`,
+      url: '/gen/table/import',
+      method: 'post',
+      data: tableNames
+    })
+  },
+
+  // 更新表配置
+  updateTable(genTable) {
+    return request({
+      url: '/gen/table',
+      method: 'put',
+      data: genTable
+    })
+  },
+
+  // 删除表
+  deleteTable(tableIds) {
+    return request({
+      url: `/gen/table/${tableIds.join(',')}`,
+      method: 'delete'
+    })
+  },
+
+  // 同步数据库表结构
+  syncDb(tableId) {
+    return request({
+      url: `/gen/table/sync/${tableId}`,
+      method: 'post'
+    })
+  },
+
+  // 预览代码
+  previewCode(tableId) {
+    return request({
+      url: `/gen/preview/${tableId}`,
       method: 'get'
     })
   },
 
-  // 预览生成代码
-  previewCode(tableName, options) {
-    return request({
-      url: '/generator/preview',
-      method: 'post',
-      data: { tableName, options }
-    })
-  },
-
-  // 预览完整代码（含DTO、Converter、Test）
-  previewFullCode(tableName, options) {
-    return request({
-      url: '/generator/preview/full',
-      method: 'post',
-      data: { tableName, options }
-    })
-  },
-
-  // 执行代码生成
-  generateCode(tableName, options) {
-    return request({
-      url: '/generator/generate',
-      method: 'post',
-      data: { tableName, options }
-    })
-  },
-
-  // 执行完整代码生成（含DTO、Converter、Test）
-  generateFullCode(tableName, options) {
-    return request({
-      url: '/generator/generate/full',
-      method: 'post',
-      data: { tableName, options }
-    })
-  },
-
-  // 下载生成的代码（ZIP格式）
-  async downloadCode(tableName, options) {
+  // 下载代码（单表）
+  async downloadCode(tableId) {
     const token = localStorage.getItem('token')
     try {
-      const response = await fetch('/api/generator/download', {
-        method: 'POST',
+      const response = await fetch(`/api/gen/download/${tableId}`, {
+        method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ tableName, options })
+          'Authorization': `Bearer ${token}`
+        }
       })
 
       if (!response.ok) {
@@ -512,7 +526,37 @@ export const generatorApi = {
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `${tableName}_code.zip`
+      link.download = 'code.zip'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      throw error
+    }
+  },
+
+  // 批量下载代码
+  async downloadCodeBatch(tableIds) {
+    const token = localStorage.getItem('token')
+    try {
+      const response = await fetch(`/api/gen/download/batch?tableIds=${tableIds.join(',')}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || '下载失败')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'code.zip'
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)

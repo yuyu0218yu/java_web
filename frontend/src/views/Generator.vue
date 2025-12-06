@@ -8,31 +8,59 @@
             <el-icon class="title-icon" style="color: #E6A23C"><Cpu /></el-icon>
             <span>代码生成器</span>
             <el-tag type="warning" size="small" effect="plain" round style="margin-left: 12px;">
-              共 {{ tableList.length }} 张表
+              已导入 {{ pagination.total }} 张表
             </el-tag>
           </div>
           <div class="action-buttons">
+            <el-button type="success" @click="showImportDialog" class="action-btn">
+              <el-icon><Plus /></el-icon>
+              导入表
+            </el-button>
             <el-button type="primary" @click="handleRefresh" class="action-btn">
               <el-icon><Refresh /></el-icon>
-              刷新表列表
+              刷新
             </el-button>
           </div>
         </div>
       </el-card>
     </transition>
 
-    <!-- 表列表 -->
+    <!-- 已导入表列表 -->
     <transition name="fade-slide-up" appear>
       <el-card class="table-card">
+        <div class="search-bar">
+          <el-input
+            v-model="searchParams.tableName"
+            placeholder="搜索表名..."
+            clearable
+            style="width: 250px; margin-right: 10px"
+            :prefix-icon="Search"
+            @clear="handleSearch"
+            @keyup.enter="handleSearch"
+          />
+          <el-input
+            v-model="searchParams.tableComment"
+            placeholder="搜索表注释..."
+            clearable
+            style="width: 250px; margin-right: 10px"
+            @clear="handleSearch"
+            @keyup.enter="handleSearch"
+          />
+          <el-button type="primary" @click="handleSearch">
+            <el-icon><Search /></el-icon>
+            搜索
+          </el-button>
+        </div>
+
         <el-table
           v-loading="loading"
-          :data="filteredTables"
-          style="width: 100%"
+          :data="tableList"
+          style="width: 100%; margin-top: 20px"
           table-layout="auto"
           highlight-current-row
           stripe
-          @row-click="handleSelectTable"
         >
+          <el-table-column type="selection" width="55" />
           <el-table-column type="index" label="#" width="60" />
           <el-table-column prop="tableName" label="表名" min-width="200">
             <template #default="scope">
@@ -47,46 +75,90 @@
               <span>{{ scope.row.tableComment || '-' }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="createTime" label="创建时间" width="180">
+          <el-table-column prop="className" label="实体类名" min-width="150" />
+          <el-table-column prop="updateTime" label="更新时间" width="180">
             <template #default="scope">
               <div class="time-cell">
                 <el-icon><Clock /></el-icon>
-                <span>{{ formatTime(scope.row.createTime) }}</span>
+                <span>{{ formatTime(scope.row.updateTime) }}</span>
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="280">
+          <el-table-column label="操作" width="320" fixed="right">
             <template #default="scope">
               <div class="operation-buttons">
-                <el-button type="primary" size="small" @click.stop="handlePreview(scope.row)">
+                <el-button type="primary" size="small" @click="handlePreview(scope.row)">
                   <el-icon><View /></el-icon>
                   预览
                 </el-button>
-                <el-button type="success" size="small" @click.stop="handleGenerate(scope.row)">
-                  <el-icon><Cpu /></el-icon>
-                  生成
-                </el-button>
-                <el-button type="warning" size="small" @click.stop="handleDownload(scope.row)">
+                <el-button type="warning" size="small" @click="handleDownload(scope.row)">
                   <el-icon><Download /></el-icon>
                   下载
+                </el-button>
+                <el-button type="info" size="small" @click="handleEdit(scope.row)">
+                  <el-icon><Edit /></el-icon>
+                  编辑
+                </el-button>
+                <el-button type="danger" size="small" @click="handleDelete(scope.row)">
+                  <el-icon><Delete /></el-icon>
+                  删除
                 </el-button>
               </div>
             </template>
           </el-table-column>
         </el-table>
 
-        <!-- 搜索 -->
-        <div class="search-bar">
-          <el-input
-            v-model="searchKeyword"
-            placeholder="搜索表名..."
-            clearable
-            style="width: 300px"
-            :prefix-icon="Search"
-          />
-        </div>
+        <!-- 分页 -->
+        <el-pagination
+          v-model:current-page="pagination.current"
+          v-model:page-size="pagination.size"
+          :total="pagination.total"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          style="margin-top: 20px; justify-content: flex-end"
+          @current-change="loadTables"
+          @size-change="loadTables"
+        />
       </el-card>
     </transition>
+
+    <!-- 导入表对话框 -->
+    <el-dialog
+      v-model="importDialogVisible"
+      title="导入表"
+      width="70%"
+      :close-on-click-modal="false"
+    >
+      <el-input
+        v-model="dbSearchKeyword"
+        placeholder="搜索表名..."
+        clearable
+        style="width: 300px; margin-bottom: 20px"
+        :prefix-icon="Search"
+      />
+      <el-table
+        v-loading="dbTableLoading"
+        :data="filteredDbTables"
+        style="width: 100%"
+        max-height="400"
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="55" />
+        <el-table-column prop="tableName" label="表名" min-width="200" />
+        <el-table-column prop="tableComment" label="表注释" min-width="200" />
+        <el-table-column prop="createTime" label="创建时间" width="180">
+          <template #default="scope">
+            {{ formatTime(scope.row.createTime) }}
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <el-button @click="importDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmImport" :disabled="selectedTables.length === 0">
+          确定导入 ({{ selectedTables.length }})
+        </el-button>
+      </template>
+    </el-dialog>
 
     <!-- 预览对话框 -->
     <el-dialog
@@ -112,261 +184,66 @@
           <el-icon><Download /></el-icon>
           下载ZIP
         </el-button>
-        <el-button type="success" @click="confirmGenerate" :loading="generating">
-          <el-icon><Cpu /></el-icon>
-          确认生成代码
-        </el-button>
-      </template>
-    </el-dialog>
-
-    <!-- 生成配置对话框 -->
-    <el-dialog
-      v-model="configDialogVisible"
-      title="生成配置"
-      width="600px"
-      :close-on-click-modal="false"
-    >
-      <el-form :model="generateOptions" label-width="120px">
-        <el-form-item label="表名">
-          <el-tag type="info" size="large">{{ selectedTable?.tableName }}</el-tag>
-        </el-form-item>
-
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="移除表前缀">
-              <el-input v-model="generateOptions.tablePrefix" placeholder="如: sys_, t_" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="作者">
-              <el-input v-model="generateOptions.author" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="实体中文名">
-              <el-input v-model="generateOptions.entityCnName" placeholder="如: 用户、产品" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="API模块名">
-              <el-input v-model="generateOptions.apiModuleName" placeholder="如: 用户管理" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-divider content-position="left">
-          <el-icon><Setting /></el-icon>
-          快捷配置
-        </el-divider>
-
-        <el-form-item label="生成模式">
-          <el-radio-group v-model="generateMode" @change="handleModeChange">
-            <el-radio-button label="basic">基础模式</el-radio-button>
-            <el-radio-button label="full">完整模式</el-radio-button>
-            <el-radio-button label="quick">快速模式</el-radio-button>
-            <el-radio-button label="custom">自定义</el-radio-button>
-          </el-radio-group>
-        </el-form-item>
-
-        <el-collapse v-model="activeCollapse">
-          <el-collapse-item title="基础代码" name="basic">
-            <el-checkbox-group v-model="generateFiles">
-              <el-checkbox label="entity">
-                <el-tag type="primary" size="small">Entity</el-tag>
-                实体类
-              </el-checkbox>
-              <el-checkbox label="mapper">
-                <el-tag type="success" size="small">Mapper</el-tag>
-                数据访问层
-              </el-checkbox>
-              <el-checkbox label="service">
-                <el-tag type="warning" size="small">Service</el-tag>
-                业务逻辑层
-              </el-checkbox>
-              <el-checkbox label="controller">
-                <el-tag type="danger" size="small">Controller</el-tag>
-                控制器
-              </el-checkbox>
-            </el-checkbox-group>
-          </el-collapse-item>
-
-          <el-collapse-item title="扩展代码" name="extended">
-            <el-checkbox-group v-model="extendedFiles">
-              <el-checkbox label="dto">
-                <el-tag type="info" size="small">DTO</el-tag>
-                数据传输对象 (Request/Response)
-              </el-checkbox>
-              <el-checkbox label="converter">
-                <el-tag type="info" size="small">Converter</el-tag>
-                实体转换器
-              </el-checkbox>
-              <el-checkbox label="test">
-                <el-tag type="info" size="small">Test</el-tag>
-                单元测试类
-              </el-checkbox>
-            </el-checkbox-group>
-          </el-collapse-item>
-        </el-collapse>
-
-        <el-divider content-position="left">
-          <el-icon><Tools /></el-icon>
-          代码选项
-        </el-divider>
-
-        <el-form-item label="功能开关">
-          <el-space wrap>
-            <el-checkbox v-model="generateOptions.enableSwagger">
-              <el-tag effect="plain" size="small">Swagger</el-tag>
-            </el-checkbox>
-            <el-checkbox v-model="generateOptions.enableLombok">
-              <el-tag effect="plain" size="small">Lombok</el-tag>
-            </el-checkbox>
-            <el-checkbox v-model="generateOptions.overwrite">
-              <el-tag effect="plain" size="small" type="danger">覆盖已有文件</el-tag>
-            </el-checkbox>
-          </el-space>
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <el-button @click="configDialogVisible = false">取消</el-button>
-        <el-button type="warning" @click="doDownload" :loading="downloading">
-          <el-icon><Download /></el-icon>
-          下载ZIP
-        </el-button>
-        <el-button type="primary" @click="doPreview" :loading="previewing">
-          <el-icon><View /></el-icon>
-          预览代码
-        </el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Cpu, Refresh, Grid, Clock, View, Download, Search, Setting, Tools } from '@element-plus/icons-vue'
+import { Cpu, Refresh, Grid, Clock, View, Download, Search, Plus, Edit, Delete } from '@element-plus/icons-vue'
 import { generatorApi } from '@/api'
 
 // 响应式数据
 const loading = ref(false)
 const tableList = ref([])
-const searchKeyword = ref('')
-const selectedTable = ref(null)
+const dbTableList = ref([])
+const dbTableLoading = ref(false)
+const selectedTables = ref([])
+const dbSearchKeyword = ref('')
+
+// 搜索参数
+const searchParams = ref({
+  tableName: '',
+  tableComment: ''
+})
+
+// 分页
+const pagination = ref({
+  current: 1,
+  size: 10,
+  total: 0
+})
 
 // 对话框
-const configDialogVisible = ref(false)
+const importDialogVisible = ref(false)
 const previewDialogVisible = ref(false)
 const previewCode = ref({})
-const activeTab = ref('Entity')
-const previewing = ref(false)
-const generating = ref(false)
+const activeTab = ref('')
 const downloading = ref(false)
-
-// 折叠面板
-const activeCollapse = ref(['basic', 'extended'])
-
-// 生成模式
-const generateMode = ref('basic')
-
-// 生成选项
-const generateOptions = ref({
-  tablePrefix: 'sys_',
-  author: 'zhangjiajie',
-  entityCnName: '',
-  apiModuleName: '',
-  enableSwagger: true,
-  enableLombok: true,
-  overwrite: true,
-  generateEntity: true,
-  generateMapper: true,
-  generateService: true,
-  generateController: true,
-  generateDto: false,
-  generateConverter: false,
-  generateTest: false
-})
-
-const generateFiles = ref(['entity', 'mapper', 'service', 'controller'])
-const extendedFiles = ref([])
+const currentTable = ref(null)
 
 // 计算属性
-const filteredTables = computed(() => {
-  if (!searchKeyword.value) return tableList.value
-  return tableList.value.filter(t =>
-    t.tableName.toLowerCase().includes(searchKeyword.value.toLowerCase())
+const filteredDbTables = computed(() => {
+  if (!dbSearchKeyword.value) return dbTableList.value
+  return dbTableList.value.filter(t =>
+    t.tableName.toLowerCase().includes(dbSearchKeyword.value.toLowerCase())
   )
 })
-
-// 监听生成文件变化
-watch(generateFiles, (val) => {
-  generateOptions.value.generateEntity = val.includes('entity')
-  generateOptions.value.generateMapper = val.includes('mapper')
-  generateOptions.value.generateService = val.includes('service')
-  generateOptions.value.generateController = val.includes('controller')
-  // 如果手动修改了选项，切换到自定义模式
-  if (generateMode.value !== 'custom') {
-    checkCustomMode()
-  }
-})
-
-watch(extendedFiles, (val) => {
-  generateOptions.value.generateDto = val.includes('dto')
-  generateOptions.value.generateConverter = val.includes('converter')
-  generateOptions.value.generateTest = val.includes('test')
-  // 如果手动修改了选项，切换到自定义模式
-  if (generateMode.value !== 'custom') {
-    checkCustomMode()
-  }
-})
-
-// 检查是否应该切换到自定义模式
-const checkCustomMode = () => {
-  const basicMode = generateFiles.value.length === 4 && extendedFiles.value.length === 0
-  const fullMode = generateFiles.value.length === 4 && extendedFiles.value.length === 3
-  const quickMode = generateFiles.value.includes('service') &&
-                    generateFiles.value.includes('controller') &&
-                    !generateFiles.value.includes('entity') &&
-                    !generateFiles.value.includes('mapper') &&
-                    extendedFiles.value.includes('dto') &&
-                    extendedFiles.value.length === 1
-
-  if (!basicMode && !fullMode && !quickMode) {
-    generateMode.value = 'custom'
-  }
-}
-
-// 处理生成模式变化
-const handleModeChange = (mode) => {
-  switch (mode) {
-    case 'basic':
-      generateFiles.value = ['entity', 'mapper', 'service', 'controller']
-      extendedFiles.value = []
-      break
-    case 'full':
-      generateFiles.value = ['entity', 'mapper', 'service', 'controller']
-      extendedFiles.value = ['dto', 'converter', 'test']
-      break
-    case 'quick':
-      generateFiles.value = ['service', 'controller']
-      extendedFiles.value = ['dto']
-      break
-    case 'custom':
-      // 保持当前选择
-      break
-  }
-}
 
 // 方法
 const loadTables = async () => {
   loading.value = true
   try {
-    const res = await generatorApi.getTableList()
-    tableList.value = res.data || []
+    const res = await generatorApi.getTablePage({
+      current: pagination.value.current,
+      size: pagination.value.size,
+      tableName: searchParams.value.tableName,
+      tableComment: searchParams.value.tableComment
+    })
+    tableList.value = res.data.records || []
+    pagination.value.total = res.data.total || 0
   } catch (error) {
     console.error('加载表列表失败', error)
     ElMessage.error('加载表列表失败')
@@ -375,77 +252,70 @@ const loadTables = async () => {
   }
 }
 
-const handleRefresh = () => {
+const handleSearch = () => {
+  pagination.value.current = 1
   loadTables()
 }
 
-const handleSelectTable = (row) => {
-  selectedTable.value = row
+const handleRefresh = () => {
+  searchParams.value = { tableName: '', tableComment: '' }
+  pagination.value.current = 1
+  loadTables()
 }
 
-const handlePreview = (row) => {
-  selectedTable.value = row
-  // 根据表注释自动填充中文名
-  if (row.tableComment) {
-    generateOptions.value.entityCnName = row.tableComment
-    generateOptions.value.apiModuleName = row.tableComment + '管理'
-  }
-  configDialogVisible.value = true
-}
-
-const handleGenerate = (row) => {
-  selectedTable.value = row
-  // 根据表注释自动填充中文名
-  if (row.tableComment) {
-    generateOptions.value.entityCnName = row.tableComment
-    generateOptions.value.apiModuleName = row.tableComment + '管理'
-  }
-  configDialogVisible.value = true
-}
-
-const handleDownload = async (row) => {
-  selectedTable.value = row
-  // 根据表注释自动填充中文名
-  if (row.tableComment) {
-    generateOptions.value.entityCnName = row.tableComment
-    generateOptions.value.apiModuleName = row.tableComment + '管理'
-  }
-  configDialogVisible.value = true
-}
-
-const doPreview = async () => {
-  if (!selectedTable.value) return
-
-  previewing.value = true
+const showImportDialog = async () => {
+  importDialogVisible.value = true
+  dbTableLoading.value = true
   try {
-    // 直接使用 previewCode 端点，传递用户选择的所有选项
-    const res = await generatorApi.previewCode(
-      selectedTable.value.tableName,
-      generateOptions.value
-    )
+    const res = await generatorApi.getDbTableList({})
+    dbTableList.value = res.data || []
+  } catch (error) {
+    console.error('加载数据库表失败', error)
+    ElMessage.error('加载数据库表失败')
+  } finally {
+    dbTableLoading.value = false
+  }
+}
+
+const handleSelectionChange = (selection) => {
+  selectedTables.value = selection.map(item => item.tableName)
+}
+
+const confirmImport = async () => {
+  if (selectedTables.value.length === 0) {
+    ElMessage.warning('请选择要导入的表')
+    return
+  }
+
+  try {
+    await generatorApi.importTable(selectedTables.value)
+    ElMessage.success('导入成功！')
+    importDialogVisible.value = false
+    loadTables()
+  } catch (error) {
+    console.error('导入失败', error)
+    ElMessage.error('导入失败: ' + (error.message || '未知错误'))
+  }
+}
+
+const handlePreview = async (row) => {
+  currentTable.value = row
+  try {
+    const res = await generatorApi.previewCode(row.tableId)
     previewCode.value = res.data || {}
-    activeTab.value = Object.keys(previewCode.value)[0] || 'Entity'
-    configDialogVisible.value = false
+    activeTab.value = Object.keys(previewCode.value)[0] || ''
     previewDialogVisible.value = true
   } catch (error) {
     console.error('预览失败', error)
     ElMessage.error('预览失败: ' + (error.message || '未知错误'))
-  } finally {
-    previewing.value = false
   }
 }
 
-const doDownload = async () => {
-  if (!selectedTable.value) return
-
+const handleDownload = async (row) => {
   downloading.value = true
   try {
-    await generatorApi.downloadCode(
-      selectedTable.value.tableName,
-      generateOptions.value
-    )
+    await generatorApi.downloadCode(row.tableId)
     ElMessage.success('代码下载成功！')
-    configDialogVisible.value = false
   } catch (error) {
     console.error('下载失败', error)
     ElMessage.error('下载失败: ' + (error.message || '未知错误'))
@@ -455,14 +325,10 @@ const doDownload = async () => {
 }
 
 const downloadFromPreview = async () => {
-  if (!selectedTable.value) return
-
+  if (!currentTable.value) return
   downloading.value = true
   try {
-    await generatorApi.downloadCode(
-      selectedTable.value.tableName,
-      generateOptions.value
-    )
+    await generatorApi.downloadCode(currentTable.value.tableId)
     ElMessage.success('代码下载成功！')
   } catch (error) {
     console.error('下载失败', error)
@@ -472,29 +338,27 @@ const downloadFromPreview = async () => {
   }
 }
 
-const confirmGenerate = async () => {
+const handleEdit = (row) => {
+  ElMessage.info('编辑功能开发中...')
+  // TODO: 实现编辑功能
+}
+
+const handleDelete = async (row) => {
   try {
     await ElMessageBox.confirm(
-      '确定要生成代码吗？这将覆盖已存在的同名文件。',
-      '确认生成',
+      `确定要删除表 "${row.tableName}" 吗？`,
+      '确认删除',
       { type: 'warning' }
     )
 
-    generating.value = true
-    // 直接使用 generateCode 端点，传递用户选择的所有选项
-    await generatorApi.generateCode(
-      selectedTable.value.tableName,
-      generateOptions.value
-    )
-    ElMessage.success('代码生成成功！请刷新项目查看生成的文件。')
-    previewDialogVisible.value = false
+    await generatorApi.deleteTable([row.tableId])
+    ElMessage.success('删除成功！')
+    loadTables()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('生成失败', error)
-      ElMessage.error('生成失败: ' + (error.message || '未知错误'))
+      console.error('删除失败', error)
+      ElMessage.error('删除失败: ' + (error.message || '未知错误'))
     }
-  } finally {
-    generating.value = false
   }
 }
 
@@ -581,9 +445,8 @@ onMounted(() => {
 }
 
 .search-bar {
-  position: absolute;
-  top: 16px;
-  right: 20px;
+  display: flex;
+  margin-bottom: 10px;
 }
 
 .time-cell {
