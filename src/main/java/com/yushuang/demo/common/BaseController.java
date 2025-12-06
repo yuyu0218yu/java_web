@@ -118,26 +118,41 @@ public abstract class BaseController<S extends IService<T>, T> {
      */
     private void setEntityId(T entity, Serializable id) {
         Class<?> entityClass = entity.getClass();
+        Class<?> idClass = id.getClass();
         
-        // 尝试常见的ID类型
-        Class<?>[] idTypes = {Long.class, Integer.class, String.class, id.getClass()};
+        // 首先尝试ID的实际类型
+        if (trySetId(entityClass, entity, id, idClass)) {
+            return;
+        }
         
-        for (Class<?> idType : idTypes) {
-            try {
-                Method setIdMethod = entityClass.getMethod("setId", idType);
-                Object convertedId = convertId(id, idType);
-                if (convertedId != null) {
-                    setIdMethod.invoke(entity, convertedId);
-                    return;
-                }
-            } catch (NoSuchMethodException ignored) {
-                // 继续尝试下一个类型
-            } catch (Exception e) {
-                throw new RuntimeException("设置实体ID失败", e);
+        // 尝试常见的ID类型（排除已尝试的类型）
+        Class<?>[] commonTypes = {Long.class, Integer.class, String.class};
+        for (Class<?> idType : commonTypes) {
+            if (!idType.equals(idClass) && trySetId(entityClass, entity, id, idType)) {
+                return;
             }
         }
         
         throw new RuntimeException("无法找到合适的setId方法");
+    }
+
+    /**
+     * 尝试使用指定类型设置ID
+     */
+    private boolean trySetId(Class<?> entityClass, T entity, Serializable id, Class<?> idType) {
+        try {
+            Method setIdMethod = entityClass.getMethod("setId", idType);
+            Object convertedId = convertId(id, idType);
+            if (convertedId != null) {
+                setIdMethod.invoke(entity, convertedId);
+                return true;
+            }
+        } catch (NoSuchMethodException ignored) {
+            // 方法不存在，返回false继续尝试
+        } catch (Exception e) {
+            throw new RuntimeException("设置实体ID失败", e);
+        }
+        return false;
     }
 
     /**
