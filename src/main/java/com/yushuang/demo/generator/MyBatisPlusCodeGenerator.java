@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.generator.config.OutputFile;
 import com.baomidou.mybatisplus.generator.config.rules.DateType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collections;
 
@@ -19,6 +20,7 @@ import java.util.Collections;
  *
  * @author yushuang
  */
+@Slf4j
 public class MyBatisPlusCodeGenerator {
 
     // ==================== 配置区域（根据需要修改） ====================
@@ -120,11 +122,11 @@ public class MyBatisPlusCodeGenerator {
             // 执行生成
             .execute();
 
-        System.out.println("========================================");
-        System.out.println("代码生成完成！");
-        System.out.println("生成的表: " + String.join(", ", tableNames));
-        System.out.println("输出目录: " + OUTPUT_DIR);
-        System.out.println("========================================");
+        log.info("========================================");
+        log.info("代码生成完成！");
+        log.info("生成的表: {}", String.join(", ", tableNames));
+        log.info("输出目录: {}", OUTPUT_DIR);
+        log.info("========================================");
     }
 
     /**
@@ -178,8 +180,8 @@ public class MyBatisPlusCodeGenerator {
             .templateEngine(new FreemarkerTemplateEngine())
             .execute();
 
-        System.out.println("========================================");
-        System.out.println("代码生成完成！（按前缀：" + tablePrefix + "）");
-        System.out.println("========================================");
+        log.info("========================================");
+        log.info("代码生成完成！（按前缀：{}）", tablePrefix);
+        log.info("========================================");
     }
 }

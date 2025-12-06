@@ -14,11 +14,11 @@ import java.util.regex.Pattern;
  *
  * @author yushuang
  */
-public class ValidationUtil {
+public final class ValidationUtil {
 
-    private static final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private static final Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
 
-    // 常用正则表达式
+    // 常用正则表达式 - 使用枚举或常量类封装
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
         "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
     );
@@ -51,15 +51,15 @@ public class ValidationUtil {
         "^[\\u4e00-\\u9fa5]+$"
     );
 
+    private ValidationUtil() {
+        // 工具类不应被实例化
+    }
+
     /**
      * 使用JSR-303校验对象
-     *
-     * @param object 待校验对象
-     * @param <T>    对象类型
-     * @throws BusinessException 校验失败时抛出
      */
     public static <T> void validate(T object) {
-        Set<ConstraintViolation<T>> violations = validator.validate(object);
+        Set<ConstraintViolation<T>> violations = VALIDATOR.validate(object);
         if (!violations.isEmpty()) {
             StringBuilder message = new StringBuilder();
             for (ConstraintViolation<T> violation : violations) {
@@ -72,124 +72,114 @@ public class ValidationUtil {
         }
     }
 
+    // ======================== 格式校验方法 ========================
+
     /**
      * 校验邮箱格式
      */
     public static boolean isEmail(String email) {
-        return email != null && EMAIL_PATTERN.matcher(email).matches();
+        return matches(email, EMAIL_PATTERN);
     }
 
     /**
      * 校验邮箱格式（校验失败抛出异常）
      */
     public static void validateEmail(String email, String message) {
-        if (!isEmail(email)) {
-            throw new BusinessException(400, message != null ? message : "邮箱格式不正确");
-        }
+        validatePattern(email, EMAIL_PATTERN, message, "邮箱格式不正确");
     }
 
     /**
      * 校验手机号格式
      */
     public static boolean isPhone(String phone) {
-        return phone != null && PHONE_PATTERN.matcher(phone).matches();
+        return matches(phone, PHONE_PATTERN);
     }
 
     /**
      * 校验手机号格式（校验失败抛出异常）
      */
     public static void validatePhone(String phone, String message) {
-        if (!isPhone(phone)) {
-            throw new BusinessException(400, message != null ? message : "手机号格式不正确");
-        }
+        validatePattern(phone, PHONE_PATTERN, message, "手机号格式不正确");
     }
 
     /**
      * 校验身份证号格式
      */
     public static boolean isIdCard(String idCard) {
-        return idCard != null && ID_CARD_PATTERN.matcher(idCard).matches();
+        return matches(idCard, ID_CARD_PATTERN);
     }
 
     /**
      * 校验身份证号格式（校验失败抛出异常）
      */
     public static void validateIdCard(String idCard, String message) {
-        if (!isIdCard(idCard)) {
-            throw new BusinessException(400, message != null ? message : "身份证号格式不正确");
-        }
+        validatePattern(idCard, ID_CARD_PATTERN, message, "身份证号格式不正确");
     }
 
     /**
      * 校验用户名格式（3-20位字母数字下划线）
      */
     public static boolean isUsername(String username) {
-        return username != null && USERNAME_PATTERN.matcher(username).matches();
+        return matches(username, USERNAME_PATTERN);
     }
 
     /**
      * 校验用户名格式（校验失败抛出异常）
      */
     public static void validateUsername(String username, String message) {
-        if (!isUsername(username)) {
-            throw new BusinessException(400, message != null ? message : "用户名格式不正确（3-20位字母数字下划线）");
-        }
+        validatePattern(username, USERNAME_PATTERN, message, "用户名格式不正确（3-20位字母数字下划线）");
     }
 
     /**
      * 校验密码强度（8-20位，必须包含大小写字母和数字）
      */
     public static boolean isStrongPassword(String password) {
-        return password != null && PASSWORD_PATTERN.matcher(password).matches();
+        return matches(password, PASSWORD_PATTERN);
     }
 
     /**
      * 校验密码强度（校验失败抛出异常）
      */
     public static void validatePassword(String password, String message) {
-        if (!isStrongPassword(password)) {
-            throw new BusinessException(400, message != null ? message : "密码强度不足（8-20位，必须包含大小写字母和数字）");
-        }
+        validatePattern(password, PASSWORD_PATTERN, message, "密码强度不足（8-20位，必须包含大小写字母和数字）");
     }
 
     /**
      * 校验URL格式
      */
     public static boolean isUrl(String url) {
-        return url != null && URL_PATTERN.matcher(url).matches();
+        return matches(url, URL_PATTERN);
     }
 
     /**
      * 校验URL格式（校验失败抛出异常）
      */
     public static void validateUrl(String url, String message) {
-        if (!isUrl(url)) {
-            throw new BusinessException(400, message != null ? message : "URL格式不正确");
-        }
+        validatePattern(url, URL_PATTERN, message, "URL格式不正确");
     }
 
     /**
      * 校验IP地址格式
      */
     public static boolean isIpAddress(String ip) {
-        return ip != null && IP_PATTERN.matcher(ip).matches();
+        return matches(ip, IP_PATTERN);
     }
 
     /**
      * 校验IP地址格式（校验失败抛出异常）
      */
     public static void validateIpAddress(String ip, String message) {
-        if (!isIpAddress(ip)) {
-            throw new BusinessException(400, message != null ? message : "IP地址格式不正确");
-        }
+        validatePattern(ip, IP_PATTERN, message, "IP地址格式不正确");
     }
 
     /**
      * 校验是否为纯中文
      */
     public static boolean isChinese(String text) {
-        return text != null && CHINESE_PATTERN.matcher(text).matches();
+        return matches(text, CHINESE_PATTERN);
     }
+
+    // ======================== 通用校验方法 ========================
 
     /**
      * 校验是否为空
@@ -203,7 +193,7 @@ public class ValidationUtil {
      */
     public static void validateNotEmpty(String str, String message) {
         if (isEmpty(str)) {
-            throw new BusinessException(400, message != null ? message : "参数不能为空");
+            throwValidationError(message, "参数不能为空");
         }
     }
 
@@ -223,8 +213,7 @@ public class ValidationUtil {
      */
     public static void validateLength(String str, int min, int max, String message) {
         if (!isLengthBetween(str, min, max)) {
-            throw new BusinessException(400, message != null ? message :
-                String.format("长度必须在%d到%d之间", min, max));
+            throwValidationError(message, String.format("长度必须在%d到%d之间", min, max));
         }
     }
 
@@ -236,9 +225,7 @@ public class ValidationUtil {
             return false;
         }
         double val = value.doubleValue();
-        double minVal = min.doubleValue();
-        double maxVal = max.doubleValue();
-        return val >= minVal && val <= maxVal;
+        return val >= min.doubleValue() && val <= max.doubleValue();
     }
 
     /**
@@ -246,8 +233,7 @@ public class ValidationUtil {
      */
     public static void validateNumber(Number value, Number min, Number max, String message) {
         if (!isNumberBetween(value, min, max)) {
-            throw new BusinessException(400, message != null ? message :
-                String.format("数值必须在%s到%s之间", min, max));
+            throwValidationError(message, String.format("数值必须在%s到%s之间", min, max));
         }
     }
 
@@ -256,7 +242,7 @@ public class ValidationUtil {
      */
     public static void validateNotNull(Object obj, String message) {
         if (obj == null) {
-            throw new BusinessException(400, message != null ? message : "对象不能为空");
+            throwValidationError(message, "对象不能为空");
         }
     }
 
@@ -265,7 +251,7 @@ public class ValidationUtil {
      */
     public static void validateTrue(boolean condition, String message) {
         if (!condition) {
-            throw new BusinessException(400, message != null ? message : "校验失败");
+            throwValidationError(message, "校验失败");
         }
     }
 
@@ -274,7 +260,32 @@ public class ValidationUtil {
      */
     public static void validateFalse(boolean condition, String message) {
         if (condition) {
-            throw new BusinessException(400, message != null ? message : "校验失败");
+            throwValidationError(message, "校验失败");
         }
+    }
+
+    // ======================== 私有辅助方法 ========================
+
+    /**
+     * 通用正则匹配
+     */
+    private static boolean matches(String value, Pattern pattern) {
+        return value != null && pattern.matcher(value).matches();
+    }
+
+    /**
+     * 通用正则校验（校验失败抛出异常）
+     */
+    private static void validatePattern(String value, Pattern pattern, String customMessage, String defaultMessage) {
+        if (!matches(value, pattern)) {
+            throwValidationError(customMessage, defaultMessage);
+        }
+    }
+
+    /**
+     * 抛出校验异常
+     */
+    private static void throwValidationError(String customMessage, String defaultMessage) {
+        throw new BusinessException(400, customMessage != null ? customMessage : defaultMessage);
     }
 }

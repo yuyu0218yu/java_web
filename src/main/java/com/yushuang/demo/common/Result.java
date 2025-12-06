@@ -1,5 +1,6 @@
 package com.yushuang.demo.common;
 
+import com.yushuang.demo.common.enums.ResultCode;
 import lombok.Data;
 
 /**
@@ -45,45 +46,66 @@ public class Result<T> {
     }
 
     /**
+     * 根据ResultCode创建响应
+     */
+    public static <T> Result<T> of(ResultCode resultCode) {
+        return new Result<>(resultCode.getCode(), resultCode.getMessage());
+    }
+
+    /**
+     * 根据ResultCode创建响应（带数据）
+     */
+    public static <T> Result<T> of(ResultCode resultCode, T data) {
+        return new Result<>(resultCode.getCode(), resultCode.getMessage(), data);
+    }
+
+    /**
+     * 根据ResultCode创建响应（自定义消息）
+     */
+    public static <T> Result<T> of(ResultCode resultCode, String message) {
+        return new Result<>(resultCode.getCode(), message);
+    }
+
+    /**
      * 成功响应
      */
     public static <T> Result<T> success() {
-        return new Result<>(200, "操作成功");
+        return of(ResultCode.SUCCESS);
     }
 
     /**
      * 成功响应（带数据）
      */
     public static <T> Result<T> success(T data) {
-        return new Result<>(200, "操作成功", data);
+        return of(ResultCode.SUCCESS, data);
     }
 
     /**
      * 成功响应（自定义消息）
      */
     public static <T> Result<T> success(String message, T data) {
-        return new Result<>(200, message, data);
+        return new Result<>(ResultCode.SUCCESS.getCode(), message, data);
     }
 
     /**
      * 成功响应（仅消息）
      */
     public static <T> Result<T> success(String message) {
-        return new Result<>(200, message, null);
+        return new Result<>(ResultCode.SUCCESS.getCode(), message, null);
     }
 
     /**
      * 失败响应
      */
     public static <T> Result<T> error() {
-        return new Result<>(500, "操作失败");
+        return of(ResultCode.INTERNAL_ERROR);
     }
 
     /**
      * 失败响应（自定义消息）
      */
     public static <T> Result<T> error(String message) {
-        return new Result<>(500, message);
+        return of(ResultCode.INTERNAL_ERROR, message);
     }
 
     /**
@@ -97,62 +119,62 @@ public class Result<T> {
      * 参数错误响应
      */
     public static <T> Result<T> paramError() {
-        return new Result<>(400, "参数错误");
+        return of(ResultCode.BAD_REQUEST);
     }
 
     /**
      * 参数错误响应（自定义消息）
      */
     public static <T> Result<T> paramError(String message) {
-        return new Result<>(400, message);
+        return of(ResultCode.BAD_REQUEST, message);
     }
 
     /**
      * 未授权响应
      */
     public static <T> Result<T> unauthorized() {
-        return new Result<>(401, "未授权");
+        return of(ResultCode.UNAUTHORIZED);
     }
 
     /**
      * 未授权响应（自定义消息）
      */
     public static <T> Result<T> unauthorized(String message) {
-        return new Result<>(401, message);
+        return of(ResultCode.UNAUTHORIZED, message);
     }
 
     /**
      * 禁止访问响应
      */
     public static <T> Result<T> forbidden() {
-        return new Result<>(403, "禁止访问");
+        return of(ResultCode.FORBIDDEN);
     }
 
     /**
      * 禁止访问响应（自定义消息）
      */
     public static <T> Result<T> forbidden(String message) {
-        return new Result<>(403, message);
+        return of(ResultCode.FORBIDDEN, message);
     }
 
     /**
      * 资源不存在响应
      */
     public static <T> Result<T> notFound() {
-        return new Result<>(404, "资源不存在");
+        return of(ResultCode.NOT_FOUND);
     }
 
     /**
      * 资源不存在响应（自定义消息）
      */
     public static <T> Result<T> notFound(String message) {
-        return new Result<>(404, message);
+        return of(ResultCode.NOT_FOUND, message);
     }
 
     /**
      * 判断是否成功
      */
     public boolean isSuccess() {
-        return this.code != null && this.code == 200;
+        return this.code != null && this.code.equals(ResultCode.SUCCESS.getCode());
     }
 }
