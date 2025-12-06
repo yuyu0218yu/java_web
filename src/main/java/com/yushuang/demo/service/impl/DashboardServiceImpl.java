@@ -46,14 +46,14 @@ public class DashboardServiceImpl implements DashboardService {
     private final OperationLogMapper operationLogMapper;
 
     @Override
-    public DashboardStatistics getStatistics() {
+    public DashboardStatistics getStatistics(String period) {
         DashboardStatistics statistics = new DashboardStatistics();
         
         // 获取统计卡片数据
         statistics.setStats(getStatsData());
         
-        // 获取用户增长趋势数据
-        statistics.setUserGrowthData(getUserGrowthData());
+        // 获取用户增长趋势数据（根据周期）
+        statistics.setUserGrowthData(getUserGrowthData(period));
         
         // 获取权限分布数据
         statistics.setPermissionDistribution(getPermissionDistribution());
@@ -196,9 +196,55 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     /**
+     * 获取用户增长趋势数据（根据周期）
+     * @param period 周期：week（最近7天）、month（最近12个月）、year（最近5年）
+     */
+    private List<DashboardStatistics.ChartData> getUserGrowthData(String period) {
+        if ("week".equalsIgnoreCase(period)) {
+            return getUserGrowthDataByWeek();
+        } else if ("year".equalsIgnoreCase(period)) {
+            return getUserGrowthDataByYear();
+        } else {
+            return getUserGrowthDataByMonth();
+        }
+    }
+
+    /**
+     * 获取用户增长趋势数据（最近7天）
+     */
+    private List<DashboardStatistics.ChartData> getUserGrowthDataByWeek() {
+        List<DashboardStatistics.ChartData> chartDataList = new ArrayList<>();
+        LocalDate now = LocalDate.now();
+        
+        long maxCount = 0;
+        long[] dailyCounts = new long[7];
+        String[] labels = new String[7];
+        
+        // 获取过去7天的数据
+        for (int i = 6; i >= 0; i--) {
+            LocalDate dayStart = now.minusDays(i);
+            LocalDate dayEnd = dayStart.plusDays(1);
+            
+            LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(User::getDeleted, 0);
+            wrapper.lt(User::getCreateTime, dayEnd.atStartOfDay());
+            
+            long count = userMapper.selectCount(wrapper);
+            dailyCounts[6 - i] = count;
+            labels[6 - i] = dayStart.format(DateTimeFormatter.ofPattern("M/d"));
+            
+            if (count > maxCount) {
+                maxCount = count;
+            }
+        }
+        
+        return buildChartDataList(dailyCounts, labels, maxCount);
+    }
+
+    /**
      * 获取用户增长趋势数据（最近12个月）
      */
-    private List<DashboardStatistics.ChartData> getUserGrowthData() {
+    private List<DashboardStatistics.ChartData> getUserGrowthDataByMonth() {
         List<DashboardStatistics.ChartData> chartDataList = new ArrayList<>();
         LocalDate now = LocalDate.now();
         
@@ -224,18 +270,59 @@ public class DashboardServiceImpl implements DashboardService {
             }
         }
         
+        return buildChartDataList(monthlyCounts, labels, maxCount);
+    }
+
+    /**
+     * 获取用户增长趋势数据（最近5年）
+     */
+    private List<DashboardStatistics.ChartData> getUserGrowthDataByYear() {
+        List<DashboardStatistics.ChartData> chartDataList = new ArrayList<>();
+        LocalDate now = LocalDate.now();
+        
+        long maxCount = 0;
+        long[] yearlyCounts = new long[5];
+        String[] labels = new String[5];
+        
+        // 获取过去5年的数据
+        for (int i = 4; i >= 0; i--) {
+            LocalDate yearStart = now.minusYears(i).withDayOfYear(1);
+            LocalDate yearEnd = yearStart.plusYears(1);
+            
+            LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(User::getDeleted, 0);
+            wrapper.lt(User::getCreateTime, yearEnd.atStartOfDay());
+            
+            long count = userMapper.selectCount(wrapper);
+            yearlyCounts[4 - i] = count;
+            labels[4 - i] = yearStart.format(DateTimeFormatter.ofPattern("yyyy年"));
+            
+            if (count > maxCount) {
+                maxCount = count;
+            }
+        }
+        
+        return buildChartDataList(yearlyCounts, labels, maxCount);
+    }
+
+    /**
+     * 构建图表数据列表
+     */
+    private List<DashboardStatistics.ChartData> buildChartDataList(long[] counts, String[] labels, long maxCount) {
+        List<DashboardStatistics.ChartData> chartDataList = new ArrayList<>();
+        
         // 如果maxCount为0，设置默认值避免除零错误
         if (maxCount == 0) {
             maxCount = 1;
         }
         
         // 构建图表数据
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < counts.length; i++) {
             DashboardStatistics.ChartData chartData = new DashboardStatistics.ChartData();
             chartData.setLabel(labels[i]);
-            chartData.setCount(monthlyCounts[i]);
+            chartData.setCount(counts[i]);
             // 计算百分比值（相对于最大值的百分比）
-            int percentage = (int) Math.round((double) monthlyCounts[i] / maxCount * 100);
+            int percentage = (int) Math.round((double) counts[i] / maxCount * 100);
             chartData.setValue(Math.max(percentage, MIN_CHART_VISIBILITY_PERCENT));
             chartDataList.add(chartData);
         }

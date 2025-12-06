@@ -427,10 +427,11 @@ export const fileApi = {
 // 仪表板API
 export const dashboardApi = {
   // 获取仪表板统计数据
-  getStatistics() {
+  getStatistics(period = 'month') {
     return request({
       url: '/dashboard/statistics',
-      method: 'get'
+      method: 'get',
+      params: { period }
     })
   }
 }

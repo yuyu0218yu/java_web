@@ -130,7 +130,7 @@
                   <span>最近活动</span>
                   <el-badge :value="recentActivities.length" class="activity-badge" />
                 </div>
-                <el-button type="primary" link>
+                <el-button type="primary" link @click="handleViewAllActivities">
                   查看全部
                   <el-icon class="el-icon--right"><ArrowRight /></el-icon>
                 </el-button>
@@ -188,11 +188,67 @@
         </transition>
       </el-col>
     </el-row>
+
+    <!-- 全部活动对话框 -->
+    <el-dialog 
+      v-model="showAllActivitiesDialog" 
+      title="全部活动记录" 
+      width="800px"
+      destroy-on-close
+    >
+      <el-table :data="recentActivities" style="width: 100%">
+        <el-table-column prop="time" label="时间" width="180">
+          <template #default="scope">
+            <div class="time-cell">
+              <el-icon><Clock /></el-icon>
+              <span>{{ scope.row.time }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="user" label="用户" width="120">
+          <template #default="scope">
+            <div class="user-cell">
+              <el-avatar :size="24" :style="{ backgroundColor: getAvatarColor(scope.row.user) }">
+                {{ scope.row.user.charAt(0).toUpperCase() }}
+              </el-avatar>
+              <span>{{ scope.row.user }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="action" label="操作">
+          <template #default="scope">
+            <div class="action-cell">
+              <el-icon :style="{ color: getActionColor(scope.row.action) }">
+                <component :is="getActionIcon(scope.row.action)" />
+              </el-icon>
+              <span>{{ scope.row.action }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="120">
+          <template #default="scope">
+            <el-tag 
+              :type="scope.row.status === '成功' ? 'success' : 'danger'" 
+              size="small"
+              effect="light"
+              round
+            >
+              <el-icon v-if="scope.row.status === '成功'"><CircleCheck /></el-icon>
+              <el-icon v-else><CircleClose /></el-icon>
+              {{ scope.row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <el-button @click="showAllActivitiesDialog = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { 
   User, UserFilled, Lock, Key, TrendCharts, PieChart, 
   CaretTop, CaretBottom, Bell, ArrowRight, Clock,
@@ -206,6 +262,9 @@ const loading = ref(true)
 
 // 图表周期
 const chartPeriod = ref('month')
+
+// 是否显示全部活动对话框
+const showAllActivitiesDialog = ref(false)
 
 // 动画帧ID列表，用于清理
 const animationFrameIds = ref([])
@@ -328,10 +387,10 @@ const animateValue = (index, targetValue, duration = 1500) => {
 }
 
 // 获取仪表板数据
-const fetchDashboardData = async () => {
+const fetchDashboardData = async (period = 'month') => {
   try {
     loading.value = true
-    const res = await dashboardApi.getStatistics()
+    const res = await dashboardApi.getStatistics(period)
     
     if (res.code === 200 && res.data) {
       const data = res.data
@@ -349,9 +408,7 @@ const fetchDashboardData = async () => {
       }
       
       // 更新图表数据
-      if (data.userGrowthData && data.userGrowthData.length > 0) {
-        chartData.value = data.userGrowthData
-      }
+      updateChartData(data)
       
       // 更新权限分布数据
       if (data.permissionDistribution && data.permissionDistribution.length > 0) {
@@ -378,9 +435,40 @@ const fetchDashboardData = async () => {
   }
 }
 
+// 更新图表数据（共享方法）
+const updateChartData = (data) => {
+  if (data.userGrowthData && data.userGrowthData.length > 0) {
+    chartData.value = data.userGrowthData
+  }
+}
+
+// 仅获取图表数据（用于切换周期时）
+const fetchChartData = async (period) => {
+  try {
+    const res = await dashboardApi.getStatistics(period)
+    
+    if (res.code === 200 && res.data) {
+      updateChartData(res.data)
+    }
+  } catch (error) {
+    console.error('获取图表数据失败:', error)
+    ElMessage.error('获取图表数据失败')
+  }
+}
+
+// 监听图表周期变化
+watch(chartPeriod, (newPeriod) => {
+  fetchChartData(newPeriod)
+})
+
+// 查看全部活动
+const handleViewAllActivities = () => {
+  showAllActivitiesDialog.value = true
+}
+
 onMounted(() => {
   // 从后端获取数据
-  fetchDashboardData()
+  fetchDashboardData(chartPeriod.value)
 })
 
 onUnmounted(() => {
