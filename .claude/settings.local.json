@@ -3,7 +3,9 @@
     "allow": [
       "Bash(Select-Object -First 30 -ExpandProperty FullName)",
       "Bash(ls src/main/java/com/yushuang/demo/util/*.java)",
-      "Bash(mvn clean compile:*)"
+      "Bash(mvn clean compile:*)",
+      "Bash(Get-ChildItem \"C:\\Users\\Administrator\\Desktop\\DD\\java_web\\src\\main\\java\\com\\yushuang\\demo\" -Directory)",
+      "Bash(Select-Object -First 30 -ExpandProperty Name)"
     ],
     "deny": [],
     "ask": []

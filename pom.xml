@@ -66,6 +66,20 @@
 			<version>3.5.14</version>
 		</dependency>
 
+		<!-- MyBatis-Plus Generator -->
+		<dependency>
+			<groupId>com.baomidou</groupId>
+			<artifactId>mybatis-plus-generator</artifactId>
+			<version>3.5.5</version>
+		</dependency>
+
+		<!-- Freemarker Template Engine (for code generation) -->
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>2.3.32</version>
+		</dependency>
+
 		<!-- JWT -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
@@ -110,6 +124,13 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
+		</dependency>
+
+		<!-- EasyExcel (for Excel import/export) -->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>easyexcel</artifactId>
+			<version>3.3.4</version>
 		</dependency>
 
 		<dependency>
