@@ -30,6 +30,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DashboardServiceImpl implements DashboardService {
 
+    /**
+     * 百分比计算精度乘数
+     */
+    private static final double PERCENTAGE_PRECISION_MULTIPLIER = 1000.0;
+
+    /**
+     * 图表柱状条最小可见百分比
+     */
+    private static final int MIN_CHART_VISIBILITY_PERCENT = 5;
+
     private final UserMapper userMapper;
     private final RoleMapper roleMapper;
     private final PermissionMapper permissionMapper;
@@ -85,12 +95,11 @@ public class DashboardServiceImpl implements DashboardService {
         long permissionCount = permissionMapper.selectCount(permWrapper);
         stats.setPermissionCount(permissionCount);
         
-        // 计算趋势（这里简化处理，使用随机趋势或基于实际数据计算）
-        // 实际项目中应该根据历史数据计算
+        // 计算所有趋势
         stats.setUserTrend(calculateUserTrend());
-        stats.setActiveTrend(8.2);
-        stats.setRoleTrend(0.0);
-        stats.setPermissionTrend(0.0);
+        stats.setActiveTrend(calculateActiveUserTrend());
+        stats.setRoleTrend(calculateRoleTrend());
+        stats.setPermissionTrend(calculatePermissionTrend());
         
         return stats;
     }
@@ -115,11 +124,75 @@ public class DashboardServiceImpl implements DashboardService {
         lastWrapper.lt(User::getCreateTime, lastMonth);
         long lastMonthUsers = userMapper.selectCount(lastWrapper);
         
-        if (lastMonthUsers == 0) {
-            return currentMonthUsers > 0 ? 100.0 : 0.0;
-        }
+        return calculateTrendPercentage(currentMonthUsers, lastMonthUsers);
+    }
+
+    /**
+     * 计算活跃用户趋势
+     */
+    private Double calculateActiveUserTrend() {
+        // 由于活跃用户是基于当前状态的，不跟踪历史变化，返回0
+        // 实际项目中可以通过登录日志来计算活跃用户趋势
+        return 0.0;
+    }
+
+    /**
+     * 计算角色趋势
+     */
+    private Double calculateRoleTrend() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime lastMonth = now.minusMonths(1);
         
-        return Math.round((double)(currentMonthUsers - lastMonthUsers) / lastMonthUsers * 1000) / 10.0;
+        // 本月新增角色
+        LambdaQueryWrapper<Role> currentWrapper = new LambdaQueryWrapper<>();
+        currentWrapper.eq(Role::getDeleted, 0);
+        currentWrapper.ge(Role::getCreateTime, lastMonth);
+        long currentMonthRoles = roleMapper.selectCount(currentWrapper);
+        
+        // 上月新增角色
+        LambdaQueryWrapper<Role> lastWrapper = new LambdaQueryWrapper<>();
+        lastWrapper.eq(Role::getDeleted, 0);
+        lastWrapper.ge(Role::getCreateTime, lastMonth.minusMonths(1));
+        lastWrapper.lt(Role::getCreateTime, lastMonth);
+        long lastMonthRoles = roleMapper.selectCount(lastWrapper);
+        
+        return calculateTrendPercentage(currentMonthRoles, lastMonthRoles);
+    }
+
+    /**
+     * 计算权限趋势
+     */
+    private Double calculatePermissionTrend() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime lastMonth = now.minusMonths(1);
+        
+        // 本月新增权限
+        LambdaQueryWrapper<Permission> currentWrapper = new LambdaQueryWrapper<>();
+        currentWrapper.eq(Permission::getDeleted, 0);
+        currentWrapper.ge(Permission::getCreateTime, lastMonth);
+        long currentMonthPermissions = permissionMapper.selectCount(currentWrapper);
+        
+        // 上月新增权限
+        LambdaQueryWrapper<Permission> lastWrapper = new LambdaQueryWrapper<>();
+        lastWrapper.eq(Permission::getDeleted, 0);
+        lastWrapper.ge(Permission::getCreateTime, lastMonth.minusMonths(1));
+        lastWrapper.lt(Permission::getCreateTime, lastMonth);
+        long lastMonthPermissions = permissionMapper.selectCount(lastWrapper);
+        
+        return calculateTrendPercentage(currentMonthPermissions, lastMonthPermissions);
+    }
+
+    /**
+     * 计算趋势百分比
+     * @param currentValue 当前值
+     * @param previousValue 上月值
+     * @return 趋势百分比
+     */
+    private Double calculateTrendPercentage(long currentValue, long previousValue) {
+        if (previousValue == 0) {
+            return currentValue > 0 ? 100.0 : 0.0;
+        }
+        return Math.round((double)(currentValue - previousValue) / previousValue * PERCENTAGE_PRECISION_MULTIPLIER) / 10.0;
     }
 
     /**
@@ -163,7 +236,7 @@ public class DashboardServiceImpl implements DashboardService {
             chartData.setCount(monthlyCounts[i]);
             // 计算百分比值（相对于最大值的百分比）
             int percentage = (int) Math.round((double) monthlyCounts[i] / maxCount * 100);
-            chartData.setValue(Math.max(percentage, 5)); // 最小5%，确保可见
+            chartData.setValue(Math.max(percentage, MIN_CHART_VISIBILITY_PERCENT));
             chartDataList.add(chartData);
         }
         

@@ -37,7 +37,7 @@ public class DashboardController {
             return Result.success(statistics);
         } catch (Exception e) {
             log.error("获取仪表板统计数据失败", e);
-            return Result.error("获取统计数据失败: " + e.getMessage());
+            return Result.error("获取统计数据失败");
         }
     }
 }
