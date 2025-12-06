@@ -423,3 +423,14 @@ export const fileApi = {
     return `/api/files/${fileId}/preview`
   }
 }
+
+// 仪表板API
+export const dashboardApi = {
+  // 获取仪表板统计数据
+  getStatistics() {
+    return request({
+      url: '/dashboard/statistics',
+      method: 'get'
+    })
+  }
+}

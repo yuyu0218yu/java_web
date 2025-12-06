@@ -198,6 +198,11 @@ import {
   CaretTop, CaretBottom, Bell, ArrowRight, Clock,
   CircleCheck, CircleClose, Connection, Edit, Unlock
 } from '@element-plus/icons-vue'
+import { dashboardApi } from '@/api'
+import { ElMessage } from 'element-plus'
+
+// 加载状态
+const loading = ref(true)
 
 // 图表周期
 const chartPeriod = ref('month')
@@ -209,31 +214,31 @@ const animationFrameIds = ref([])
 const statsCards = ref([
   {
     title: '总用户数',
-    value: 156,
+    value: 0,
     icon: User,
     gradient: 'linear-gradient(135deg, #409EFF 0%, #53a8ff 100%)',
-    trend: 12.5
+    trend: 0
   },
   {
     title: '活跃用户',
-    value: 89,
+    value: 0,
     icon: UserFilled,
     gradient: 'linear-gradient(135deg, #67C23A 0%, #85ce61 100%)',
-    trend: 8.2
+    trend: 0
   },
   {
     title: '角色数量',
-    value: 12,
+    value: 0,
     icon: Lock,
     gradient: 'linear-gradient(135deg, #E6A23C 0%, #ebb563 100%)',
-    trend: -2.1
+    trend: 0
   },
   {
     title: '权限数量',
-    value: 45,
+    value: 0,
     icon: Key,
     gradient: 'linear-gradient(135deg, #F56C6C 0%, #f78989 100%)',
-    trend: 15.8
+    trend: 0
   }
 ])
 
@@ -241,40 +246,19 @@ const statsCards = ref([
 const animatedValues = ref([0, 0, 0, 0])
 
 // 图表数据
-const chartData = ref([
-  { label: '1月', value: 30, count: 45 },
-  { label: '2月', value: 45, count: 68 },
-  { label: '3月', value: 55, count: 82 },
-  { label: '4月', value: 40, count: 60 },
-  { label: '5月', value: 65, count: 98 },
-  { label: '6月', value: 75, count: 112 },
-  { label: '7月', value: 85, count: 128 },
-  { label: '8月', value: 70, count: 105 },
-  { label: '9月', value: 80, count: 120 },
-  { label: '10月', value: 90, count: 135 },
-  { label: '11月', value: 95, count: 143 },
-  { label: '12月', value: 100, count: 156 }
-])
+const chartData = ref([])
 
 // 权限分布数据
-const permissionDistribution = ref([
-  { name: '菜单权限', value: 18, color: '#409EFF' },
-  { name: '按钮权限', value: 15, color: '#67C23A' },
-  { name: '接口权限', value: 12, color: '#E6A23C' }
-])
+const permissionDistribution = ref([])
 
 // 计算总权限数
 const totalPermissions = computed(() => {
   return permissionDistribution.value.reduce((sum, item) => sum + item.value, 0)
 })
 
-// 计算百分比
-permissionDistribution.value.forEach(item => {
-  item.percent = Math.round((item.value / totalPermissions.value) * 100)
-})
-
 // 生成饼图渐变
 const pieGradient = computed(() => {
+  if (totalPermissions.value === 0) return '#ccc'
   let gradient = ''
   let currentAngle = 0
   permissionDistribution.value.forEach((item, index) => {
@@ -289,32 +273,7 @@ const pieGradient = computed(() => {
 })
 
 // 最近活动数据
-const recentActivities = ref([
-  {
-    time: '2025-12-05 09:10:00',
-    user: 'admin',
-    action: '登录系统',
-    status: '成功'
-  },
-  {
-    time: '2025-12-05 09:05:00',
-    user: 'manager',
-    action: '创建用户',
-    status: '成功'
-  },
-  {
-    time: '2025-12-05 08:58:00',
-    user: 'user1',
-    action: '修改密码',
-    status: '成功'
-  },
-  {
-    time: '2025-12-05 08:45:00',
-    user: 'guest',
-    action: '访问受限页面',
-    status: '失败'
-  }
-])
+const recentActivities = ref([])
 
 // 表格行样式
 const tableRowClassName = ({ row, rowIndex }) => {
@@ -368,13 +327,60 @@ const animateValue = (index, targetValue, duration = 1500) => {
   animationFrameIds.value[index] = frameId
 }
 
+// 获取仪表板数据
+const fetchDashboardData = async () => {
+  try {
+    loading.value = true
+    const res = await dashboardApi.getStatistics()
+    
+    if (res.code === 200 && res.data) {
+      const data = res.data
+      
+      // 更新统计卡片数据
+      if (data.stats) {
+        statsCards.value[0].value = data.stats.totalUsers || 0
+        statsCards.value[0].trend = data.stats.userTrend || 0
+        statsCards.value[1].value = data.stats.activeUsers || 0
+        statsCards.value[1].trend = data.stats.activeTrend || 0
+        statsCards.value[2].value = data.stats.roleCount || 0
+        statsCards.value[2].trend = data.stats.roleTrend || 0
+        statsCards.value[3].value = data.stats.permissionCount || 0
+        statsCards.value[3].trend = data.stats.permissionTrend || 0
+      }
+      
+      // 更新图表数据
+      if (data.userGrowthData && data.userGrowthData.length > 0) {
+        chartData.value = data.userGrowthData
+      }
+      
+      // 更新权限分布数据
+      if (data.permissionDistribution && data.permissionDistribution.length > 0) {
+        permissionDistribution.value = data.permissionDistribution
+      }
+      
+      // 更新最近活动数据
+      if (data.recentActivities && data.recentActivities.length > 0) {
+        recentActivities.value = data.recentActivities
+      }
+      
+      // 启动数字动画
+      statsCards.value.forEach((card, index) => {
+        setTimeout(() => {
+          animateValue(index, card.value)
+        }, index * 100)
+      })
+    }
+  } catch (error) {
+    console.error('获取仪表板数据失败:', error)
+    ElMessage.error('获取仪表板数据失败')
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(() => {
-  // 启动数字动画
-  statsCards.value.forEach((card, index) => {
-    setTimeout(() => {
-      animateValue(index, card.value)
-    }, index * 100)
-  })
+  // 从后端获取数据
+  fetchDashboardData()
 })
 
 onUnmounted(() => {
