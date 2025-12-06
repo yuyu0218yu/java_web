@@ -124,6 +124,21 @@
 </template>
 
 <script setup>
+/**
+ * 通用 CRUD 表格组件
+ * 
+ * 使用说明：
+ * 1. 通过 #columns 插槽定义表格列
+ * 2. 至少有一列使用 min-width 而非固定 width，以填满容器避免右侧空白
+ * 3. 通过 #form 插槽定义表单内容
+ * 4. 通过 #operations 插槽自定义操作按钮
+ * 
+ * 示例：
+ * <template #columns>
+ *   <el-table-column prop="name" label="名称" width="200" />
+ *   <el-table-column prop="desc" label="描述" min-width="200" />  <!-- 使用 min-width -->
+ * </template>
+ */
 import { ref, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Download, Edit, Delete, Close, Check } from '@element-plus/icons-vue'
@@ -372,6 +387,16 @@ defineExpose({
 .table-card {
   min-height: 400px;
   border-radius: 12px;
+}
+
+/* 确保表格填满容器，避免右侧空白 */
+.table-card :deep(.el-table) {
+  width: 100% !important;
+}
+
+.table-card :deep(.el-table__header),
+.table-card :deep(.el-table__body) {
+  width: 100% !important;
 }
 
 .operation-buttons {
