@@ -19,7 +19,8 @@ import java.util.Collections;
  *   MyBatisPlusCodeGenerator.generateCode("table_name");
  *
  * 方式二：通过代码生成器Web界面使用（推荐）
- *   访问系统的代码生成器页面，导入表后进行可视化配置和生成
+ *   访问系统菜单：系统管理 -> 代码生成器 (路径: /generator)
+ *   功能：导入数据库表、预览代码、下载ZIP、在线生成
  *
  * @author yushuang
  */

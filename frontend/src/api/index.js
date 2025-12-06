@@ -507,7 +507,7 @@ export const generatorApi = {
   },
 
   // 下载代码（单表）
-  async downloadCode(tableId) {
+  async downloadCode(tableId, tableName = 'code') {
     const token = localStorage.getItem('token')
     try {
       const response = await fetch(`/api/gen/download/${tableId}`, {
@@ -526,7 +526,8 @@ export const generatorApi = {
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = 'code.zip'
+      const timestamp = new Date().getTime()
+      link.download = `${tableName}_${timestamp}.zip`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -556,7 +557,8 @@ export const generatorApi = {
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = 'code.zip'
+      const timestamp = new Date().getTime()
+      link.download = `code_batch_${timestamp}.zip`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)

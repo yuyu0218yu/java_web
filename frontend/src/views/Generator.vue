@@ -267,7 +267,10 @@ const showImportDialog = async () => {
   importDialogVisible.value = true
   dbTableLoading.value = true
   try {
-    const res = await generatorApi.getDbTableList({})
+    const res = await generatorApi.getDbTableList({
+      tableName: '',
+      tableComment: ''
+    })
     dbTableList.value = res.data || []
   } catch (error) {
     console.error('加载数据库表失败', error)
@@ -314,7 +317,7 @@ const handlePreview = async (row) => {
 const handleDownload = async (row) => {
   downloading.value = true
   try {
-    await generatorApi.downloadCode(row.tableId)
+    await generatorApi.downloadCode(row.tableId, row.tableName)
     ElMessage.success('代码下载成功！')
   } catch (error) {
     console.error('下载失败', error)
@@ -328,7 +331,7 @@ const downloadFromPreview = async () => {
   if (!currentTable.value) return
   downloading.value = true
   try {
-    await generatorApi.downloadCode(currentTable.value.tableId)
+    await generatorApi.downloadCode(currentTable.value.tableId, currentTable.value.tableName)
     ElMessage.success('代码下载成功！')
   } catch (error) {
     console.error('下载失败', error)
