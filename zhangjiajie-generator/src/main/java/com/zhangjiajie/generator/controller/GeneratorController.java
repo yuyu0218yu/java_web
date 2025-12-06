@@ -1,14 +1,21 @@
 package com.zhangjiajie.generator.controller;
 
 import com.zhangjiajie.common.core.Result;
+import com.zhangjiajie.generator.dto.GenerateOptions;
 import com.zhangjiajie.generator.dto.GenerateRequest;
 import com.zhangjiajie.generator.service.GeneratorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +58,8 @@ public class GeneratorController {
     @Operation(summary = "预览生成代码")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public Result<Map<String, String>> previewCode(@RequestBody GenerateRequest request) {
-        return Result.success(generatorService.previewCode(request.getTableName(), request.getOptions()));
+        GenerateOptions options = request.getOptions() != null ? request.getOptions() : new GenerateOptions();
+        return Result.success(generatorService.previewCode(request.getTableName(), options));
     }
 
     /**
@@ -61,7 +69,60 @@ public class GeneratorController {
     @Operation(summary = "生成代码")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public Result<String> generateCode(@RequestBody GenerateRequest request) {
-        generatorService.generateCode(request.getTableName(), request.getOptions());
+        GenerateOptions options = request.getOptions() != null ? request.getOptions() : new GenerateOptions();
+        generatorService.generateCode(request.getTableName(), options);
         return Result.success("代码生成成功！");
+    }
+
+    /**
+     * 下载生成的代码（ZIP格式）
+     */
+    @PostMapping("/download")
+    @Operation(summary = "下载生成的代码")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public void downloadCode(@RequestBody GenerateRequest request, HttpServletResponse response) throws IOException {
+        GenerateOptions options = request.getOptions() != null ? request.getOptions() : GenerateOptions.full();
+        byte[] zipBytes = generatorService.downloadCode(request.getTableName(), options);
+
+        String fileName = request.getTableName() + "_code.zip";
+        String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
+
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + fileName + "\"; filename*=UTF-8''" + encodedFileName);
+        response.setContentLength(zipBytes.length);
+        response.getOutputStream().write(zipBytes);
+        response.getOutputStream().flush();
+    }
+
+    /**
+     * 使用完整选项预览代码（包含DTO、Converter、Test）
+     */
+    @PostMapping("/preview/full")
+    @Operation(summary = "预览完整代码（含DTO、Converter、Test）")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public Result<Map<String, String>> previewFullCode(@RequestBody GenerateRequest request) {
+        GenerateOptions options = request.getOptions() != null ? request.getOptions() : GenerateOptions.full();
+        // 确保完整选项
+        options.setGenerateDto(true);
+        options.setGenerateConverter(true);
+        options.setGenerateTest(true);
+        return Result.success(generatorService.previewCode(request.getTableName(), options));
+    }
+
+    /**
+     * 执行完整代码生成（包含DTO、Converter、Test）
+     */
+    @PostMapping("/generate/full")
+    @Operation(summary = "生成完整代码（含DTO、Converter、Test）")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public Result<String> generateFullCode(@RequestBody GenerateRequest request) {
+        GenerateOptions options = request.getOptions() != null ? request.getOptions() : GenerateOptions.full();
+        // 确保完整选项
+        options.setGenerateDto(true);
+        options.setGenerateConverter(true);
+        options.setGenerateTest(true);
+        generatorService.generateCode(request.getTableName(), options);
+        return Result.success("完整代码生成成功！");
     }
 }

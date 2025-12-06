@@ -463,6 +463,15 @@ export const generatorApi = {
     })
   },
 
+  // 预览完整代码（含DTO、Converter、Test）
+  previewFullCode(tableName, options) {
+    return request({
+      url: '/generator/preview/full',
+      method: 'post',
+      data: { tableName, options }
+    })
+  },
+
   // 执行代码生成
   generateCode(tableName, options) {
     return request({
@@ -470,5 +479,46 @@ export const generatorApi = {
       method: 'post',
       data: { tableName, options }
     })
+  },
+
+  // 执行完整代码生成（含DTO、Converter、Test）
+  generateFullCode(tableName, options) {
+    return request({
+      url: '/generator/generate/full',
+      method: 'post',
+      data: { tableName, options }
+    })
+  },
+
+  // 下载生成的代码（ZIP格式）
+  async downloadCode(tableName, options) {
+    const token = localStorage.getItem('token')
+    try {
+      const response = await fetch('/api/generator/download', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ tableName, options })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || '下载失败')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${tableName}_code.zip`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      throw error
+    }
   }
 }

@@ -55,7 +55,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="200">
+          <el-table-column label="操作" width="280">
             <template #default="scope">
               <div class="operation-buttons">
                 <el-button type="primary" size="small" @click.stop="handlePreview(scope.row)">
@@ -63,8 +63,12 @@
                   预览
                 </el-button>
                 <el-button type="success" size="small" @click.stop="handleGenerate(scope.row)">
-                  <el-icon><Download /></el-icon>
+                  <el-icon><Cpu /></el-icon>
                   生成
+                </el-button>
+                <el-button type="warning" size="small" @click.stop="handleDownload(scope.row)">
+                  <el-icon><Download /></el-icon>
+                  下载
                 </el-button>
               </div>
             </template>
@@ -88,15 +92,15 @@
     <el-dialog
       v-model="previewDialogVisible"
       title="代码预览"
-      width="80%"
-      top="5vh"
+      width="85%"
+      top="3vh"
       :close-on-click-modal="false"
     >
       <el-tabs v-model="activeTab" type="border-card">
-        <el-tab-pane 
-          v-for="(code, name) in previewCode" 
-          :key="name" 
-          :label="name" 
+        <el-tab-pane
+          v-for="(code, name) in previewCode"
+          :key="name"
+          :label="name"
           :name="name"
         >
           <pre class="code-preview"><code>{{ code }}</code></pre>
@@ -104,8 +108,12 @@
       </el-tabs>
       <template #footer>
         <el-button @click="previewDialogVisible = false">关闭</el-button>
-        <el-button type="success" @click="confirmGenerate" :loading="generating">
+        <el-button type="warning" @click="downloadFromPreview" :loading="downloading">
           <el-icon><Download /></el-icon>
+          下载ZIP
+        </el-button>
+        <el-button type="success" @click="confirmGenerate" :loading="generating">
+          <el-icon><Cpu /></el-icon>
           确认生成代码
         </el-button>
       </template>
@@ -115,35 +123,120 @@
     <el-dialog
       v-model="configDialogVisible"
       title="生成配置"
-      width="500px"
+      width="600px"
       :close-on-click-modal="false"
     >
       <el-form :model="generateOptions" label-width="120px">
         <el-form-item label="表名">
-          <el-tag type="info">{{ selectedTable?.tableName }}</el-tag>
+          <el-tag type="info" size="large">{{ selectedTable?.tableName }}</el-tag>
         </el-form-item>
-        <el-form-item label="移除表前缀">
-          <el-input v-model="generateOptions.tablePrefix" placeholder="如: sys_, t_" />
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="移除表前缀">
+              <el-input v-model="generateOptions.tablePrefix" placeholder="如: sys_, t_" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="作者">
+              <el-input v-model="generateOptions.author" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="实体中文名">
+              <el-input v-model="generateOptions.entityCnName" placeholder="如: 用户、产品" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="API模块名">
+              <el-input v-model="generateOptions.apiModuleName" placeholder="如: 用户管理" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-divider content-position="left">
+          <el-icon><Setting /></el-icon>
+          快捷配置
+        </el-divider>
+
+        <el-form-item label="生成模式">
+          <el-radio-group v-model="generateMode" @change="handleModeChange">
+            <el-radio-button label="basic">基础模式</el-radio-button>
+            <el-radio-button label="full">完整模式</el-radio-button>
+            <el-radio-button label="quick">快速模式</el-radio-button>
+            <el-radio-button label="custom">自定义</el-radio-button>
+          </el-radio-group>
         </el-form-item>
-        <el-form-item label="作者">
-          <el-input v-model="generateOptions.author" />
-        </el-form-item>
-        <el-divider content-position="left">生成选项</el-divider>
-        <el-form-item label="生成文件">
-          <el-checkbox-group v-model="generateFiles">
-            <el-checkbox label="entity">Entity</el-checkbox>
-            <el-checkbox label="mapper">Mapper</el-checkbox>
-            <el-checkbox label="service">Service</el-checkbox>
-            <el-checkbox label="controller">Controller</el-checkbox>
-          </el-checkbox-group>
-        </el-form-item>
-        <el-form-item label="代码选项">
-          <el-checkbox v-model="generateOptions.enableSwagger">启用Swagger</el-checkbox>
-          <el-checkbox v-model="generateOptions.enableLombok">启用Lombok</el-checkbox>
+
+        <el-collapse v-model="activeCollapse">
+          <el-collapse-item title="基础代码" name="basic">
+            <el-checkbox-group v-model="generateFiles">
+              <el-checkbox label="entity">
+                <el-tag type="primary" size="small">Entity</el-tag>
+                实体类
+              </el-checkbox>
+              <el-checkbox label="mapper">
+                <el-tag type="success" size="small">Mapper</el-tag>
+                数据访问层
+              </el-checkbox>
+              <el-checkbox label="service">
+                <el-tag type="warning" size="small">Service</el-tag>
+                业务逻辑层
+              </el-checkbox>
+              <el-checkbox label="controller">
+                <el-tag type="danger" size="small">Controller</el-tag>
+                控制器
+              </el-checkbox>
+            </el-checkbox-group>
+          </el-collapse-item>
+
+          <el-collapse-item title="扩展代码" name="extended">
+            <el-checkbox-group v-model="extendedFiles">
+              <el-checkbox label="dto">
+                <el-tag type="info" size="small">DTO</el-tag>
+                数据传输对象 (Request/Response)
+              </el-checkbox>
+              <el-checkbox label="converter">
+                <el-tag type="info" size="small">Converter</el-tag>
+                实体转换器
+              </el-checkbox>
+              <el-checkbox label="test">
+                <el-tag type="info" size="small">Test</el-tag>
+                单元测试类
+              </el-checkbox>
+            </el-checkbox-group>
+          </el-collapse-item>
+        </el-collapse>
+
+        <el-divider content-position="left">
+          <el-icon><Tools /></el-icon>
+          代码选项
+        </el-divider>
+
+        <el-form-item label="功能开关">
+          <el-space wrap>
+            <el-checkbox v-model="generateOptions.enableSwagger">
+              <el-tag effect="plain" size="small">Swagger</el-tag>
+            </el-checkbox>
+            <el-checkbox v-model="generateOptions.enableLombok">
+              <el-tag effect="plain" size="small">Lombok</el-tag>
+            </el-checkbox>
+            <el-checkbox v-model="generateOptions.overwrite">
+              <el-tag effect="plain" size="small" type="danger">覆盖已有文件</el-tag>
+            </el-checkbox>
+          </el-space>
         </el-form-item>
       </el-form>
+
       <template #footer>
         <el-button @click="configDialogVisible = false">取消</el-button>
+        <el-button type="warning" @click="doDownload" :loading="downloading">
+          <el-icon><Download /></el-icon>
+          下载ZIP
+        </el-button>
         <el-button type="primary" @click="doPreview" :loading="previewing">
           <el-icon><View /></el-icon>
           预览代码
@@ -154,9 +247,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Cpu, Refresh, Grid, Clock, View, Download, Search } from '@element-plus/icons-vue'
+import { Cpu, Refresh, Grid, Clock, View, Download, Search, Setting, Tools } from '@element-plus/icons-vue'
 import { generatorApi } from '@/api'
 
 // 响应式数据
@@ -172,28 +265,101 @@ const previewCode = ref({})
 const activeTab = ref('Entity')
 const previewing = ref(false)
 const generating = ref(false)
+const downloading = ref(false)
+
+// 折叠面板
+const activeCollapse = ref(['basic', 'extended'])
+
+// 生成模式
+const generateMode = ref('basic')
 
 // 生成选项
 const generateOptions = ref({
   tablePrefix: 'sys_',
-  author: 'yushuang',
+  author: 'zhangjiajie',
+  entityCnName: '',
+  apiModuleName: '',
   enableSwagger: true,
   enableLombok: true,
+  overwrite: true,
   generateEntity: true,
   generateMapper: true,
   generateService: true,
-  generateController: true
+  generateController: true,
+  generateDto: false,
+  generateConverter: false,
+  generateTest: false
 })
 
 const generateFiles = ref(['entity', 'mapper', 'service', 'controller'])
+const extendedFiles = ref([])
 
 // 计算属性
 const filteredTables = computed(() => {
   if (!searchKeyword.value) return tableList.value
-  return tableList.value.filter(t => 
+  return tableList.value.filter(t =>
     t.tableName.toLowerCase().includes(searchKeyword.value.toLowerCase())
   )
 })
+
+// 监听生成文件变化
+watch(generateFiles, (val) => {
+  generateOptions.value.generateEntity = val.includes('entity')
+  generateOptions.value.generateMapper = val.includes('mapper')
+  generateOptions.value.generateService = val.includes('service')
+  generateOptions.value.generateController = val.includes('controller')
+  // 如果手动修改了选项，切换到自定义模式
+  if (generateMode.value !== 'custom') {
+    checkCustomMode()
+  }
+})
+
+watch(extendedFiles, (val) => {
+  generateOptions.value.generateDto = val.includes('dto')
+  generateOptions.value.generateConverter = val.includes('converter')
+  generateOptions.value.generateTest = val.includes('test')
+  // 如果手动修改了选项，切换到自定义模式
+  if (generateMode.value !== 'custom') {
+    checkCustomMode()
+  }
+})
+
+// 检查是否应该切换到自定义模式
+const checkCustomMode = () => {
+  const basicMode = generateFiles.value.length === 4 && extendedFiles.value.length === 0
+  const fullMode = generateFiles.value.length === 4 && extendedFiles.value.length === 3
+  const quickMode = generateFiles.value.includes('service') &&
+                    generateFiles.value.includes('controller') &&
+                    !generateFiles.value.includes('entity') &&
+                    !generateFiles.value.includes('mapper') &&
+                    extendedFiles.value.includes('dto') &&
+                    extendedFiles.value.length === 1
+
+  if (!basicMode && !fullMode && !quickMode) {
+    generateMode.value = 'custom'
+  }
+}
+
+// 处理生成模式变化
+const handleModeChange = (mode) => {
+  switch (mode) {
+    case 'basic':
+      generateFiles.value = ['entity', 'mapper', 'service', 'controller']
+      extendedFiles.value = []
+      break
+    case 'full':
+      generateFiles.value = ['entity', 'mapper', 'service', 'controller']
+      extendedFiles.value = ['dto', 'converter', 'test']
+      break
+    case 'quick':
+      generateFiles.value = ['service', 'controller']
+      extendedFiles.value = ['dto']
+      break
+    case 'custom':
+      // 保持当前选择
+      break
+  }
+}
 
 // 方法
 const loadTables = async () => {
@@ -203,6 +369,7 @@ const loadTables = async () => {
     tableList.value = res.data || []
   } catch (error) {
     console.error('加载表列表失败', error)
+    ElMessage.error('加载表列表失败')
   } finally {
     loading.value = false
   }
@@ -218,25 +385,40 @@ const handleSelectTable = (row) => {
 
 const handlePreview = (row) => {
   selectedTable.value = row
+  // 根据表注释自动填充中文名
+  if (row.tableComment) {
+    generateOptions.value.entityCnName = row.tableComment
+    generateOptions.value.apiModuleName = row.tableComment + '管理'
+  }
   configDialogVisible.value = true
 }
 
 const handleGenerate = (row) => {
   selectedTable.value = row
+  // 根据表注释自动填充中文名
+  if (row.tableComment) {
+    generateOptions.value.entityCnName = row.tableComment
+    generateOptions.value.apiModuleName = row.tableComment + '管理'
+  }
+  configDialogVisible.value = true
+}
+
+const handleDownload = async (row) => {
+  selectedTable.value = row
+  // 根据表注释自动填充中文名
+  if (row.tableComment) {
+    generateOptions.value.entityCnName = row.tableComment
+    generateOptions.value.apiModuleName = row.tableComment + '管理'
+  }
   configDialogVisible.value = true
 }
 
 const doPreview = async () => {
   if (!selectedTable.value) return
-  
+
   previewing.value = true
   try {
-    // 更新选项
-    generateOptions.value.generateEntity = generateFiles.value.includes('entity')
-    generateOptions.value.generateMapper = generateFiles.value.includes('mapper')
-    generateOptions.value.generateService = generateFiles.value.includes('service')
-    generateOptions.value.generateController = generateFiles.value.includes('controller')
-    
+    // 直接使用 previewCode 端点，传递用户选择的所有选项
     const res = await generatorApi.previewCode(
       selectedTable.value.tableName,
       generateOptions.value
@@ -247,9 +429,46 @@ const doPreview = async () => {
     previewDialogVisible.value = true
   } catch (error) {
     console.error('预览失败', error)
-    ElMessage.error('预览失败')
+    ElMessage.error('预览失败: ' + (error.message || '未知错误'))
   } finally {
     previewing.value = false
+  }
+}
+
+const doDownload = async () => {
+  if (!selectedTable.value) return
+
+  downloading.value = true
+  try {
+    await generatorApi.downloadCode(
+      selectedTable.value.tableName,
+      generateOptions.value
+    )
+    ElMessage.success('代码下载成功！')
+    configDialogVisible.value = false
+  } catch (error) {
+    console.error('下载失败', error)
+    ElMessage.error('下载失败: ' + (error.message || '未知错误'))
+  } finally {
+    downloading.value = false
+  }
+}
+
+const downloadFromPreview = async () => {
+  if (!selectedTable.value) return
+
+  downloading.value = true
+  try {
+    await generatorApi.downloadCode(
+      selectedTable.value.tableName,
+      generateOptions.value
+    )
+    ElMessage.success('代码下载成功！')
+  } catch (error) {
+    console.error('下载失败', error)
+    ElMessage.error('下载失败: ' + (error.message || '未知错误'))
+  } finally {
+    downloading.value = false
   }
 }
 
@@ -260,8 +479,9 @@ const confirmGenerate = async () => {
       '确认生成',
       { type: 'warning' }
     )
-    
+
     generating.value = true
+    // 直接使用 generateCode 端点，传递用户选择的所有选项
     await generatorApi.generateCode(
       selectedTable.value.tableName,
       generateOptions.value
@@ -271,7 +491,7 @@ const confirmGenerate = async () => {
   } catch (error) {
     if (error !== 'cancel') {
       console.error('生成失败', error)
-      ElMessage.error('生成失败')
+      ElMessage.error('生成失败: ' + (error.message || '未知错误'))
     }
   } finally {
     generating.value = false
@@ -390,5 +610,35 @@ onMounted(() => {
   font-size: 13px;
   line-height: 1.5;
   margin: 0;
+}
+
+/* 复选框组样式 */
+.el-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.el-checkbox {
+  margin-right: 0;
+}
+
+/* 折叠面板样式 */
+:deep(.el-collapse-item__header) {
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+:deep(.el-collapse-item__content) {
+  padding: 16px 0;
+}
+
+/* 分割线样式 */
+:deep(.el-divider__text) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  color: var(--el-text-color-secondary);
 }
 </style>

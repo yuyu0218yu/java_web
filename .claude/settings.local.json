@@ -5,7 +5,10 @@
       "Bash(ls src/main/java/com/yushuang/demo/util/*.java)",
       "Bash(mvn clean compile:*)",
       "Bash(Get-ChildItem \"C:\\Users\\Administrator\\Desktop\\DD\\java_web\\src\\main\\java\\com\\yushuang\\demo\" -Directory)",
-      "Bash(Select-Object -First 30 -ExpandProperty Name)"
+      "Bash(Select-Object -First 30 -ExpandProperty Name)",
+      "Bash(Get-ChildItem \"C:\\Users\\Administrator\\Desktop\\DD\\java_web\\zhangjiajie-generator\" -Directory)",
+      "Bash(Get-ChildItem \"C:\\Users\\Administrator\\Desktop\\DD\\java_web\\zhangjiajie-generator\\src\" -Recurse -File)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

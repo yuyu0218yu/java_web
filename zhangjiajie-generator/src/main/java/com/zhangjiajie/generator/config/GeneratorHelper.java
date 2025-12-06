@@ -12,33 +12,99 @@ import java.time.format.DateTimeFormatter;
  * 代码生成器共享工具类
  * 提供字符串转换、文件写入等通用方法
  *
+ * 支持两种使用方式：
+ * 1. Spring 环境：通过 GeneratorConfig 注入配置
+ * 2. 独立运行：使用静态配置或默认值
+ *
  * @author yushuang
  * @since 2025-12-06
  */
 @Slf4j
 public final class GeneratorHelper {
 
-    public static final String BASE_PACKAGE = "com.yushuang.demo";
-    public static final String AUTHOR = "yushuang";
+    // ==================== 默认配置（可通过 configure 方法覆盖） ====================
+
+    private static String basePackage = "com.zhangjiajie.system";
+    private static String author = "zhangjiajie";
+    private static String targetModule = "zhangjiajie-system";
+
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private GeneratorHelper() {
         // 工具类不应被实例化
     }
 
+    // ==================== 配置方法 ====================
+
+    /**
+     * 从 GeneratorConfig 初始化配置
+     * 在 Spring 环境下使用
+     */
+    public static void configure(GeneratorConfig config) {
+        if (config != null) {
+            basePackage = config.getBasePackage();
+            author = config.getAuthor();
+            // 从 outputPath 推断目标模块
+            String outputPath = config.getOutputPath();
+            if (outputPath != null && outputPath.contains("/")) {
+                String[] parts = outputPath.split("/");
+                for (String part : parts) {
+                    if (part.startsWith("zhangjiajie-")) {
+                        targetModule = part;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 静态配置方法（用于独立运行时）
+     */
+    public static void configure(String packageName, String authorName, String module) {
+        basePackage = packageName;
+        author = authorName;
+        targetModule = module;
+    }
+
+    // ==================== Getter 方法 ====================
+
+    public static String getBasePackage() {
+        return basePackage;
+    }
+
+    public static String getAuthor() {
+        return author;
+    }
+
+    public static String getTargetModule() {
+        return targetModule;
+    }
+
     /**
      * 获取Java源码基础路径
      */
     public static String getMainJavaPath() {
-        return System.getProperty("user.dir") + "/src/main/java/com/yushuang/demo";
+        return System.getProperty("user.dir") + "/" + targetModule + "/src/main/java/"
+               + basePackage.replace(".", "/");
     }
 
     /**
      * 获取测试源码基础路径
      */
     public static String getTestJavaPath() {
-        return System.getProperty("user.dir") + "/src/test/java/com/yushuang/demo";
+        return System.getProperty("user.dir") + "/" + targetModule + "/src/test/java/"
+               + basePackage.replace(".", "/");
     }
+
+    /**
+     * 获取资源文件基础路径
+     */
+    public static String getMainResourcesPath() {
+        return System.getProperty("user.dir") + "/" + targetModule + "/src/main/resources";
+    }
+
+    // ==================== 字符串转换方法 ====================
 
     /**
      * 转换为小驼峰命名
@@ -140,9 +206,26 @@ public final class GeneratorHelper {
             case "datetime", "timestamp" -> "LocalDateTime";
             case "date" -> "LocalDate";
             case "time" -> "LocalTime";
+            case "blob", "longblob", "mediumblob", "tinyblob" -> "byte[]";
+            case "json" -> "String"; // 或者可以使用特定的JSON库类型
             default -> "String";
         };
     }
+
+    /**
+     * 获取Java类型对应的import语句
+     */
+    public static String getImportForJavaType(String javaType) {
+        return switch (javaType) {
+            case "BigDecimal" -> "java.math.BigDecimal";
+            case "LocalDateTime" -> "java.time.LocalDateTime";
+            case "LocalDate" -> "java.time.LocalDate";
+            case "LocalTime" -> "java.time.LocalTime";
+            default -> null; // 基本类型和String不需要import
+        };
+    }
+
+    // ==================== 文件操作方法 ====================
 
     /**
      * 将内容写入文件
@@ -153,8 +236,23 @@ public final class GeneratorHelper {
      * @param content     文件内容
      * @throws IOException 如果写入失败
      */
-    public static void writeToFile(String basePath, String packageName, String fileName, String content) 
+    public static void writeToFile(String basePath, String packageName, String fileName, String content)
             throws IOException {
+        writeToFile(basePath, packageName, fileName, content, true);
+    }
+
+    /**
+     * 将内容写入文件（带覆盖控制）
+     *
+     * @param basePath    基础路径
+     * @param packageName 包名（如 "controller" 或 "service/impl"）
+     * @param fileName    文件名
+     * @param content     文件内容
+     * @param overwrite   是否覆盖已有文件
+     * @throws IOException 如果写入失败
+     */
+    public static void writeToFile(String basePath, String packageName, String fileName,
+                                   String content, boolean overwrite) throws IOException {
         String dirPath = basePath + "/" + packageName.replace(".", "/");
         File dir = new File(dirPath);
         if (!dir.exists()) {
@@ -162,9 +260,15 @@ public final class GeneratorHelper {
         }
 
         File file = new File(dir, fileName);
+        if (file.exists() && !overwrite) {
+            log.warn("文件已存在，跳过生成: {}", file.getAbsolutePath());
+            return;
+        }
+
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(content);
         }
+        log.info("文件已生成: {}", file.getAbsolutePath());
     }
 
     /**
@@ -178,6 +282,7 @@ public final class GeneratorHelper {
         log.info("========================================");
         log.info("{}完成！", title);
         log.info("实体: {}", entityName);
+        log.info("目标模块: {}", targetModule);
         log.info("生成文件:");
         for (String file : files) {
             log.info("  - {}", file);

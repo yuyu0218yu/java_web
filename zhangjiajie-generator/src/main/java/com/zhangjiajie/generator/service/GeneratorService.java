@@ -29,4 +29,9 @@ public interface GeneratorService {
      * 执行代码生成
      */
     void generateCode(String tableName, GenerateOptions options);
+
+    /**
+     * 下载生成的代码（ZIP格式）
+     */
+    byte[] downloadCode(String tableName, GenerateOptions options);
 }
