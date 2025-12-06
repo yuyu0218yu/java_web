@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a full-stack user management system with Spring Boot 3.2.5 backend and Vue 3 frontend. The backend uses Java 21 and Maven with MyBatis-Plus for data persistence. It features a complete JWT-based authentication system, operation logging/auditing functionality, file management module, and user management with RBAC (Role-Based Access Control). The project demonstrates enterprise-grade architecture with security, logging, and file handling capabilities.
+This is a full-stack user management system with Spring Boot 3.2.5 backend and Vue 3 frontend. The backend uses Java 17 and Maven with MyBatis-Plus for data persistence. It features a complete JWT-based authentication system, operation logging/auditing functionality, file management module, and user management with RBAC (Role-Based Access Control). The project demonstrates enterprise-grade architecture with security, logging, and file handling capabilities.
+
+**Multi-Module Maven Architecture**: The project is organized as a multi-module Maven project for better separation of concerns and future microservices migration.
 
 ## Development Commands
 
@@ -13,8 +15,10 @@ This is a full-stack user management system with Spring Boot 3.2.5 backend and V
 # Build the project
 mvn clean compile
 
-# Run the application
-mvn spring-boot:run
+# Run the application (from zhangjiajie-admin module)
+cd zhangjiajie-admin && mvn spring-boot:run
+# Or from root directory:
+mvn spring-boot:run -pl zhangjiajie-admin
 
 # Run tests
 mvn test
@@ -26,10 +30,10 @@ mvn package
 mvn package -DskipTests
 
 # Run a single test class
-mvn test -Dtest=DemoApplicationTests
+mvn test -Dtest=ZhangjiajieAdminApplicationTests -pl zhangjiajie-admin
 
 # Run a single test method
-mvn test -Dtest=DemoApplicationTests#contextLoads
+mvn test -Dtest=ZhangjiajieAdminApplicationTests#contextLoads -pl zhangjiajie-admin
 ```
 
 ### Frontend (Vue 3)
@@ -58,12 +62,22 @@ npm run preview
 
 ## Architecture
 
+### Multi-Module Structure
+
+```
+zhangjiajie-admin-parent/       (Parent POM)
+├── zhangjiajie-common/         (Common utilities, exceptions, annotations)
+├── zhangjiajie-system/         (System management: User, Role, Menu, Permission, Auth)
+├── zhangjiajie-generator/      (Code generator module)
+└── zhangjiajie-admin/          (Application startup module)
+```
+
 ### Technology Stack
 
 #### Backend
 - **Framework**: Spring Boot 3.2.5
-- **Java**: Java 21 (LTS)
-- **Build**: Apache Maven
+- **Java**: Java 17
+- **Build**: Apache Maven (Multi-Module)
 - **Security**: Spring Security with JWT authentication
 - **Database**: MyBatis-Plus 3.5.14 (Spring Boot 3 compatible)
 - **Database Driver**: MySQL Connector (runtime), H2 (test)
@@ -84,22 +98,36 @@ npm run preview
 
 ### Package Structure
 
-#### Backend Structure
-- Main package: `com.yushuang.demo`
-- Standard Maven project structure with layered architecture: Controllers → Services → Mappers
-- `com.yushuang.demo.common`: Common response and pagination components
-- `com.yushuang.demo.util`: Comprehensive utility library
-- `com.yushuang.demo.entity`: Entity classes (User, Role, Permission, UserRole, RolePermission, OperationLog, LoginLog, FileInfo)
-- `com.yushuang.demo.mapper`: MyBatis-Plus mapper interfaces
-- `com.yushuang.demo.service`: Business logic services
-- `com.yushuang.demo.controller`: REST controllers
-- `com.yushuang.demo.dto`: Data transfer objects (LoginRequest, LoginResponse, UserInfo)
-- `com.yushuang.demo.security`: JWT authentication and security components (JwtAuthenticationFilter, UserDetailsServiceImpl)
-- `com.yushuang.demo.annotation`: Custom annotations (@AuditLog)
-- `com.yushuang.demo.aspect`: AOP aspects for logging (AuditLogAspect)
-- `com.yushuang.demo.event`: Application events (LoginEvent)
-- `com.yushuang.demo.listener`: Event listeners for logging (LoginEventListener)
-- `com.yushuang.demo.config`: Configuration classes (SecurityConfig, AsyncConfig, FileUploadConfig)
+#### zhangjiajie-common Module
+- `com.zhangjiajie.common.core`: Core classes (Result, PageResult, PageRequest, BaseController)
+- `com.zhangjiajie.common.enums`: Enum classes (CodeEnum, ResultCode, EnableStatus, ResultStatus)
+- `com.zhangjiajie.common.exception`: Exception classes (BusinessException, GlobalExceptionHandler, ResourceNotFoundException)
+- `com.zhangjiajie.common.annotation`: Custom annotations (@AuditLog)
+- `com.zhangjiajie.common.util`: Utility classes (JwtUtil, IpUtil, ExcelUtil, ValidationUtil, etc.)
+- `com.zhangjiajie.common.config`: Common configuration (MyBatisPlusConfig, AsyncConfig)
+
+#### zhangjiajie-system Module
+- `com.zhangjiajie.system.entity`: Entity classes (User, Role, Menu, Permission, FileInfo, OperationLog, etc.)
+- `com.zhangjiajie.system.mapper`: MyBatis-Plus mapper interfaces
+- `com.zhangjiajie.system.service`: Business logic services
+- `com.zhangjiajie.system.controller`: REST controllers (UserController, RoleController, AuthController, etc.)
+- `com.zhangjiajie.system.dto`: Data transfer objects
+- `com.zhangjiajie.system.security`: JWT authentication components
+- `com.zhangjiajie.system.config`: System-specific configuration (SecurityConfig, FileUploadConfig)
+- `com.zhangjiajie.system.aspect`: AOP aspects (AuditLogAspect)
+- `com.zhangjiajie.system.event`: Application events
+- `com.zhangjiajie.system.listener`: Event listeners
+
+#### zhangjiajie-generator Module
+- `com.zhangjiajie.generator.controller`: Generator REST controllers
+- `com.zhangjiajie.generator.service`: Generator service
+- `com.zhangjiajie.generator.config`: Generator configuration and utilities
+- `com.zhangjiajie.generator.dto`: Generator DTOs
+
+#### zhangjiajie-admin Module
+- `com.zhangjiajie.ZhangjiajieAdminApplication`: Main startup class
+- Application configuration (application.yml)
+- SQL initialization scripts
 
 #### Frontend Structure
 - `frontend/src/api/`: API service layer with Axios requests
@@ -111,8 +139,8 @@ npm run preview
 - `frontend/vite.config.js`: Vite configuration with proxy settings for backend API
 
 ### Key Components
-- `DemoApplication.java`: Main Spring Boot application class with `@MapperScan("com.yushuang.demo.mapper")`
-- `application.properties`: Database, JWT, and file upload configuration
+- `ZhangjiajieAdminApplication.java`: Main Spring Boot application class with `@MapperScan("com.zhangjiajie.system.mapper")`
+- `application.yml`: Database, JWT, and file upload configuration
 - `Result.java`: Standard API response wrapper with HTTP status codes
 - `PageResult.java`: Pagination utility with navigation helpers
 - `@AuditLog`: Custom annotation for operation logging
@@ -129,13 +157,13 @@ npm run preview
   - Encoding: UTF-8MB4 with Asia/Shanghai timezone
   - No SSL configuration
 - **Testing**: H2 in-memory database
-- **Initialization Script**: `src/main/resources/sql/init.sql` contains complete database schema (users, roles, permissions, logs, files)
+- **Initialization Script**: `zhangjiajie-admin/src/main/resources/sql/init.sql` contains complete database schema (users, roles, permissions, logs, files)
 - **MyBatis-Plus Features**:
   - Automatic camel case mapping (`user_name` → `userName`)
   - Logical delete support (`deleted` field: 1=deleted, 0=active)
   - SQL logging to console
-  - Entity scanning: `com.yushuang.demo.entity` package
-  - XML mapper location: `classpath:mapper/*.xml`
+  - Entity scanning: `com.zhangjiajie.system.mapper` package
+  - XML mapper location: `classpath*:mapper/*.xml`
 
 ### API Documentation
 - Swagger/OpenAPI 3 available via SpringDoc
@@ -151,7 +179,7 @@ npm run preview
 
 ### Development Notes
 - Spring Security with JWT integration for API authentication
-- MyBatis-Plus mappers are auto-scanned in `com.yushuang.demo.mapper` package
+- MyBatis-Plus mappers are auto-scanned in `com.zhangjiajie.system.mapper` package
 - Database schema includes init scripts for RBAC and logging tables
 - Entity classes include logical delete field for soft deletes
 - Lombok is configured for code generation
@@ -378,7 +406,7 @@ public void export(HttpServletResponse response) {
 
 ## Code Generators (4 Automation Tools)
 
-The project includes 4 code generators in `src/main/java/com/yushuang/demo/generator/`:
+The project includes 4 code generators in `zhangjiajie-generator/src/main/java/com/zhangjiajie/generator/config/`:
 
 ### 1. MyBatisPlusCodeGenerator
 Generates complete Entity, Mapper, Service, Controller from database tables.
@@ -492,7 +520,7 @@ public class ProductController extends BaseController<ProductService, Product> {
 When starting from a database table, use generators to bootstrap the module:
 ```bash
 # Run generator main methods directly or create a utility script
-java -cp target/classes com.yushuang.demo.generator.MyBatisPlusCodeGenerator
+java -cp target/classes com.zhangjiajie.generator.MyBatisPlusCodeGenerator
 ```
 
 ### Adding Custom Business Logic
