@@ -1,6 +1,7 @@
 package com.yushuang.demo.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.yushuang.demo.dto.RoleWithPermissionsDTO;
 import com.yushuang.demo.entity.Role;
 
 import java.util.List;
@@ -27,6 +28,11 @@ public interface RoleService extends IService<Role> {
      * 根据用户ID查询角色列表
      */
     List<Role> getRolesByUserId(Long userId);
+
+    /**
+     * 获取所有角色及其权限数量
+     */
+    List<RoleWithPermissionsDTO> getRolesWithPermissionCount();
 
     /**
      * 检查角色编码是否存在

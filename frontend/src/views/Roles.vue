@@ -356,8 +356,8 @@ const loadData = async () => {
     const response = await roleApi.getRoleList()
     tableData.value = (response.data || []).map(item => ({
       ...item,
-      statusLoading: false,
-      permissionCount: Math.floor(Math.random() * 20) + 5 // 模拟数据
+      statusLoading: false
+      // permissionCount 现在从后端获取，无需模拟数据
     }))
   } catch (error) {
     console.error('加载数据失败:', error)

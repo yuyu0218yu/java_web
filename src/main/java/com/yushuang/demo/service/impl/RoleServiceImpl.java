@@ -2,6 +2,7 @@ package com.yushuang.demo.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yushuang.demo.dto.RoleWithPermissionsDTO;
 import com.yushuang.demo.entity.Role;
 import com.yushuang.demo.mapper.RoleMapper;
 import com.yushuang.demo.service.RoleService;
@@ -50,6 +51,11 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
             return List.of();
         }
         return roleMapper.selectRolesByUserId(userId);
+    }
+
+    @Override
+    public List<RoleWithPermissionsDTO> getRolesWithPermissionCount() {
+        return roleMapper.selectRolesWithPermissionCount();
     }
 
     @Override

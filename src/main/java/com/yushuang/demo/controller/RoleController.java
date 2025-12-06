@@ -1,6 +1,7 @@
 package com.yushuang.demo.controller;
 
 import com.yushuang.demo.common.Result;
+import com.yushuang.demo.dto.RoleWithPermissionsDTO;
 import com.yushuang.demo.entity.Role;
 import com.yushuang.demo.service.MenuService;
 import com.yushuang.demo.service.RoleService;
@@ -28,10 +29,21 @@ public class RoleController {
     private final MenuService menuService;
 
     /**
-     * 获取启用的角色列表
+     * 获取启用的角色列表（包含权限数量）
      */
     @GetMapping
-    @Operation(summary = "获取角色列表", description = "返回所有启用状态的角色")
+    @Operation(summary = "获取角色列表", description = "返回所有角色及其权限数量")
+    @PreAuthorize("hasAuthority('role:view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    public Result<List<RoleWithPermissionsDTO>> listRolesWithPermissions() {
+        List<RoleWithPermissionsDTO> roles = roleService.getRolesWithPermissionCount();
+        return Result.success(roles);
+    }
+
+    /**
+     * 获取启用的角色列表（简单版本，不含权限数量）
+     */
+    @GetMapping("/simple")
+    @Operation(summary = "获取角色列表（简单版本）", description = "返回所有启用状态的角色，不含权限数量")
     @PreAuthorize("hasAuthority('role:view') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     public Result<List<Role>> listEnabledRoles() {
         List<Role> roles = roleService.getEnabledRoles();

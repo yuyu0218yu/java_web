@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(Select-Object -First 30 -ExpandProperty FullName)",
-      "Bash(ls src/main/java/com/yushuang/demo/util/*.java)"
+      "Bash(ls src/main/java/com/yushuang/demo/util/*.java)",
+      "Bash(mvn clean compile:*)"
     ],
     "deny": [],
     "ask": []

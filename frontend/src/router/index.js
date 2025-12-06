@@ -23,7 +23,7 @@ const routes = [
         path: 'welcome',
         name: 'Welcome',
         component: () => import('@/views/Welcome.vue'),
-        meta: { title: '欢迎页', requiresAuth: false }
+        meta: { title: '欢迎页', requiresAuth: true }
       },
       {
         path: 'dashboard',
