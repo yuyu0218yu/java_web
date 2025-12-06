@@ -95,29 +95,30 @@ public class GeneratorServiceImpl implements GeneratorService {
         String packagePath = basePackage.replace(".", "/");
         String basePath = outputPath + "/" + packagePath;
         
+        boolean overwrite = config.isOverwrite();
+        
         try {
             if (Boolean.TRUE.equals(options.getGenerateEntity())) {
-                String code = templateEngine.render("entity.ftl", dataModel);
                 String filePath = basePath + "/entity/" + className + ".java";
-                templateEngine.renderToFile("entity.ftl", dataModel, filePath);
+                templateEngine.renderToFile("entity.ftl", dataModel, filePath, overwrite);
             }
             if (Boolean.TRUE.equals(options.getGenerateMapper())) {
                 String mapperPath = basePath + "/mapper/" + className + "Mapper.java";
-                templateEngine.renderToFile("mapper.ftl", dataModel, mapperPath);
+                templateEngine.renderToFile("mapper.ftl", dataModel, mapperPath, overwrite);
                 
                 String xmlPath = config.getMapperXmlPath() + "/" + className + "Mapper.xml";
-                templateEngine.renderToFile("mapperXml.ftl", dataModel, xmlPath);
+                templateEngine.renderToFile("mapperXml.ftl", dataModel, xmlPath, overwrite);
             }
             if (Boolean.TRUE.equals(options.getGenerateService())) {
                 String servicePath = basePath + "/service/" + className + "Service.java";
-                templateEngine.renderToFile("service.ftl", dataModel, servicePath);
+                templateEngine.renderToFile("service.ftl", dataModel, servicePath, overwrite);
                 
                 String implPath = basePath + "/service/impl/" + className + "ServiceImpl.java";
-                templateEngine.renderToFile("serviceImpl.ftl", dataModel, implPath);
+                templateEngine.renderToFile("serviceImpl.ftl", dataModel, implPath, overwrite);
             }
             if (Boolean.TRUE.equals(options.getGenerateController())) {
                 String controllerPath = basePath + "/controller/" + className + "Controller.java";
-                templateEngine.renderToFile("controller.ftl", dataModel, controllerPath);
+                templateEngine.renderToFile("controller.ftl", dataModel, controllerPath, overwrite);
             }
             
             log.info("代码生成成功：{}", className);

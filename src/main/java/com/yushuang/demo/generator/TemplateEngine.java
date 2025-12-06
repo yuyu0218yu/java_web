@@ -29,6 +29,10 @@ public class TemplateEngine {
             "templates/generator"
         );
         configuration.setDefaultEncoding("UTF-8");
+        
+        // 模板缓存配置
+        configuration.setCacheStorage(new freemarker.cache.MruCacheStorage(20, 250));
+        configuration.setTemplateUpdateDelayMilliseconds(3600000); // 1小时检查一次更新
     }
 
     /**
@@ -57,9 +61,29 @@ public class TemplateEngine {
      * @param outputFile   输出文件路径
      */
     public void renderToFile(String templateName, Map<String, Object> dataModel, String outputFile) {
+        renderToFile(templateName, dataModel, outputFile, true);
+    }
+
+    /**
+     * 渲染模板并写入文件（带覆盖控制）
+     *
+     * @param templateName 模板名称
+     * @param dataModel    数据模型
+     * @param outputFile   输出文件路径
+     * @param overwrite    是否覆盖已存在文件
+     */
+    public void renderToFile(String templateName, Map<String, Object> dataModel, 
+                             String outputFile, boolean overwrite) {
         try {
-            // 确保目录存在
             File file = new File(outputFile);
+            
+            // 检查文件是否存在
+            if (file.exists() && !overwrite) {
+                log.warn("文件已存在，跳过生成: {}", outputFile);
+                return;
+            }
+            
+            // 确保目录存在
             File parent = file.getParentFile();
             if (!parent.exists()) {
                 parent.mkdirs();
@@ -76,6 +100,13 @@ public class TemplateEngine {
         } catch (IOException | TemplateException e) {
             throw GeneratorException.writeFileFailed(outputFile, e);
         }
+    }
+
+    /**
+     * 检查文件是否存在
+     */
+    public boolean fileExists(String filePath) {
+        return new File(filePath).exists();
     }
 
     /**
