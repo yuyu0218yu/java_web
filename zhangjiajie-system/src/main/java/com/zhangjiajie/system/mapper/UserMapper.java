@@ -3,6 +3,7 @@ package com.zhangjiajie.system.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.zhangjiajie.system.dto.UserWithRole;
 import com.zhangjiajie.system.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -23,10 +24,11 @@ public interface UserMapper extends BaseMapper<User> {
      * 分页查询用户列表（包含角色信息）
      * 复杂JOIN查询，无法用LambdaQueryWrapper替代
      */
-    @Select("SELECT u.*, r.role_name, r.role_code " +
+    @Select("SELECT u.*, r.role_name, r.role_code, d.dept_name " +
             "FROM sys_user u " +
             "LEFT JOIN sys_user_role ur ON u.id = ur.user_id AND ur.deleted = 0 " +
             "LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0 " +
+            "LEFT JOIN sys_dept d ON u.dept_id = d.id AND d.deleted = 0 " +
             "WHERE u.deleted = 0 " +
             "ORDER BY u.create_time DESC")
     IPage<UserWithRole> selectUserPageWithRole(Page<UserWithRole> page);
@@ -36,12 +38,13 @@ public interface UserMapper extends BaseMapper<User> {
      * 复杂JOIN查询，无法用LambdaQueryWrapper替代
      */
     @Select("SELECT u.id, u.username, u.password, u.salt, u.real_name, u.nickname, " +
-            "u.email, u.phone, u.avatar, u.gender, u.birthday, u.status, " +
+            "u.email, u.phone, u.avatar, u.dept_id, u.gender, u.birthday, u.status, " +
             "u.last_login_time, u.last_login_ip, u.create_time, u.update_time, " +
-            "u.deleted, u.remark, r.role_name, r.role_code " +
+            "u.deleted, u.remark, r.role_name, r.role_code, d.dept_name " +
             "FROM sys_user u " +
             "LEFT JOIN sys_user_role ur ON u.id = ur.user_id AND ur.deleted = 0 " +
             "LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0 " +
+            "LEFT JOIN sys_dept d ON u.dept_id = d.id AND d.deleted = 0 " +
             "WHERE u.deleted = 0 AND u.username = #{username}")
     UserWithRole selectUserWithRoleByUsername(@Param("username") String username);
 
@@ -70,28 +73,4 @@ public interface UserMapper extends BaseMapper<User> {
      */
     @org.apache.ibatis.annotations.Update("UPDATE sys_user SET last_login_time = NOW(), last_login_ip = #{loginIp} WHERE id = #{userId}")
     int updateLastLoginInfo(@Param("userId") Long userId, @Param("loginIp") String loginIp);
-
-    /**
-     * 用户角色信息VO
-     */
-    class UserWithRole extends User {
-        private String roleName;
-        private String roleCode;
-
-        public String getRoleName() {
-            return roleName;
-        }
-
-        public void setRoleName(String roleName) {
-            this.roleName = roleName;
-        }
-
-        public String getRoleCode() {
-            return roleCode;
-        }
-
-        public void setRoleCode(String roleCode) {
-            this.roleCode = roleCode;
-        }
-    }
 }

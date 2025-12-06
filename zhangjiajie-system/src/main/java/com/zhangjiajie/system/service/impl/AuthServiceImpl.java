@@ -2,8 +2,9 @@ package com.zhangjiajie.system.service.impl;
 
 import com.zhangjiajie.system.dto.LoginRequest;
 import com.zhangjiajie.system.dto.LoginResponse;
-import com.zhangjiajie.system.dto.UserInfo;
 import com.zhangjiajie.system.dto.RegisterRequest;
+import com.zhangjiajie.system.dto.UserInfo;
+import com.zhangjiajie.system.dto.UserWithRole;
 import com.zhangjiajie.system.entity.User;
 import com.zhangjiajie.system.entity.Role;
 import com.zhangjiajie.system.entity.UserRole;
@@ -57,7 +58,7 @@ public class AuthServiceImpl implements AuthService {
 
         try {
             // 加载用户信息并验证密码（包含角色信息）
-            UserMapper.UserWithRole user = userMapper.selectUserWithRoleByUsername(loginRequest.getUsername());
+            UserWithRole user = userMapper.selectUserWithRoleByUsername(loginRequest.getUsername());
             if (user == null) {
                 throw new RuntimeException("用户不存在");
             }
@@ -243,7 +244,7 @@ public class AuthServiceImpl implements AuthService {
     /**
      * 将UserWithRole实体转换为UserInfo DTO（包含角色信息）
      */
-    private UserInfo convertToUserInfoWithRole(UserMapper.UserWithRole userWithRole) {
+    private UserInfo convertToUserInfoWithRole(UserWithRole userWithRole) {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(userWithRole.getId());
         userInfo.setUsername(userWithRole.getUsername());

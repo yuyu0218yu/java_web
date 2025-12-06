@@ -78,6 +78,12 @@ public class User implements Serializable {
     private String avatar;
 
     /**
+     * 结构ID
+     */
+    @TableField("dept_id")
+    private Long deptId;
+
+    /**
      * 性别：0-未知，1-男，2-女
      */
     @TableField("gender")

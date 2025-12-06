@@ -2,6 +2,7 @@ package com.zhangjiajie.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zhangjiajie.common.util.Assert;
 import com.zhangjiajie.system.entity.Permission;
 import com.zhangjiajie.system.mapper.PermissionMapper;
 import com.zhangjiajie.system.service.PermissionService;
@@ -78,9 +79,7 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     @Override
     public Permission getPermissionById(Long id) {
         Permission permission = getById(id);
-        if (permission == null) {
-            throw new RuntimeException("权限不存在");
-        }
+        Assert.found(permission, "权限不存在");
         return permission;
     }
 
@@ -109,14 +108,10 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     @Transactional(rollbackFor = Exception.class)
     public void createPermission(Permission permission) {
         // 检查权限编码是否重复
-        if (checkPermissionCodeExists(permission.getPermissionCode(), null)) {
-            throw new RuntimeException("权限编码已存在");
-        }
+        Assert.isFalse(checkPermissionCodeExists(permission.getPermissionCode(), null), "权限编码已存在");
 
         boolean result = save(permission);
-        if (!result) {
-            throw new RuntimeException("创建权限失败");
-        }
+        Assert.isTrue(result, "创建权限失败");
 
         log.info("创建权限成功: {}", permission.getPermissionName());
     }
@@ -126,20 +121,14 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     public void updatePermission(Long id, Permission permission) {
         // 检查权限是否存在
         Permission existPermission = getById(id);
-        if (existPermission == null) {
-            throw new RuntimeException("权限不存在");
-        }
+        Assert.found(existPermission, "权限不存在");
 
         // 检查权限编码是否重复
-        if (checkPermissionCodeExists(permission.getPermissionCode(), id)) {
-            throw new RuntimeException("权限编码已存在");
-        }
+        Assert.isFalse(checkPermissionCodeExists(permission.getPermissionCode(), id), "权限编码已存在");
 
         permission.setId(id);
         boolean result = updateById(permission);
-        if (!result) {
-            throw new RuntimeException("更新权限失败");
-        }
+        Assert.isTrue(result, "更新权限失败");
 
         log.info("更新权限成功: {}", permission.getPermissionName());
     }
@@ -149,20 +138,14 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     public void deletePermission(Long id) {
         // 检查权限是否存在
         Permission permission = getById(id);
-        if (permission == null) {
-            throw new RuntimeException("权限不存在");
-        }
+        Assert.found(permission, "权限不存在");
 
         // 检查是否有子权限
         List<Permission> children = getPermissionsByParentId(id);
-        if (!children.isEmpty()) {
-            throw new RuntimeException("该权限下有子权限，无法删除");
-        }
+        Assert.isTrue(children.isEmpty(), "该权限下有子权限，无法删除");
 
         boolean result = removeById(id);
-        if (!result) {
-            throw new RuntimeException("删除权限失败");
-        }
+        Assert.isTrue(result, "删除权限失败");
 
         log.info("删除权限成功: {}", permission.getPermissionName());
     }

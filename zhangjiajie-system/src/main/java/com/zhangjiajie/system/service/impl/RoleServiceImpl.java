@@ -2,6 +2,7 @@ package com.zhangjiajie.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zhangjiajie.common.util.Assert;
 import com.zhangjiajie.system.dto.RoleWithPermissionsDTO;
 import com.zhangjiajie.system.entity.Role;
 import com.zhangjiajie.system.mapper.RoleMapper;
@@ -74,14 +75,12 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean createRole(Role role) {
-        if (role == null || !StringUtils.hasText(role.getRoleName()) || !StringUtils.hasText(role.getRoleCode())) {
-            throw new RuntimeException("角色名称和编码不能为空");
-        }
+        Assert.notNull(role, "角色信息不能为空");
+        Assert.notEmpty(role.getRoleName(), "角色名称不能为空");
+        Assert.notEmpty(role.getRoleCode(), "角色编码不能为空");
 
         // 检查角色编码是否重复
-        if (checkRoleCodeExists(role.getRoleCode(), null)) {
-            throw new RuntimeException("角色编码已存在");
-        }
+        Assert.isFalse(checkRoleCodeExists(role.getRoleCode(), null), "角色编码已存在");
 
         // 设置默认值
         if (role.getStatus() == null) {
@@ -101,20 +100,16 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateRole(Long id, Role role) {
-        if (id == null || role == null) {
-            throw new RuntimeException("参数不能为空");
-        }
+        Assert.notNull(id, "ID不能为空");
+        Assert.notNull(role, "角色信息不能为空");
 
         Role existingRole = getById(id);
-        if (existingRole == null) {
-            throw new RuntimeException("角色不存在");
-        }
+        Assert.found(existingRole, "角色不存在");
 
         // 检查角色编码是否重复
         if (StringUtils.hasText(role.getRoleCode()) && 
-            !role.getRoleCode().equals(existingRole.getRoleCode()) &&
-            checkRoleCodeExists(role.getRoleCode(), id)) {
-            throw new RuntimeException("角色编码已存在");
+            !role.getRoleCode().equals(existingRole.getRoleCode())) {
+            Assert.isFalse(checkRoleCodeExists(role.getRoleCode(), id), "角色编码已存在");
         }
 
         role.setId(id);
@@ -128,19 +123,13 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteRole(Long id) {
-        if (id == null) {
-            throw new RuntimeException("角色ID不能为空");
-        }
+        Assert.notNull(id, "角色ID不能为空");
 
         // 不允许删除超级管理员角色
-        if (id == 1L) {
-            throw new RuntimeException("不能删除超级管理员角色");
-        }
+        Assert.isFalse(id == 1L, "不能删除超级管理员角色");
 
         Role role = getById(id);
-        if (role == null) {
-            throw new RuntimeException("角色不存在");
-        }
+        Assert.found(role, "角色不存在");
 
         boolean result = removeById(id);
         if (result) {

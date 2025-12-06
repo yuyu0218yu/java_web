@@ -1,0 +1,84 @@
+/**
+ * ${functionName}接口
+ * @author ${author}
+ * @since ${datetime}
+ */
+import request from '@/utils/request'
+
+export const ${businessName}Api = {
+  /**
+   * 分页查询${functionName}
+   */
+  getPage(params) {
+    return request({
+      url: '/api/${businessName}/page',
+      method: 'get',
+      params
+    })
+  },
+
+  /**
+   * 获取${functionName}列表
+   */
+  getList() {
+    return request({
+      url: '/api/${businessName}/list',
+      method: 'get'
+    })
+  },
+
+  /**
+   * 根据ID获取${functionName}
+   */
+  getById(id) {
+    return request({
+      url: `/api/${businessName}/${id}`,
+      method: 'get'
+    })
+  },
+
+  /**
+   * 创建${functionName}
+   */
+  create(data) {
+    return request({
+      url: '/api/${businessName}',
+      method: 'post',
+      data
+    })
+  },
+
+  /**
+   * 更新${functionName}
+   */
+  update(id, data) {
+    return request({
+      url: `/api/${businessName}/${id}`,
+      method: 'put',
+      data
+    })
+  },
+
+  /**
+   * 删除${functionName}
+   */
+  delete(id) {
+    return request({
+      url: `/api/${businessName}/${id}`,
+      method: 'delete'
+    })
+  },
+
+  /**
+   * 批量删除${functionName}
+   */
+  deleteBatch(ids) {
+    return request({
+      url: '/api/${businessName}/batch',
+      method: 'delete',
+      data: ids
+    })
+  }
+}
+
+export default ${businessName}Api

@@ -1,0 +1,137 @@
+package ${packageName}.controller;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.zhangjiajie.common.core.Result;
+import ${packageName}.entity.${ClassName};
+import ${packageName}.service.${ClassName}Service;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
+import java.util.List;
+
+/**
+ * ${functionName}控制器
+ *
+ * @author ${author}
+ * @since ${datetime}
+ */
+@Slf4j
+@RestController
+@RequestMapping("/api/${businessName}")
+@RequiredArgsConstructor
+@Tag(name = "${functionName}管理", description = "${functionName}相关接口")
+public class ${ClassName}Controller {
+
+    private final ${ClassName}Service ${className}Service;
+
+    /**
+     * 分页查询${functionName}列表
+     */
+    @GetMapping("/page")
+    @PreAuthorize("hasAuthority('${businessName}:view')")
+    @Operation(summary = "分页查询${functionName}列表")
+    public Result<IPage<${ClassName}>> getPage(
+            @RequestParam(defaultValue = "1") Integer current,
+            @RequestParam(defaultValue = "10") Integer size
+#foreach($column in $queryColumns)
+            , @RequestParam(required = false) $column.javaType $column.javaField
+#end
+    ) {
+        Page<${ClassName}> page = new Page<>(current, size);
+        LambdaQueryWrapper<${ClassName}> wrapper = new LambdaQueryWrapper<>();
+#foreach($column in $queryColumns)
+#if($column.queryType == 'LIKE')
+        if (StringUtils.hasText($column.javaField)) {
+            wrapper.like(${ClassName}::get${column.capJavaField}, $column.javaField);
+        }
+#elseif($column.queryType == 'EQ')
+        if ($column.javaField != null) {
+            wrapper.eq(${ClassName}::get${column.capJavaField}, $column.javaField);
+        }
+#end
+#end
+        wrapper.orderByDesc(${ClassName}::getCreateTime);
+        IPage<${ClassName}> result = ${className}Service.page(page, wrapper);
+        return Result.success(result);
+    }
+
+    /**
+     * 获取${functionName}列表
+     */
+    @GetMapping("/list")
+    @PreAuthorize("hasAuthority('${businessName}:view')")
+    @Operation(summary = "获取${functionName}列表")
+    public Result<List<${ClassName}>> getList() {
+        List<${ClassName}> list = ${className}Service.list();
+        return Result.success(list);
+    }
+
+    /**
+     * 根据ID获取${functionName}详情
+     */
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('${businessName}:view')")
+    @Operation(summary = "根据ID获取${functionName}详情")
+    public Result<${ClassName}> getById(
+            @PathVariable @Parameter(description = "${functionName}ID") Long id) {
+        ${ClassName} ${className} = ${className}Service.getById(id);
+        return Result.success(${className});
+    }
+
+    /**
+     * 新增${functionName}
+     */
+    @PostMapping
+    @PreAuthorize("hasAuthority('${businessName}:create')")
+    @Operation(summary = "新增${functionName}")
+    public Result<Void> create(@Valid @RequestBody ${ClassName} ${className}) {
+        ${className}Service.save(${className});
+        return Result.success("创建成功");
+    }
+
+    /**
+     * 更新${functionName}
+     */
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('${businessName}:update')")
+    @Operation(summary = "更新${functionName}")
+    public Result<Void> update(
+            @PathVariable @Parameter(description = "${functionName}ID") Long id,
+            @Valid @RequestBody ${ClassName} ${className}) {
+        ${className}.setId(id);
+        ${className}Service.updateById(${className});
+        return Result.success("更新成功");
+    }
+
+    /**
+     * 删除${functionName}
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('${businessName}:delete')")
+    @Operation(summary = "删除${functionName}")
+    public Result<Void> delete(
+            @PathVariable @Parameter(description = "${functionName}ID") Long id) {
+        ${className}Service.removeById(id);
+        return Result.success("删除成功");
+    }
+
+    /**
+     * 批量删除${functionName}
+     */
+    @DeleteMapping("/batch")
+    @PreAuthorize("hasAuthority('${businessName}:delete')")
+    @Operation(summary = "批量删除${functionName}")
+    public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
+        ${className}Service.removeByIds(ids);
+        return Result.success("批量删除成功");
+    }
+}

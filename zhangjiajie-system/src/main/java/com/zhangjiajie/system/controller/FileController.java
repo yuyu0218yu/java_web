@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhangjiajie.common.annotation.AuditLog;
 import com.zhangjiajie.common.core.Result;
+import com.zhangjiajie.common.security.SecurityUtils;
 import com.zhangjiajie.system.entity.FileInfo;
-import com.zhangjiajie.common.exception.ResourceNotFoundException;
 import com.zhangjiajie.system.service.FileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,8 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,9 +59,8 @@ public class FileController {
                                      HttpServletRequest request) {
         try {
             // 获取当前用户信息
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = authentication.getName();
-            Long userId = getUserIdFromAuthentication(authentication);
+            String username = SecurityUtils.requireUsername();
+            Long userId = SecurityUtils.requireUserId();
 
             FileInfo fileInfo = fileService.uploadFile(file, userId, username);
             return Result.success("文件上传成功", fileInfo);
@@ -85,9 +82,8 @@ public class FileController {
                                             HttpServletRequest request) {
         try {
             // 获取当前用户信息
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = authentication.getName();
-            Long userId = getUserIdFromAuthentication(authentication);
+            String username = SecurityUtils.requireUsername();
+            Long userId = SecurityUtils.requireUserId();
 
             List<FileInfo> fileInfos = fileService.uploadFiles(files, userId, username);
             return Result.success("文件批量上传成功", fileInfos);
@@ -295,8 +291,7 @@ public class FileController {
     @AuditLog(operation = "获取文件统计", module = "文件管理")
     public Result<Map<String, Object>> getFileStatistics() {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Long userId = getUserIdFromAuthentication(authentication);
+            Long userId = SecurityUtils.requireUserId();
 
             Map<String, Object> statistics = fileService.getFileStatistics(userId);
             return Result.success(statistics);
@@ -359,12 +354,4 @@ public class FileController {
         }
     }
 
-    /**
-     * 从认证信息中获取用户ID
-     */
-    private Long getUserIdFromAuthentication(Authentication authentication) {
-        // 这里简化处理，实际应该从数据库或JWT中获取用户ID
-        // 现在返回一个默认值
-        return 1L; // 默认用户ID
-    }
 }

@@ -2,6 +2,7 @@ package com.zhangjiajie.system.controller;
 
 import com.zhangjiajie.common.annotation.AuditLog;
 import com.zhangjiajie.common.core.Result;
+import com.zhangjiajie.common.security.SecurityUtils;
 import com.zhangjiajie.system.dto.LoginRequest;
 import com.zhangjiajie.system.dto.LoginResponse;
 import com.zhangjiajie.system.dto.RegisterRequest;
@@ -15,8 +16,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -44,7 +43,7 @@ public class AuthController {
             return Result.success("登录成功", response);
         } catch (Exception e) {
             log.warn("登录失败: {}", e.getMessage());
-            return Result.error(401, "用户名或密码错误");
+            return Result.unauthorized("用户名或密码错误");
         }
     }
 
@@ -59,7 +58,7 @@ public class AuthController {
             return Result.success("注册成功");
         } catch (Exception e) {
             log.warn("注册失败: {}", e.getMessage());
-            return Result.error(400, e.getMessage());
+            return Result.paramError(e.getMessage());
         }
     }
 
@@ -71,14 +70,12 @@ public class AuthController {
     @AuditLog(operation = "获取用户信息", module = "认证管理")
     public Result<Object> getUserInfo() {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = authentication.getName();
-
+            String username = SecurityUtils.requireUsername();
             Object userInfo = authService.getUserInfo(username);
             return Result.success(userInfo);
         } catch (Exception e) {
             log.warn("获取用户信息失败: {}", e.getMessage());
-            return Result.error(401, "获取用户信息失败");
+            return Result.unauthorized("获取用户信息失败");
         }
     }
 
@@ -92,7 +89,7 @@ public class AuthController {
             return Result.success(authService.getCurrentUserProfile());
         } catch (Exception e) {
             log.warn("获取个人信息失败: {}", e.getMessage());
-            return Result.error(400, e.getMessage());
+            return Result.paramError(e.getMessage());
         }
     }
 
@@ -103,16 +100,14 @@ public class AuthController {
     @Operation(summary = "更新个人信息")
     public Result<Void> updateProfile(@Valid @RequestBody ProfileUpdateRequest request) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null) {
-                return Result.error(401, "未登录");
-            }
-            String username = authentication.getName();
+            String username = SecurityUtils.requireUsername();
             authService.updateCurrentUserProfile(username, request.getNickname(), request.getPhone(), request.getAvatar());
             return Result.success("更新成功");
+        } catch (IllegalStateException e) {
+            return Result.unauthorized("未登录");
         } catch (Exception e) {
             log.warn("更新个人信息失败: {}", e.getMessage());
-            return Result.error(400, e.getMessage());
+            return Result.paramError(e.getMessage());
         }
     }
 
@@ -123,16 +118,14 @@ public class AuthController {
     @Operation(summary = "修改密码")
     public Result<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null) {
-                return Result.error(401, "未登录");
-            }
-            String username = authentication.getName();
+            String username = SecurityUtils.requireUsername();
             authService.changePassword(username, request.getOldPassword(), request.getNewPassword());
             return Result.success("密码修改成功");
+        } catch (IllegalStateException e) {
+            return Result.unauthorized("未登录");
         } catch (Exception e) {
             log.warn("修改密码失败: {}", e.getMessage());
-            return Result.error(400, e.getMessage());
+            return Result.paramError(e.getMessage());
         }
     }
 
@@ -145,14 +138,14 @@ public class AuthController {
         try {
             String token = extractTokenFromRequest(request);
             if (token == null) {
-                return Result.error(401, "缺少Token");
+                return Result.unauthorized("缺少Token");
             }
 
             String newToken = authService.refreshToken(token);
             return Result.success("Token刷新成功", newToken);
         } catch (Exception e) {
             log.warn("刷新Token失败: {}", e.getMessage());
-            return Result.error(401, "Token刷新失败");
+            return Result.unauthorized("Token刷新失败");
         }
     }
 
@@ -164,9 +157,9 @@ public class AuthController {
     public Result<String> logout() {
         // 由于使用JWT，客户端删除token即可
         // 这里可以记录日志或进行其他清理操作
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            log.info("用户 {} 退出登录", authentication.getName());
+        String username = SecurityUtils.getUsername();
+        if (username != null) {
+            log.info("用户 {} 退出登录", username);
         }
         return Result.success("退出登录成功");
     }

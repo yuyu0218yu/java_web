@@ -254,6 +254,7 @@ CREATE TABLE `sys_user`  (
   `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '邮箱',
   `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '手机号',
   `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '头像URL',
+  `dept_id` bigint NULL DEFAULT NULL COMMENT '结构ID',
   `gender` tinyint NULL DEFAULT 0 COMMENT '性别：0-未知，1-男，2-女',
   `birthday` date NULL DEFAULT NULL COMMENT '生日',
   `status` tinyint NULL DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
@@ -264,14 +265,15 @@ CREATE TABLE `sys_user`  (
   `deleted` tinyint NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
   `remark` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `username`(`username` ASC) USING BTREE
+  UNIQUE INDEX `username`(`username` ASC) USING BTREE,
+  INDEX `idx_dept_id`(`dept_id` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 'admin', '$2a$10$jeHWtKljDN1X.HLBbexeFuUmfx/T0Ea6TjtAxicJ6my8HF3Frl83m', NULL, '系统管理员', '超级管理员', 'admin@example.com', '13800138000', NULL, 0, NULL, 1, NULL, NULL, '2025-12-05 17:59:19', '2025-12-05 20:00:47', 0, NULL);
-INSERT INTO `sys_user` VALUES (6, 'yushuang', '$2a$10$fXzw5k5bJGkiB7357Mk0Geey1pVBvN2ehHePLEBL9tGfsBoBPoWy2', NULL, NULL, NULL, '18888888@qq.com', NULL, NULL, 0, NULL, 0, NULL, NULL, '2025-12-05 20:50:23', '2025-12-05 21:06:49', 0, NULL);
+INSERT INTO `sys_user` VALUES (1, 'admin', '$2a$10$jeHWtKljDN1X.HLBbexeFuUmfx/T0Ea6TjtAxicJ6my8HF3Frl83m', NULL, '系统管理员', '超级管理员', 'admin@example.com', '13800138000', NULL, 1, 0, NULL, 1, NULL, NULL, '2025-12-05 17:59:19', '2025-12-05 20:00:47', 0, NULL);
+INSERT INTO `sys_user` VALUES (6, 'yushuang', '$2a$10$fXzw5k5bJGkiB7357Mk0Geey1pVBvN2ehHePLEBL9tGfsBoBPoWy2', NULL, NULL, NULL, '18888888@qq.com', NULL, NULL, NULL, 0, NULL, 0, NULL, NULL, '2025-12-05 20:50:23', '2025-12-05 21:06:49', 0, NULL);
 
 -- ----------------------------
 -- Table structure for sys_user_role
@@ -295,5 +297,99 @@ INSERT INTO `sys_user_role` VALUES (1, 1, 1, '2025-12-05 17:59:19', '2025-12-05 
 INSERT INTO `sys_user_role` VALUES (2, 4, 3, NULL, '2025-12-05 19:35:53', 0);
 INSERT INTO `sys_user_role` VALUES (3, 5, 3, NULL, '2025-12-05 19:38:34', 0);
 INSERT INTO `sys_user_role` VALUES (4, 6, 3, NULL, '2025-12-05 20:14:00', 0);
+
+-- ----------------------------
+-- Table structure for sys_dept
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_dept`;
+CREATE TABLE `sys_dept` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '结构ID',
+  `parent_id` bigint DEFAULT 0 COMMENT '父结构ID (0=根节点)',
+  `ancestors` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '祖先节点列表 (如: 0,1,2)',
+  `dept_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '结构名称',
+  `dept_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '结构编码',
+  `leader` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '负责人',
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '联系电话',
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '邮箱',
+  `sort_order` int DEFAULT 0 COMMENT '排序',
+  `status` tinyint DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` tinyint DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_dept_code` (`dept_code`)
+) ENGINE=InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='结构表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sys_dept
+-- ----------------------------
+INSERT INTO `sys_dept` VALUES (1, 0, '0', '张家界旅游公司', 'HQ', '总经理', '0744-8888888', 'admin@zjj.com', 1, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, '总公司');
+INSERT INTO `sys_dept` VALUES (2, 1, '0,1', '技术部', 'TECH', '技术总监', NULL, NULL, 1, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
+INSERT INTO `sys_dept` VALUES (3, 1, '0,1', '产品部', 'PRODUCT', '产品总监', NULL, NULL, 2, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
+INSERT INTO `sys_dept` VALUES (4, 1, '0,1', '运营部', 'OPERATION', '运营总监', NULL, NULL, 3, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
+INSERT INTO `sys_dept` VALUES (5, 2, '0,1,2', '后端组', 'TECH_BE', '后端负责人', NULL, NULL, 1, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
+INSERT INTO `sys_dept` VALUES (6, 2, '0,1,2', '前端组', 'TECH_FE', '前端负责人', NULL, NULL, 2, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
+
+-- ----------------------------
+-- Table structure for gen_table (代码生成业务表)
+-- ----------------------------
+DROP TABLE IF EXISTS `gen_table`;
+CREATE TABLE `gen_table` (
+    `table_id`          BIGINT          NOT NULL AUTO_INCREMENT    COMMENT '编号',
+    `table_name`        VARCHAR(200)    DEFAULT ''                 COMMENT '表名称',
+    `table_comment`     VARCHAR(500)    DEFAULT ''                 COMMENT '表描述',
+    `sub_table_name`    VARCHAR(64)     DEFAULT NULL               COMMENT '关联子表的表名',
+    `sub_table_fk_name` VARCHAR(64)     DEFAULT NULL               COMMENT '子表关联的外键名',
+    `class_name`        VARCHAR(100)    DEFAULT ''                 COMMENT '实体类名称',
+    `tpl_category`      VARCHAR(200)    DEFAULT 'crud'             COMMENT '使用的模板（crud单表 tree树表 sub主子表）',
+    `tpl_web_type`      VARCHAR(30)     DEFAULT ''                 COMMENT '前端模板类型（element-ui element-plus）',
+    `package_name`      VARCHAR(100)                               COMMENT '生成包路径',
+    `module_name`       VARCHAR(30)                                COMMENT '生成模块名',
+    `business_name`     VARCHAR(30)                                COMMENT '生成业务名',
+    `function_name`     VARCHAR(50)                                COMMENT '生成功能名',
+    `function_author`   VARCHAR(50)                                COMMENT '生成功能作者',
+    `gen_type`          CHAR(1)         DEFAULT '0'                COMMENT '生成代码方式（0zip压缩包 1自定义路径）',
+    `gen_path`          VARCHAR(200)    DEFAULT '/'                COMMENT '生成路径（不填默认项目路径）',
+    `options`           VARCHAR(1000)                              COMMENT '其它生成选项（JSON格式）',
+    `create_by`         VARCHAR(64)     DEFAULT ''                 COMMENT '创建者',
+    `create_time`       DATETIME                                   COMMENT '创建时间',
+    `update_by`         VARCHAR(64)     DEFAULT ''                 COMMENT '更新者',
+    `update_time`       DATETIME                                   COMMENT '更新时间',
+    `remark`            VARCHAR(500)    DEFAULT NULL               COMMENT '备注',
+    PRIMARY KEY (`table_id`),
+    INDEX `idx_gen_table_name` (`table_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 COMMENT='代码生成业务表';
+
+-- ----------------------------
+-- Table structure for gen_table_column (代码生成业务表字段)
+-- ----------------------------
+DROP TABLE IF EXISTS `gen_table_column`;
+CREATE TABLE `gen_table_column` (
+    `column_id`         BIGINT          NOT NULL AUTO_INCREMENT    COMMENT '编号',
+    `table_id`          BIGINT                                     COMMENT '归属表编号',
+    `column_name`       VARCHAR(200)                               COMMENT '列名称',
+    `column_comment`    VARCHAR(500)                               COMMENT '列描述',
+    `column_type`       VARCHAR(100)                               COMMENT '列类型',
+    `java_type`         VARCHAR(500)                               COMMENT 'JAVA类型',
+    `java_field`        VARCHAR(200)                               COMMENT 'JAVA字段名',
+    `is_pk`             CHAR(1)                                    COMMENT '是否主键（1是）',
+    `is_increment`      CHAR(1)                                    COMMENT '是否自增（1是）',
+    `is_required`       CHAR(1)                                    COMMENT '是否必填（1是）',
+    `is_insert`         CHAR(1)                                    COMMENT '是否为插入字段（1是）',
+    `is_edit`           CHAR(1)                                    COMMENT '是否编辑字段（1是）',
+    `is_list`           CHAR(1)                                    COMMENT '是否列表字段（1是）',
+    `is_query`          CHAR(1)                                    COMMENT '是否查询字段（1是）',
+    `query_type`        VARCHAR(200)    DEFAULT 'EQ'               COMMENT '查询方式（等于、不等于、大于、小于、范围）',
+    `html_type`         VARCHAR(200)                               COMMENT '显示类型（文本框、文本域、下拉框、复选框、单选框、日期控件）',
+    `dict_type`         VARCHAR(200)    DEFAULT ''                 COMMENT '字典类型',
+    `sort`              INT                                        COMMENT '排序',
+    `create_by`         VARCHAR(64)     DEFAULT ''                 COMMENT '创建者',
+    `create_time`       DATETIME                                   COMMENT '创建时间',
+    `update_by`         VARCHAR(64)     DEFAULT ''                 COMMENT '更新者',
+    `update_time`       DATETIME                                   COMMENT '更新时间',
+    PRIMARY KEY (`column_id`),
+    INDEX `idx_gen_column_table_id` (`table_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 COMMENT='代码生成业务表字段';
 
 SET FOREIGN_KEY_CHECKS = 1;

@@ -10,7 +10,7 @@ import com.zhangjiajie.system.dto.ResetPasswordRequest;
 import com.zhangjiajie.system.dto.UpdateUserRequest;
 import com.zhangjiajie.system.dto.UpdateUserStatusRequest;
 import com.zhangjiajie.system.entity.User;
-import com.zhangjiajie.system.mapper.UserMapper.UserWithRole;
+import com.zhangjiajie.system.dto.UserWithRole;
 import com.zhangjiajie.system.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

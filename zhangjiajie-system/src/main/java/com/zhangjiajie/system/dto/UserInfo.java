@@ -22,5 +22,7 @@ public class UserInfo {
     private String avatar;
     private String roleName;
     private String roleCode;
+    private Long deptId;
+    private String deptName;
     private LocalDateTime createdAt;
 }

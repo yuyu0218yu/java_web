@@ -1,6 +1,7 @@
 package com.zhangjiajie.system.controller;
 
 import com.zhangjiajie.common.core.Result;
+import com.zhangjiajie.common.security.SecurityUtils;
 import com.zhangjiajie.system.entity.Menu;
 import com.zhangjiajie.system.service.MenuService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,8 +9,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -29,7 +28,6 @@ import java.util.List;
 public class MenuController {
 
     private final MenuService menuService;
-    private final com.zhangjiajie.system.mapper.UserMapper userMapper;
 
     /**
      * 获取当前用户的菜单树（用于动态渲染侧边栏）
@@ -37,15 +35,11 @@ public class MenuController {
     @GetMapping("/user")
     @Operation(summary = "获取当前用户菜单树", description = "根据当前登录用户的角色获取可访问的菜单")
     public Result<List<Menu>> getUserMenus() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        
-        var user = userMapper.selectByUsername(username);
-        if (user == null) {
-            return Result.error("用户不存在");
+        Long userId = SecurityUtils.getUserId();
+        if (userId == null) {
+            return Result.unauthorized("未登录");
         }
-        
-        List<Menu> menus = menuService.getUserMenuTree(user.getId());
+        List<Menu> menus = menuService.getUserMenuTree(userId);
         return Result.success(menus);
     }
 
@@ -55,15 +49,11 @@ public class MenuController {
     @GetMapping("/user/permissions")
     @Operation(summary = "获取当前用户权限列表")
     public Result<List<String>> getUserPermissions() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        
-        var user = userMapper.selectByUsername(username);
-        if (user == null) {
-            return Result.error("用户不存在");
+        Long userId = SecurityUtils.getUserId();
+        if (userId == null) {
+            return Result.unauthorized("未登录");
         }
-        
-        List<String> permissions = menuService.getUserPermissions(user.getId());
+        List<String> permissions = menuService.getUserPermissions(userId);
         return Result.success(permissions);
     }
 

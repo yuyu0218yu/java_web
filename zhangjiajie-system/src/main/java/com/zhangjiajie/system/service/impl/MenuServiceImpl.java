@@ -1,7 +1,7 @@
 package com.zhangjiajie.system.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zhangjiajie.common.util.TreeUtil;
 import com.zhangjiajie.system.entity.Menu;
 import com.zhangjiajie.system.entity.RoleMenu;
 import com.zhangjiajie.system.mapper.MenuMapper;
@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -82,32 +81,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Override
     public List<Menu> buildMenuTree(List<Menu> menus) {
-        List<Menu> result = new ArrayList<>();
-        List<Long> menuIds = menus.stream().map(Menu::getId).collect(Collectors.toList());
-        
-        for (Menu menu : menus) {
-            // 找到顶级菜单（parent_id为0或parent_id不在当前列表中）
-            if (menu.getParentId() == null || menu.getParentId() == 0 || !menuIds.contains(menu.getParentId())) {
-                buildChildren(menu, menus);
-                result.add(menu);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * 递归构建子菜单
-     */
-    private void buildChildren(Menu parent, List<Menu> allMenus) {
-        List<Menu> children = allMenus.stream()
-                .filter(m -> parent.getId().equals(m.getParentId()))
-                .collect(Collectors.toList());
-        
-        if (!children.isEmpty()) {
-            parent.setChildren(children);
-            for (Menu child : children) {
-                buildChildren(child, allMenus);
-            }
-        }
+        // 使用TreeUtil构建树形结构
+        return TreeUtil.buildLongTree(menus, Menu::getId, Menu::getParentId, Menu::setChildren);
     }
 }

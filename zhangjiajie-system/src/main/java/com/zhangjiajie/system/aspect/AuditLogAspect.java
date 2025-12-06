@@ -2,6 +2,7 @@ package com.zhangjiajie.system.aspect;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zhangjiajie.common.annotation.AuditLog;
+import com.zhangjiajie.common.security.SecurityUtils;
 import com.zhangjiajie.system.entity.OperationLog;
 import com.zhangjiajie.system.mapper.OperationLogMapper;
 import com.zhangjiajie.common.util.IpUtil;
@@ -14,8 +15,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -83,9 +82,9 @@ public class AuditLogAspect {
     }
 
     private void setUserInfo(OperationLog operationLog) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            operationLog.setUsername(authentication.getName());
+        String username = SecurityUtils.getUsername();
+        if (username != null) {
+            operationLog.setUsername(username);
         }
     }
 

@@ -1,0 +1,42 @@
+package ${packageName}.entity;
+
+#foreach ($import in $importList)
+import ${import};
+#end
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
+
+import java.io.Serializable;
+
+/**
+ * ${functionName}实体类
+ *
+ * @author ${author}
+ * @since ${datetime}
+ */
+@Data
+@TableName("${tableName}")
+public class ${ClassName} implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+#foreach ($column in $columns)
+#if($column.columnComment)
+    /** $column.columnComment */
+#end
+#if($column.isPk())
+    @TableId(type = IdType.AUTO)
+#end
+#if($column.javaField == 'createTime')
+    @TableField(fill = FieldFill.INSERT)
+#end
+#if($column.javaField == 'updateTime')
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+#end
+#if($column.javaField == 'deleted')
+    @TableLogic
+#end
+    private $column.javaType $column.javaField;
+
+#end
+}

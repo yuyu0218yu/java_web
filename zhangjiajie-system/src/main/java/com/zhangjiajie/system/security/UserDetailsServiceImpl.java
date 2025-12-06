@@ -1,5 +1,7 @@
 package com.zhangjiajie.system.security;
 
+import com.zhangjiajie.common.security.LoginUser;
+import com.zhangjiajie.system.dto.UserWithRole;
 import com.zhangjiajie.system.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +12,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 用户详情服务实现
@@ -26,7 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // 查询用户及角色信息
-        UserMapper.UserWithRole user = userMapper.selectUserWithRoleByUsername(username);
+        UserWithRole user = userMapper.selectUserWithRoleByUsername(username);
         if (user == null) {
             log.warn("用户 {} 不存在", username);
             throw new UsernameNotFoundException("用户不存在: " + username);
@@ -39,6 +43,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // 构建权限列表
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        Set<String> permissionSet = new HashSet<>();
         
         // 添加角色（Spring Security的hasRole需要ROLE_前缀）
         String roleCode = user.getRoleCode();
@@ -52,16 +57,25 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (permissions != null) {
             for (String permission : permissions) {
                 authorities.add(new SimpleGrantedAuthority(permission));
+                permissionSet.add(permission);
             }
             log.debug("用户 {} 权限: {}", username, permissions);
         }
 
         log.debug("加载用户信息: {}, 权限数量: {}", username, authorities.size());
 
-        return new org.springframework.security.core.userdetails.User(
-            user.getUsername(),
-            user.getPassword(),
-            authorities
-        );
+        // 构建LoginUser对象，包含完整用户信息
+        LoginUser loginUser = new LoginUser(user.getId(), user.getUsername(), user.getPassword(), authorities);
+        loginUser.setNickname(user.getNickname());
+        loginUser.setAvatar(user.getAvatar());
+        loginUser.setEmail(user.getEmail());
+        loginUser.setPhone(user.getPhone());
+        loginUser.setRoleCode(user.getRoleCode());
+        loginUser.setRoleName(user.getRoleName());
+        loginUser.setStatus(user.getStatus());
+        loginUser.setPermissions(permissionSet);
+        loginUser.setLoginTime(System.currentTimeMillis());
+
+        return loginUser;
     }
 }

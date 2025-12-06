@@ -1,0 +1,34 @@
+package ${packageName}.dto;
+
+#foreach ($import in $importList)
+import ${import};
+#end
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.*;
+import lombok.Data;
+
+/**
+ * 更新${functionName}请求
+ *
+ * @author ${author}
+ * @since ${datetime}
+ */
+@Data
+@Schema(description = "更新${functionName}请求")
+public class Update${ClassName}Request {
+
+#foreach ($column in $editColumns)
+#if($column.columnComment)
+    @Schema(description = "$column.columnComment")
+#end
+#if($column.isRequired() && !$column.isPk())
+#if($column.javaType == 'String')
+    @NotBlank(message = "$column.columnComment不能为空")
+#else
+    @NotNull(message = "$column.columnComment不能为空")
+#end
+#end
+    private $column.javaType $column.javaField;
+
+#end
+}

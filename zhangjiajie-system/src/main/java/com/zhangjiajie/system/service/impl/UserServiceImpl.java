@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zhangjiajie.system.dto.UserWithRole;
 import com.zhangjiajie.system.entity.Role;
 import com.zhangjiajie.system.entity.User;
 import com.zhangjiajie.system.entity.UserRole;
@@ -38,12 +39,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public IPage<UserMapper.UserWithRole> getUserPageWithRole(Page<UserMapper.UserWithRole> page) {
+    public IPage<UserWithRole> getUserPageWithRole(Page<UserWithRole> page) {
         return userMapper.selectUserPageWithRole(page);
     }
 
     @Override
-    public UserMapper.UserWithRole getUserWithRoleByUsername(String username) {
+    public UserWithRole getUserWithRoleByUsername(String username) {
         if (!StringUtils.hasText(username)) {
             return null;
         }
@@ -57,7 +58,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return null;
         }
 
-        UserMapper.UserWithRole user = getUserWithRoleByUsername(username);
+        UserWithRole user = getUserWithRoleByUsername(username);
         if (user == null || user.getStatus() != User.Status.ENABLED.getCode()) {
             return null;
         }

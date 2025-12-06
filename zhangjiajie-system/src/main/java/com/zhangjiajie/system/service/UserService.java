@@ -3,9 +3,8 @@ package com.zhangjiajie.system.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.zhangjiajie.system.dto.UserWithRole;
 import com.zhangjiajie.system.entity.User;
-import com.zhangjiajie.system.mapper.UserMapper;
-import com.zhangjiajie.system.mapper.UserMapper.UserWithRole;
 
 import java.util.List;
 
