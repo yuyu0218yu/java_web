@@ -45,6 +45,7 @@ INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `co
 (101, '角色管理', 3, 2, '/roles', 'Roles', 'C', 1, 1, 'role:view', 'Avatar'),
 (102, '菜单管理', 3, 3, '/menus', 'Menus', 'C', 1, 1, 'menu:view', 'Menu'),
 (103, '权限管理', 3, 4, '/permissions', 'Permissions', 'C', 1, 1, 'permission:view', 'Key'),
+(104, '代码生成器', 3, 5, '/generator', 'Generator', 'C', 1, 1, 'generator:view', 'Cpu'),
 
 -- 用户管理按钮
 (1001, '用户查询', 100, 1, '', NULL, 'F', 1, 1, 'user:view', '#'),

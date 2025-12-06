@@ -60,6 +60,12 @@ const routes = [
         name: 'Profile',
         component: () => import('@/views/Profile.vue'),
         meta: { title: '个人中心', requiresAuth: true }
+      },
+      {
+        path: 'generator',
+        name: 'Generator',
+        component: () => import('@/views/Generator.vue'),
+        meta: { title: '代码生成器', requiresAuth: true, requiredRoles: ['SUPER_ADMIN'] }
       }
     ]
   }

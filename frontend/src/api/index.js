@@ -435,3 +435,40 @@ export const dashboardApi = {
     })
   }
 }
+
+// 代码生成器API
+export const generatorApi = {
+  // 获取数据库表列表
+  getTableList() {
+    return request({
+      url: '/generator/tables',
+      method: 'get'
+    })
+  },
+
+  // 获取表列信息
+  getTableColumns(tableName) {
+    return request({
+      url: `/generator/tables/${tableName}/columns`,
+      method: 'get'
+    })
+  },
+
+  // 预览生成代码
+  previewCode(tableName, options) {
+    return request({
+      url: '/generator/preview',
+      method: 'post',
+      data: { tableName, options }
+    })
+  },
+
+  // 执行代码生成
+  generateCode(tableName, options) {
+    return request({
+      url: '/generator/generate',
+      method: 'post',
+      data: { tableName, options }
+    })
+  }
+}
