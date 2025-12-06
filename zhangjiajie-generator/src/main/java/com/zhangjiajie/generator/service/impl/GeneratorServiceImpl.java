@@ -50,6 +50,7 @@ public class GeneratorServiceImpl implements GeneratorService {
 
     @Override
     public List<Map<String, Object>> getTableColumns(String tableName) {
+        validateTableName(tableName);
         String sql = """
             SELECT
                 COLUMN_NAME as columnName,
@@ -68,6 +69,7 @@ public class GeneratorServiceImpl implements GeneratorService {
 
     @Override
     public Map<String, String> previewCode(String tableName, GenerateOptions options) {
+        validateTableName(tableName);
         Map<String, String> codeMap = new LinkedHashMap<>();
         Map<String, Object> dataModel = buildDataModel(tableName, options);
         String className = (String) dataModel.get("className");
@@ -111,6 +113,7 @@ public class GeneratorServiceImpl implements GeneratorService {
 
     @Override
     public void generateCode(String tableName, GenerateOptions options) {
+        validateTableName(tableName);
         Map<String, Object> dataModel = buildDataModel(tableName, options);
         String className = (String) dataModel.get("className");
 
@@ -364,7 +367,7 @@ public class GeneratorServiceImpl implements GeneratorService {
         if (fileName.contains("Converter")) {
             return "main/converter/" + fileName;
         }
-        if (fileName.endsWith(" (Entity)")) {
+        if (fileName.endsWith(".java (Entity)")) {
             return "main/entity/" + fileName.replace(" (Entity)", "");
         }
         return fileName;
@@ -631,6 +634,23 @@ public class GeneratorServiceImpl implements GeneratorService {
     }
 
     // ==================== 辅助方法 ====================
+
+    /**
+     * 验证表名格式（防止SQL注入和无效输入）
+     */
+    private void validateTableName(String tableName) {
+        if (tableName == null || tableName.isBlank()) {
+            throw new GeneratorException("表名不能为空");
+        }
+        // 表名只允许字母、数字和下划线
+        if (!tableName.matches("^[a-zA-Z_][a-zA-Z0-9_]*$")) {
+            throw new GeneratorException("表名格式无效，只允许字母、数字和下划线");
+        }
+        // 表名长度限制
+        if (tableName.length() > 64) {
+            throw new GeneratorException("表名长度不能超过64个字符");
+        }
+    }
 
     private String getBasePackage(GenerateOptions options) {
         if (options.getModuleName() != null && !options.getModuleName().isEmpty()) {

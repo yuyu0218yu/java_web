@@ -43,7 +43,8 @@ file:
 
 # Code Generator Configuration
 generator:
-  base-package: com.zhangjiajie
+  base-package: com.zhangjiajie.system
+  target-module: zhangjiajie-system
   author: zhangjiajie
   enable-swagger: true
   enable-lombok: true

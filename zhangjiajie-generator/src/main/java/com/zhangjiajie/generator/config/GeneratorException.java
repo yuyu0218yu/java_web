@@ -1,12 +1,14 @@
 package com.zhangjiajie.generator.config;
 
+import com.zhangjiajie.common.exception.BusinessException;
+
 /**
  * 代码生成器异常
- * 统一的异常处理机制
+ * 继承自 BusinessException，统一处理机制
  *
  * @author yushuang
  */
-public class GeneratorException extends RuntimeException {
+public class GeneratorException extends BusinessException {
 
     public GeneratorException(String message) {
         super(message);
