@@ -82,6 +82,69 @@ public final class GeneratorHelper {
     }
 
     /**
+     * 表名转类名（大驼峰）
+     * sys_user -> User (移除前缀后)
+     * user_role -> UserRole
+     */
+    public static String tableNameToClassName(String tableName, String tablePrefix) {
+        if (tablePrefix != null && !tablePrefix.isEmpty() && tableName.startsWith(tablePrefix)) {
+            tableName = tableName.substring(tablePrefix.length());
+        }
+        return toCamelCase(tableName, true);
+    }
+
+    /**
+     * 列名转字段名（小驼峰）
+     * user_name -> userName
+     */
+    public static String columnNameToFieldName(String columnName) {
+        return toCamelCase(columnName, false);
+    }
+
+    /**
+     * 下划线命名转驼峰命名
+     *
+     * @param name            原名称
+     * @param capitalizeFirst 首字母是否大写
+     */
+    public static String toCamelCase(String name, boolean capitalizeFirst) {
+        if (name == null || name.isEmpty()) {
+            return name;
+        }
+        StringBuilder result = new StringBuilder();
+        String[] parts = name.toLowerCase().split("_");
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].isEmpty()) continue;
+            if (i == 0 && !capitalizeFirst) {
+                result.append(parts[i]);
+            } else {
+                result.append(Character.toUpperCase(parts[i].charAt(0)));
+                result.append(parts[i].substring(1));
+            }
+        }
+        return result.toString();
+    }
+
+    /**
+     * 数据库类型转Java类型
+     */
+    public static String dbTypeToJavaType(String dbType) {
+        if (dbType == null) return "String";
+        return switch (dbType.toLowerCase()) {
+            case "bigint" -> "Long";
+            case "int", "integer", "tinyint", "smallint", "mediumint" -> "Integer";
+            case "decimal", "numeric" -> "BigDecimal";
+            case "float" -> "Float";
+            case "double" -> "Double";
+            case "bit", "boolean" -> "Boolean";
+            case "datetime", "timestamp" -> "LocalDateTime";
+            case "date" -> "LocalDate";
+            case "time" -> "LocalTime";
+            default -> "String";
+        };
+    }
+
+    /**
      * 将内容写入文件
      *
      * @param basePath    基础路径
