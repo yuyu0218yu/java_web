@@ -84,7 +84,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="320" fixed="right">
+          <el-table-column label="操作" width="400" fixed="right">
             <template #default="scope">
               <div class="operation-buttons">
                 <el-button type="primary" size="small" @click="handlePreview(scope.row)">
@@ -98,6 +98,10 @@
                 <el-button type="info" size="small" @click="handleEdit(scope.row)">
                   <el-icon><Edit /></el-icon>
                   编辑
+                </el-button>
+                <el-button type="success" size="small" @click="handleSync(scope.row)">
+                  <el-icon><RefreshRight /></el-icon>
+                  同步
                 </el-button>
                 <el-button type="danger" size="small" @click="handleDelete(scope.row)">
                   <el-icon><Delete /></el-icon>
@@ -186,13 +190,192 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 编辑表配置对话框 -->
+    <el-dialog
+      v-model="editDialogVisible"
+      title="编辑表配置"
+      width="85%"
+      top="3vh"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <el-tabs v-model="editActiveTab" type="border-card">
+        <!-- 基本信息 -->
+        <el-tab-pane label="基本信息" name="basic">
+          <el-form :model="editForm" label-width="120px" style="max-width: 800px; margin: 0 auto;">
+            <el-row :gutter="24">
+              <el-col :span="12">
+                <el-form-item label="表名称">
+                  <el-input v-model="editForm.tableName" disabled />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="表描述">
+                  <el-input v-model="editForm.tableComment" placeholder="请输入表描述" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="24">
+              <el-col :span="12">
+                <el-form-item label="实体类名称">
+                  <el-input v-model="editForm.className" placeholder="请输入实体类名称" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="作者">
+                  <el-input v-model="editForm.functionAuthor" placeholder="请输入作者" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="24">
+              <el-col :span="12">
+                <el-form-item label="生成包路径">
+                  <el-input v-model="editForm.packageName" placeholder="com.xxx.xxx" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="生成模块名">
+                  <el-input v-model="editForm.moduleName" placeholder="请输入模块名" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="24">
+              <el-col :span="12">
+                <el-form-item label="业务名">
+                  <el-input v-model="editForm.businessName" placeholder="请输入业务名" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="功能名">
+                  <el-input v-model="editForm.functionName" placeholder="请输入功能名" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="24">
+              <el-col :span="12">
+                <el-form-item label="生成模板">
+                  <el-select v-model="editForm.tplCategory" placeholder="请选择" style="width: 100%">
+                    <el-option label="单表（CRUD）" value="crud" />
+                    <el-option label="树表" value="tree" />
+                    <el-option label="主子表" value="sub" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="前端类型">
+                  <el-select v-model="editForm.tplWebType" placeholder="请选择" style="width: 100%">
+                    <el-option label="Element Plus" value="element-plus" />
+                    <el-option label="Element UI" value="element-ui" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+        </el-tab-pane>
+
+        <!-- 字段配置 -->
+        <el-tab-pane label="字段配置" name="columns">
+          <el-table :data="editForm.columns" border style="width: 100%" max-height="500">
+            <el-table-column prop="columnName" label="字段名" width="120" fixed />
+            <el-table-column prop="columnComment" label="字段描述" width="140">
+              <template #default="scope">
+                <el-input v-model="scope.row.columnComment" size="small" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="columnType" label="物理类型" width="100" />
+            <el-table-column prop="javaType" label="Java类型" width="130">
+              <template #default="scope">
+                <el-select v-model="scope.row.javaType" size="small">
+                  <el-option label="Long" value="Long" />
+                  <el-option label="String" value="String" />
+                  <el-option label="Integer" value="Integer" />
+                  <el-option label="Double" value="Double" />
+                  <el-option label="BigDecimal" value="BigDecimal" />
+                  <el-option label="LocalDateTime" value="LocalDateTime" />
+                  <el-option label="LocalDate" value="LocalDate" />
+                  <el-option label="Boolean" value="Boolean" />
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column prop="javaField" label="Java字段" width="120">
+              <template #default="scope">
+                <el-input v-model="scope.row.javaField" size="small" />
+              </template>
+            </el-table-column>
+            <el-table-column label="插入" width="60" align="center">
+              <template #default="scope">
+                <el-checkbox v-model="scope.row.isInsert" true-value="1" false-value="0" />
+              </template>
+            </el-table-column>
+            <el-table-column label="编辑" width="60" align="center">
+              <template #default="scope">
+                <el-checkbox v-model="scope.row.isEdit" true-value="1" false-value="0" />
+              </template>
+            </el-table-column>
+            <el-table-column label="列表" width="60" align="center">
+              <template #default="scope">
+                <el-checkbox v-model="scope.row.isList" true-value="1" false-value="0" />
+              </template>
+            </el-table-column>
+            <el-table-column label="查询" width="60" align="center">
+              <template #default="scope">
+                <el-checkbox v-model="scope.row.isQuery" true-value="1" false-value="0" />
+              </template>
+            </el-table-column>
+            <el-table-column label="必填" width="60" align="center">
+              <template #default="scope">
+                <el-checkbox v-model="scope.row.isRequired" true-value="1" false-value="0" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="queryType" label="查询方式" width="110">
+              <template #default="scope">
+                <el-select v-model="scope.row.queryType" size="small">
+                  <el-option label="=" value="EQ" />
+                  <el-option label="!=" value="NE" />
+                  <el-option label=">" value="GT" />
+                  <el-option label=">=" value="GE" />
+                  <el-option label="<" value="LT" />
+                  <el-option label="<=" value="LE" />
+                  <el-option label="LIKE" value="LIKE" />
+                  <el-option label="BETWEEN" value="BETWEEN" />
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column prop="htmlType" label="显示类型" width="130">
+              <template #default="scope">
+                <el-select v-model="scope.row.htmlType" size="small">
+                  <el-option label="文本框" value="input" />
+                  <el-option label="文本域" value="textarea" />
+                  <el-option label="下拉框" value="select" />
+                  <el-option label="单选框" value="radio" />
+                  <el-option label="复选框" value="checkbox" />
+                  <el-option label="日期控件" value="datetime" />
+                  <el-option label="图片上传" value="image" />
+                  <el-option label="文件上传" value="upload" />
+                  <el-option label="富文本" value="editor" />
+                </el-select>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
+
+      <template #footer>
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitEditForm" :loading="editSubmitting">
+          <el-icon><Check /></el-icon>
+          保存
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Cpu, Refresh, Grid, Clock, View, Download, Search, Plus, Edit, Delete } from '@element-plus/icons-vue'
+import { Cpu, Refresh, RefreshRight, Grid, Clock, View, Download, Search, Plus, Edit, Delete, Check } from '@element-plus/icons-vue'
 import { generatorApi } from '@/api'
 
 // 响应式数据
@@ -223,6 +406,12 @@ const previewCode = ref({})
 const activeTab = ref('')
 const downloading = ref(false)
 const currentTable = ref(null)
+
+// 编辑对话框
+const editDialogVisible = ref(false)
+const editActiveTab = ref('basic')
+const editForm = ref({})
+const editSubmitting = ref(false)
 
 // 计算属性
 const filteredDbTables = computed(() => {
@@ -341,9 +530,50 @@ const downloadFromPreview = async () => {
   }
 }
 
-const handleEdit = (row) => {
-  ElMessage.info('编辑功能开发中...')
-  // TODO: 实现编辑功能
+const handleEdit = async (row) => {
+  try {
+    const res = await generatorApi.getTableById(row.tableId)
+    editForm.value = res.data || {}
+    editActiveTab.value = 'basic'
+    editDialogVisible.value = true
+  } catch (error) {
+    console.error('获取表详情失败', error)
+    ElMessage.error('获取表详情失败')
+  }
+}
+
+const submitEditForm = async () => {
+  editSubmitting.value = true
+  try {
+    await generatorApi.updateTable(editForm.value)
+    ElMessage.success('保存成功！')
+    editDialogVisible.value = false
+    loadTables()
+  } catch (error) {
+    console.error('保存失败', error)
+    ElMessage.error('保存失败: ' + (error.message || '未知错误'))
+  } finally {
+    editSubmitting.value = false
+  }
+}
+
+const handleSync = async (row) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要同步表 "${row.tableName}" 的结构吗？这将从数据库重新读取字段信息。`,
+      '同步确认',
+      { type: 'warning' }
+    )
+
+    await generatorApi.syncDb(row.tableId)
+    ElMessage.success('同步成功！')
+    loadTables()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('同步失败', error)
+      ElMessage.error('同步失败: ' + (error.message || '未知错误'))
+    }
+  }
 }
 
 const handleDelete = async (row) => {

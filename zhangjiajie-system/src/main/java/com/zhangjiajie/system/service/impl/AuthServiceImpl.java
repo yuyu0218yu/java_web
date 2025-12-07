@@ -69,6 +69,11 @@ public class AuthServiceImpl implements AuthService {
                 throw new RuntimeException("用户名或密码错误");
             }
 
+            // 检查用户状态是否被禁用
+            if (user.getStatus() != null && user.getStatus() == 0) {
+                throw new RuntimeException("账号已被禁用，请联系管理员");
+            }
+
             // 获取用户详情
             UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
 
@@ -97,6 +102,11 @@ public class AuthServiceImpl implements AuthService {
             // 发布登录失败事件
             publishLoginEvent(loginRequest.getUsername(), ip, userAgent, false, e.getMessage());
 
+            // 保留禁用账号的错误提示，其他统一显示用户名或密码错误
+            String errorMsg = e.getMessage();
+            if (errorMsg != null && errorMsg.contains("禁用")) {
+                throw new RuntimeException(errorMsg);
+            }
             throw new RuntimeException("用户名或密码错误");
         }
     }
