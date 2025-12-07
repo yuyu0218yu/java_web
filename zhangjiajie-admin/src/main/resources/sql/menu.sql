@@ -65,6 +65,16 @@ INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `co
 (1023, '菜单修改', 102, 3, '', NULL, 'F', 1, 1, 'menu:update', '#'),
 (1024, '菜单删除', 102, 4, '', NULL, 'F', 1, 1, 'menu:delete', '#');
 
+-- 代码生成器按钮
+INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `menu_type`, `visible`, `status`, `perms`, `icon`) VALUES
+(1041, '生成器查询', 104, 1, '', NULL, 'F', 1, 1, 'generator:view', '#'),
+(1042, '导入表', 104, 2, '', NULL, 'F', 1, 1, 'generator:import', '#'),
+(1043, '保存配置', 104, 3, '', NULL, 'F', 1, 1, 'generator:update', '#'),
+(1044, '同步表结构', 104, 4, '', NULL, 'F', 1, 1, 'generator:sync', '#'),
+(1045, '预览代码', 104, 5, '', NULL, 'F', 1, 1, 'generator:preview', '#'),
+(1046, '下载代码', 104, 6, '', NULL, 'F', 1, 1, 'generator:download', '#'),
+(1047, '删除表', 104, 7, '', NULL, 'F', 1, 1, 'generator:delete', '#');
+
 -- 只给超级管理员分配所有菜单（其他角色由超级管理员在系统中分配）
 INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) 
 SELECT 1, id FROM `sys_menu` WHERE deleted = 0;

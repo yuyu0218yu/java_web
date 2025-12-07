@@ -218,7 +218,7 @@ public class GenTableServiceImpl extends ServiceImpl<GenTableMapper, GenTable>
             throw new RuntimeException("表不存在");
         }
 
-        List<GenTableColumn> tableColumns = genTable.getColumns();
+        List<GenTableColumn> tableColumns = Optional.ofNullable(genTable.getColumns()).orElse(Collections.emptyList());
         Map<String, GenTableColumn> tableColumnMap = new HashMap<>();
         for (GenTableColumn column : tableColumns) {
             tableColumnMap.put(column.getColumnName(), column);

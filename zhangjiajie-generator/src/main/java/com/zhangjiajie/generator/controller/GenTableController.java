@@ -3,6 +3,7 @@ package com.zhangjiajie.generator.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhangjiajie.common.core.Result;
+import com.zhangjiajie.common.security.SecurityUtils;
 import com.zhangjiajie.generator.entity.GenTable;
 import com.zhangjiajie.generator.service.GenTableService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -81,8 +82,7 @@ public class GenTableController {
     @Operation(summary = "导入表结构", description = "从数据库导入表结构")
     public Result<Void> importTable(
             @RequestBody @Parameter(description = "表名列表") List<String> tableNames) {
-        // TODO: 从Security获取当前用户
-        String operName = "admin";
+        String operName = SecurityUtils.requireUsername();
         genTableService.importTableList(tableNames, operName);
         return Result.success("导入成功");
     }
