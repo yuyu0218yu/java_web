@@ -16,7 +16,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 
 /**
- * 结构服务实现类
+ * 部门服务实现类
  *
  * @author yushuang
  * @since 2025-12-06
@@ -32,7 +32,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
                 .orderByAsc(Dept::getParentId)
                 .orderByAsc(Dept::getSortOrder)
                 .list();
-        // 使用 TreeUtil 构建树
+        // 使用 TreeUtil 构建树形结构，根节点的 parentId 为 0
         return TreeUtil.buildLongTree(depts, Dept::getId, Dept::getParentId, Dept::setChildren);
     }
 
@@ -48,24 +48,24 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     @Override
     public Dept getDeptById(Long id) {
         Dept dept = getById(id);
-        Assert.found(dept, "结构不存在");
+        Assert.found(dept, "部门不存在");
         return dept;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void createDept(Dept dept) {
-        Assert.notEmpty(dept.getDeptName(), "结构名称不能为空");
+        Assert.notEmpty(dept.getDeptName(), "部门名称不能为空");
 
         // 检查编码是否重复
         if (StringUtils.hasText(dept.getDeptCode())) {
-            Assert.isFalse(checkDeptCodeExists(dept.getDeptCode(), null), "结构编码已存在");
+            Assert.isFalse(checkDeptCodeExists(dept.getDeptCode(), null), "部门编码已存在");
         }
 
         // 设置祖先节点
         if (dept.getParentId() != null && dept.getParentId() > 0) {
             Dept parent = getById(dept.getParentId());
-            Assert.found(parent, "父结构不存在");
+            Assert.found(parent, "父部门不存在");
             dept.setAncestors(parent.getAncestors() + "," + parent.getId());
         } else {
             dept.setParentId(0L);
@@ -81,69 +81,69 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
         }
 
         save(dept);
-        log.info("创建结构成功: {}", dept.getDeptName());
+        log.info("创建部门成功: {}", dept.getDeptName());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateDept(Long id, Dept dept) {
-        Assert.notNull(id, "结构ID不能为空");
+        Assert.notNull(id, "部门ID不能为空");
 
         Dept existing = getById(id);
-        Assert.found(existing, "结构不存在");
+        Assert.found(existing, "部门不存在");
 
         // 检查编码是否重复
         if (StringUtils.hasText(dept.getDeptCode())) {
-            Assert.isFalse(checkDeptCodeExists(dept.getDeptCode(), id), "结构编码已存在");
+            Assert.isFalse(checkDeptCodeExists(dept.getDeptCode(), id), "部门编码已存在");
         }
 
-        // 不能将自己设为父结构
+        // 不能将自己设为父部门
         if (dept.getParentId() != null && dept.getParentId().equals(id)) {
-            throw new IllegalArgumentException("不能将自己设为父结构");
+            throw new IllegalArgumentException("不能将自己设为父部门");
         }
 
-        // 如果父结构变更，需要更新 ancestors
+        // 如果父部门变更，需要更新 ancestors
         if (dept.getParentId() != null && !dept.getParentId().equals(existing.getParentId())) {
-            // 检查新父结构是否是自己的子结构（防止循环引用）
+            // 检查新父部门是否是自己的子部门（防止循环引用）
             List<Long> childIds = getChildDeptIds(id);
-            Assert.isFalse(childIds.contains(dept.getParentId()), "不能将子结构设为父结构");
+            Assert.isFalse(childIds.contains(dept.getParentId()), "不能将子部门设为父部门");
 
             // 更新自己的 ancestors
             if (dept.getParentId() > 0) {
                 Dept newParent = getById(dept.getParentId());
-                Assert.found(newParent, "父结构不存在");
+                Assert.found(newParent, "父部门不存在");
                 dept.setAncestors(newParent.getAncestors() + "," + newParent.getId());
             } else {
                 dept.setAncestors("0");
             }
 
-            // 更新所有子结构的 ancestors
+            // 更新所有子部门的 ancestors
             updateChildrenAncestors(id, existing.getAncestors(), dept.getAncestors());
         }
 
         dept.setId(id);
         updateById(dept);
-        log.info("更新结构成功: {}", dept.getDeptName());
+        log.info("更新部门成功: {}", dept.getDeptName());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteDept(Long id) {
-        Assert.notNull(id, "结构ID不能为空");
+        Assert.notNull(id, "部门ID不能为空");
 
         Dept dept = getById(id);
-        Assert.found(dept, "结构不存在");
+        Assert.found(dept, "部门不存在");
 
-        // 检查是否有子结构
+        // 检查是否有子部门
         long childCount = lambdaQuery().eq(Dept::getParentId, id).count();
-        Assert.isTrue(childCount == 0, "存在子结构，无法删除");
+        Assert.isTrue(childCount == 0, "存在子部门，无法删除");
 
-        // TODO: 检查是否有用户属于该结构
+        // TODO: 检查是否有用户属于该部门
         // long userCount = userMapper.countByDeptId(id);
-        // Assert.isTrue(userCount == 0, "结构下存在用户，无法删除");
+        // Assert.isTrue(userCount == 0, "部门下存在用户，无法删除");
 
         removeById(id);
-        log.info("删除结构成功: {}", dept.getDeptName());
+        log.info("删除部门成功: {}", dept.getDeptName());
     }
 
     @Override
@@ -173,9 +173,9 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     }
 
     /**
-     * 更新子结构的祖先节点
+     * 更新子部门的祖先节点
      *
-     * @param deptId       结构ID
+     * @param deptId       部门ID
      * @param oldAncestors 旧祖先节点
      * @param newAncestors 新祖先节点
      */
