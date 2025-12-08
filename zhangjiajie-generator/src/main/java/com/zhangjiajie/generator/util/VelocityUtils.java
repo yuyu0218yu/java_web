@@ -139,14 +139,12 @@ public class VelocityUtils {
         templates.add("vm/java/controller.java.vm");
         templates.add("vm/xml/mapper.xml.vm");
 
-        // DTO
-        templates.add("vm/java/dto/createRequest.java.vm");
-        templates.add("vm/java/dto/updateRequest.java.vm");
-        templates.add("vm/java/dto/response.java.vm");
-
         // Vue前端
         templates.add("vm/vue/index.vue.vm");
         templates.add("vm/vue/api.js.vm");
+
+        // 菜单权限 SQL
+        templates.add("vm/sql/menu.sql.vm");
 
         return templates;
     }
@@ -182,20 +180,14 @@ public class VelocityUtils {
         if (template.contains("mapper.xml.vm")) {
             return MYBATIS_PATH + "/" + className + "Mapper.xml";
         }
-        if (template.contains("createRequest.java.vm")) {
-            return javaPath + "/dto/Create" + className + "Request.java";
-        }
-        if (template.contains("updateRequest.java.vm")) {
-            return javaPath + "/dto/Update" + className + "Request.java";
-        }
-        if (template.contains("response.java.vm")) {
-            return javaPath + "/dto/" + className + "Response.java";
-        }
         if (template.contains("index.vue.vm")) {
             return vuePath + "/index.vue";
         }
         if (template.contains("api.js.vm")) {
             return vueApiPath + "/" + businessName + ".js";
+        }
+        if (template.contains("menu.sql.vm")) {
+            return "sql/" + businessName + "_menu.sql";
         }
 
         return null;

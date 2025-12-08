@@ -179,7 +179,7 @@
         <el-tab-pane
           v-for="(code, name) in previewCode"
           :key="name"
-          :label="name"
+          :label="getTabLabel(name)"
           :name="name"
         >
           <pre class="code-preview" :class="{ 'code-dark': isDark, 'code-light': !isDark }"><code v-html="highlightCode(code, name)"></code></pre>
@@ -436,13 +436,29 @@ const themeObserver = new MutationObserver(() => {
   isDark.value = document.documentElement.classList.contains('dark')
 })
 
+// 获取友好的标签名
+const getTabLabel = (templatePath) => {
+  const labelMap = {
+    'vm/java/entity.java.vm': 'Entity.java',
+    'vm/java/mapper.java.vm': 'Mapper.java',
+    'vm/java/service.java.vm': 'Service.java',
+    'vm/java/serviceImpl.java.vm': 'ServiceImpl.java',
+    'vm/java/controller.java.vm': 'Controller.java',
+    'vm/xml/mapper.xml.vm': 'Mapper.xml',
+    'vm/vue/index.vue.vm': 'index.vue',
+    'vm/vue/api.js.vm': 'api.js',
+    'vm/sql/menu.sql.vm': 'menu.sql'
+  }
+  return labelMap[templatePath] || templatePath.split('/').pop().replace('.vm', '')
+}
+
 // 根据文件名获取语言
 const getLanguage = (fileName) => {
-  if (fileName.endsWith('.java')) return 'java'
-  if (fileName.endsWith('.xml')) return 'xml'
-  if (fileName.endsWith('.vue')) return 'vue'
-  if (fileName.endsWith('.js')) return 'javascript'
-  if (fileName.endsWith('.sql')) return 'sql'
+  if (fileName.includes('.java')) return 'java'
+  if (fileName.includes('.xml')) return 'xml'
+  if (fileName.includes('.vue')) return 'vue'
+  if (fileName.includes('.js')) return 'javascript'
+  if (fileName.includes('.sql')) return 'sql'
   return 'plaintext'
 }
 

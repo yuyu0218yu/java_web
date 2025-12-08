@@ -1,0 +1,19 @@
+-- 菜单权限 SQL
+-- 模块: ${functionName}
+-- 生成时间: ${datetime}
+
+-- 插入菜单
+INSERT INTO sys_menu (name, path, component, permission, icon, type, sort, parent_id, status, visible, create_time, update_time, deleted)
+VALUES ('${functionName}管理', '${businessName}', 'views/${moduleName}/${businessName}/index', '${moduleName}:${businessName}:view', 'List', 1, 10, 0, 1, 1, NOW(), NOW(), 0);
+
+-- 获取刚插入菜单的 ID（用于子菜单的 parent_id）
+SET @menuId = LAST_INSERT_ID();
+
+-- 插入按钮权限
+INSERT INTO sys_menu (name, path, component, permission, icon, type, sort, parent_id, status, visible, create_time, update_time, deleted)
+VALUES 
+('${functionName}查询', '', '', '${moduleName}:${businessName}:view', '', 2, 1, @menuId, 1, 1, NOW(), NOW(), 0),
+('${functionName}新增', '', '', '${moduleName}:${businessName}:create', '', 2, 2, @menuId, 1, 1, NOW(), NOW(), 0),
+('${functionName}修改', '', '', '${moduleName}:${businessName}:edit', '', 2, 3, @menuId, 1, 1, NOW(), NOW(), 0),
+('${functionName}删除', '', '', '${moduleName}:${businessName}:delete', '', 2, 4, @menuId, 1, 1, NOW(), NOW(), 0),
+('${functionName}导出', '', '', '${moduleName}:${businessName}:export', '', 2, 5, @menuId, 1, 1, NOW(), NOW(), 0);
