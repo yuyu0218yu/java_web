@@ -71,7 +71,6 @@
           v-loading="loading"
           :data="tableData"
           style="width: 100%"
-          table-layout="auto"
           @selection-change="handleSelectionChange"
           :row-class-name="tableRowClassName"
           highlight-current-row
@@ -666,19 +665,6 @@ onMounted(() => {
 .phone-cell .el-icon,
 .time-cell .el-icon {
   color: #909399;
-}
-
-.operation-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.operation-buttons .el-button {
-  transition: all 0.3s ease;
-}
-
-.operation-buttons .el-button:hover {
-  transform: scale(1.1);
 }
 
 /* 表格行动画 */

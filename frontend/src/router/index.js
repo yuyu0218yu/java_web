@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import request from '@/utils/request'
+import { isTokenValidated, setTokenValidated } from '@/utils/tokenState'
 
 const routes = [
   {
@@ -77,8 +79,24 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
+  
+  // 如果有 token 但还没验证过，先验证 token 有效性
+  if (authStore.isAuthenticated && !isTokenValidated()) {
+    try {
+      await request({ url: '/auth/userinfo', method: 'get' })
+      setTokenValidated(true)
+    } catch (error) {
+      // token 无效，清除登录状态（request.js 中 401 响应会自动清除）
+      setTokenValidated(false)
+      // 如果目标页面需要认证，重定向到登录页
+      if (to.meta.requiresAuth !== false) {
+        next('/login')
+        return
+      }
+    }
+  }
   
   // 如果访问登录/注册页面且已登录，重定向到仪表盘
   if ((to.name === 'Login' || to.name === 'Register') && authStore.isAuthenticated) {

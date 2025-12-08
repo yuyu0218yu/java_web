@@ -56,13 +56,11 @@
           v-loading="loading"
           :data="tableList"
           style="width: 100%; margin-top: 20px"
-          table-layout="auto"
           highlight-current-row
           stripe
         >
-          <el-table-column type="selection" width="55" />
           <el-table-column type="index" label="#" width="60" />
-          <el-table-column prop="tableName" label="表名" min-width="200">
+          <el-table-column prop="tableName" label="表名" width="180">
             <template #default="scope">
               <el-tag effect="plain" type="info">
                 <el-icon style="margin-right: 4px;"><Grid /></el-icon>
@@ -70,12 +68,12 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="tableComment" label="表注释" min-width="200">
+          <el-table-column prop="tableComment" label="表注释" min-width="150">
             <template #default="scope">
               <span>{{ scope.row.tableComment || '-' }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="className" label="实体类名" min-width="150" />
+          <el-table-column prop="className" label="实体类名" width="120" />
           <el-table-column prop="updateTime" label="更新时间" width="180">
             <template #default="scope">
               <div class="time-cell">
@@ -84,29 +82,34 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="400" fixed="right">
+          <el-table-column label="操作" width="220">
             <template #default="scope">
               <div class="operation-buttons">
-                <el-button type="primary" size="small" @click="handlePreview(scope.row)">
-                  <el-icon><View /></el-icon>
-                  预览
-                </el-button>
-                <el-button type="warning" size="small" @click="handleDownload(scope.row)">
-                  <el-icon><Download /></el-icon>
-                  下载
-                </el-button>
-                <el-button type="info" size="small" @click="handleEdit(scope.row)">
-                  <el-icon><Edit /></el-icon>
-                  编辑
-                </el-button>
-                <el-button type="success" size="small" @click="handleSync(scope.row)">
-                  <el-icon><RefreshRight /></el-icon>
-                  同步
-                </el-button>
-                <el-button type="danger" size="small" @click="handleDelete(scope.row)">
-                  <el-icon><Delete /></el-icon>
-                  删除
-                </el-button>
+                <el-tooltip content="预览代码" placement="top">
+                  <el-button type="primary" size="small" circle @click="handlePreview(scope.row)">
+                    <el-icon><View /></el-icon>
+                  </el-button>
+                </el-tooltip>
+                <el-tooltip content="下载代码" placement="top">
+                  <el-button type="warning" size="small" circle @click="handleDownload(scope.row)">
+                    <el-icon><Download /></el-icon>
+                  </el-button>
+                </el-tooltip>
+                <el-tooltip content="编辑配置" placement="top">
+                  <el-button type="info" size="small" circle @click="handleEdit(scope.row)">
+                    <el-icon><Edit /></el-icon>
+                  </el-button>
+                </el-tooltip>
+                <el-tooltip content="同步表结构" placement="top">
+                  <el-button type="success" size="small" circle @click="handleSync(scope.row)">
+                    <el-icon><RefreshRight /></el-icon>
+                  </el-button>
+                </el-tooltip>
+                <el-tooltip content="删除" placement="top">
+                  <el-button type="danger" size="small" circle @click="handleDelete(scope.row)">
+                    <el-icon><Delete /></el-icon>
+                  </el-button>
+                </el-tooltip>
               </div>
             </template>
           </el-table-column>
@@ -179,7 +182,7 @@
           :label="name"
           :name="name"
         >
-          <pre class="code-preview"><code>{{ code }}</code></pre>
+          <pre class="code-preview" :class="{ 'code-dark': isDark, 'code-light': !isDark }"><code v-html="highlightCode(code, name)"></code></pre>
         </el-tab-pane>
       </el-tabs>
       <template #footer>
@@ -373,10 +376,22 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Cpu, Refresh, RefreshRight, Grid, Clock, View, Download, Search, Plus, Edit, Delete, Check } from '@element-plus/icons-vue'
 import { generatorApi } from '@/api'
+import hljs from 'highlight.js/lib/core'
+import java from 'highlight.js/lib/languages/java'
+import xml from 'highlight.js/lib/languages/xml'
+import javascript from 'highlight.js/lib/languages/javascript'
+import sql from 'highlight.js/lib/languages/sql'
+
+// 注册语言
+hljs.registerLanguage('java', java)
+hljs.registerLanguage('xml', xml)
+hljs.registerLanguage('vue', xml)
+hljs.registerLanguage('javascript', javascript)
+hljs.registerLanguage('sql', sql)
 
 // 响应式数据
 const loading = ref(false)
@@ -412,6 +427,35 @@ const editDialogVisible = ref(false)
 const editActiveTab = ref('basic')
 const editForm = ref({})
 const editSubmitting = ref(false)
+
+// 主题状态
+const isDark = ref(document.documentElement.classList.contains('dark'))
+
+// 监听主题变化
+const themeObserver = new MutationObserver(() => {
+  isDark.value = document.documentElement.classList.contains('dark')
+})
+
+// 根据文件名获取语言
+const getLanguage = (fileName) => {
+  if (fileName.endsWith('.java')) return 'java'
+  if (fileName.endsWith('.xml')) return 'xml'
+  if (fileName.endsWith('.vue')) return 'vue'
+  if (fileName.endsWith('.js')) return 'javascript'
+  if (fileName.endsWith('.sql')) return 'sql'
+  return 'plaintext'
+}
+
+// 高亮代码
+const highlightCode = (code, fileName) => {
+  const lang = getLanguage(fileName)
+  try {
+    if (lang === 'plaintext') return code
+    return hljs.highlight(code, { language: lang }).value
+  } catch {
+    return code
+  }
+}
 
 // 计算属性
 const filteredDbTables = computed(() => {
@@ -603,6 +647,15 @@ const formatTime = (time) => {
 // 生命周期
 onMounted(() => {
   loadTables()
+  // 监听主题变化
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class']
+  })
+})
+
+onUnmounted(() => {
+  themeObserver.disconnect()
 })
 </script>
 
@@ -689,24 +742,64 @@ onMounted(() => {
   color: #909399;
 }
 
-.operation-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-/* 代码预览 */
+/* 代码预览基础样式 */
 .code-preview {
-  background: #1e1e1e;
-  color: #d4d4d4;
   padding: 16px;
   border-radius: 8px;
   overflow-x: auto;
   max-height: 60vh;
-  font-family: 'Consolas', 'Monaco', monospace;
+  font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.6;
   margin: 0;
+  tab-size: 2;
 }
+
+/* 暗黑模式 - VS Code Dark+ 风格 */
+.code-dark {
+  background: #1e1e1e;
+  color: #d4d4d4;
+}
+.code-dark :deep(.hljs-keyword) { color: #569cd6; }
+.code-dark :deep(.hljs-string) { color: #ce9178; }
+.code-dark :deep(.hljs-number) { color: #b5cea8; }
+.code-dark :deep(.hljs-comment) { color: #6a9955; font-style: italic; }
+.code-dark :deep(.hljs-class),
+.code-dark :deep(.hljs-title) { color: #4ec9b0; }
+.code-dark :deep(.hljs-function) { color: #dcdcaa; }
+.code-dark :deep(.hljs-variable),
+.code-dark :deep(.hljs-attr) { color: #9cdcfe; }
+.code-dark :deep(.hljs-tag) { color: #569cd6; }
+.code-dark :deep(.hljs-name) { color: #569cd6; }
+.code-dark :deep(.hljs-attribute) { color: #9cdcfe; }
+.code-dark :deep(.hljs-built_in) { color: #4ec9b0; }
+.code-dark :deep(.hljs-type) { color: #4ec9b0; }
+.code-dark :deep(.hljs-params) { color: #9cdcfe; }
+.code-dark :deep(.hljs-meta) { color: #c586c0; }
+.code-dark :deep(.hljs-literal) { color: #569cd6; }
+
+/* 白天模式 - GitHub 风格 */
+.code-light {
+  background: #f6f8fa;
+  color: #24292e;
+}
+.code-light :deep(.hljs-keyword) { color: #d73a49; }
+.code-light :deep(.hljs-string) { color: #032f62; }
+.code-light :deep(.hljs-number) { color: #005cc5; }
+.code-light :deep(.hljs-comment) { color: #6a737d; font-style: italic; }
+.code-light :deep(.hljs-class),
+.code-light :deep(.hljs-title) { color: #6f42c1; }
+.code-light :deep(.hljs-function) { color: #6f42c1; }
+.code-light :deep(.hljs-variable),
+.code-light :deep(.hljs-attr) { color: #005cc5; }
+.code-light :deep(.hljs-tag) { color: #22863a; }
+.code-light :deep(.hljs-name) { color: #22863a; }
+.code-light :deep(.hljs-attribute) { color: #6f42c1; }
+.code-light :deep(.hljs-built_in) { color: #e36209; }
+.code-light :deep(.hljs-type) { color: #005cc5; }
+.code-light :deep(.hljs-params) { color: #24292e; }
+.code-light :deep(.hljs-meta) { color: #d73a49; }
+.code-light :deep(.hljs-literal) { color: #005cc5; }
 
 /* 复选框组样式 */
 .el-checkbox-group {

@@ -40,7 +40,6 @@
           v-loading="loading"
           :data="tableData"
           style="width: 100%"
-          table-layout="auto"
           row-key="id"
           :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
           :default-expand-all="false"
@@ -690,19 +689,6 @@ onMounted(() => {
 .no-component,
 .no-perms {
   color: #c0c4cc;
-}
-
-.operation-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.operation-buttons .el-button {
-  transition: all 0.3s ease;
-}
-
-.operation-buttons .el-button:hover {
-  transform: scale(1.1);
 }
 
 /* 对话框样式 */

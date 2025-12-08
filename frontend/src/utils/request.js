@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { resetTokenValidation } from '@/utils/tokenState'
 
 // 创建axios实例
 const request = axios.create({
@@ -51,6 +52,8 @@ request.interceptors.response.use(
           localStorage.removeItem('token')
           localStorage.removeItem('user')
           localStorage.removeItem('permissions')
+          // 重置 token 验证状态
+          resetTokenValidation()
           // 跳转到登录页
           if (window.location.pathname !== '/login') {
             window.location.href = '/login'

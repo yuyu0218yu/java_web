@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
+import { resetTokenValidation } from '@/utils/tokenState'
 
 export const useAuthStore = defineStore('auth', () => {
   // 状态
@@ -68,6 +69,9 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     localStorage.removeItem('permissions')
+    
+    // 重置 token 验证状态
+    resetTokenValidation()
 
     ElMessage.success('已退出登录')
   }
