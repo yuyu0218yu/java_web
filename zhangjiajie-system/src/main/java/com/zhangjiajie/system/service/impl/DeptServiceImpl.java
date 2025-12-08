@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * 部门服务实现类
@@ -190,7 +191,9 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
                 String childAncestors = child.getAncestors();
                 // 确保只替换开头部分，避免误替换
                 if (childAncestors.startsWith(oldPrefix + ",") || childAncestors.equals(oldPrefix)) {
-                    childAncestors = childAncestors.replaceFirst("^" + oldPrefix.replace(",", "\\,"), newPrefix);
+                    // 使用 Pattern.quote 正确转义正则表达式特殊字符
+                    String regex = "^" + Pattern.quote(oldPrefix);
+                    childAncestors = childAncestors.replaceFirst(regex, newPrefix);
                     child.setAncestors(childAncestors);
                     updateList.add(child);
                 }
