@@ -326,6 +326,7 @@ import {
   Close, Check, OfficeBuilding
 } from '@element-plus/icons-vue'
 import { userApi, roleApi, deptApi } from '@/api'
+import { getDataScopeLabel, getDataScopeTagType, getDataScopeTooltip } from '@/utils/dataScope'
 
 // 响应式数据
 const loading = ref(false)
@@ -407,39 +408,6 @@ const getRoleTagType = (roleName) => {
   return typeMap[roleName] || 'primary'
 }
 
-// 获取数据范围标签
-const getDataScopeLabel = (dataScope) => {
-  const labels = {
-    1: '全部',
-    2: '本部门及下级',
-    3: '仅本部门',
-    4: '仅本人'
-  }
-  return labels[dataScope] || '未设置'
-}
-
-// 获取数据范围标签类型
-const getDataScopeTagType = (dataScope) => {
-  const types = {
-    1: 'danger',
-    2: 'warning',
-    3: 'primary',
-    4: 'info'
-  }
-  return types[dataScope] || ''
-}
-
-// 获取数据范围提示信息
-const getDataScopeTooltip = (dataScope) => {
-  const tooltips = {
-    1: '可以查看和管理所有部门的数据',
-    2: '只能查看和管理用户所在部门及其下级部门的数据',
-    3: '只能查看和管理用户所在部门的数据',
-    4: '只能查看和管理自己的数据'
-  }
-  return tooltips[dataScope] || '未设置数据范围'
-}
-
 // 表格行样式
 const tableRowClassName = ({ row, rowIndex }) => {
   return `animate-row delay-${rowIndex % 10}`
@@ -455,7 +423,7 @@ const selectedRole = computed(() => {
 const handleRoleChange = (roleId) => {
   const role = roleOptions.value.find(r => r.id === roleId)
   if (role) {
-    console.log('Selected role:', role.roleName, 'Data scope:', role.dataScope)
+    // Role selected, data scope information is now visible via selectedRole computed property
   }
 }
 

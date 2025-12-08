@@ -320,6 +320,7 @@ import {
   Connection, Search, Select, OfficeBuilding, Grid, User
 } from '@element-plus/icons-vue'
 import { roleApi, permissionApi } from '@/api'
+import { getDataScopeHelp } from '@/utils/dataScope'
 
 // 响应式数据
 const loading = ref(false)
@@ -378,17 +379,6 @@ const getRoleColor = (roleName) => {
     '普通用户': '#67C23A'
   }
   return colorMap[roleName] || '#909399'
-}
-
-// 获取数据范围帮助信息
-const getDataScopeHelp = (dataScope) => {
-  const helps = {
-    1: '该角色可以查看和管理系统中所有部门的数据，拥有最高的数据访问权限',
-    2: '该角色可以查看和管理用户所在部门及其下级部门的数据。例如：技术部的角色可以管理后端组、前端组等下级部门',
-    3: '该角色只能查看和管理用户所在部门的数据，不能访问其他部门或下级部门的数据',
-    4: '该角色只能查看和管理自己创建的数据，无法访问其他用户的数据'
-  }
-  return helps[dataScope] || '请选择数据范围'
 }
 
 // 表格行样式

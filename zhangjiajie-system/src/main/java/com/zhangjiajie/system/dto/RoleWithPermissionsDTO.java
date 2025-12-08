@@ -1,5 +1,6 @@
 package com.zhangjiajie.system.dto;
 
+import com.zhangjiajie.common.enums.DataScope;
 import com.zhangjiajie.system.entity.Role;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -29,21 +30,6 @@ public class RoleWithPermissionsDTO extends Role {
         if (dataScopeDesc != null) {
             return dataScopeDesc;
         }
-        Integer scope = getDataScope();
-        if (scope == null) {
-            return "未设置";
-        }
-        switch (scope) {
-            case 1:
-                return "全部数据 - 可以查看和管理所有部门的数据";
-            case 2:
-                return "本部门及下级 - 只能查看和管理用户所在部门及其下级部门的数据";
-            case 3:
-                return "本部门 - 只能查看和管理用户所在部门的数据";
-            case 4:
-                return "仅本人 - 只能查看和管理自己的数据";
-            default:
-                return "未知范围";
-        }
+        return DataScope.getDetailedDesc(getDataScope());
     }
 }

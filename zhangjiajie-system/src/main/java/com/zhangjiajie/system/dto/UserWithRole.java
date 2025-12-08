@@ -1,5 +1,6 @@
 package com.zhangjiajie.system.dto;
 
+import com.zhangjiajie.common.enums.DataScope;
 import com.zhangjiajie.system.entity.User;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -65,17 +66,8 @@ public class UserWithRole extends User {
         if (dataScope == null) {
             return "未设置";
         }
-        switch (dataScope) {
-            case 1:
-                return "全部数据权限";
-            case 2:
-                return "本部门及下级";
-            case 3:
-                return "仅本部门";
-            case 4:
-                return "仅本人数据";
-            default:
-                return "未知";
-        }
+        
+        DataScope scope = DataScope.getByCode(dataScope);
+        return scope != null ? scope.getDesc() : "未知";
     }
 }
