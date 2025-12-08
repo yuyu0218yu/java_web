@@ -11,11 +11,128 @@
  Target Server Version : 80041 (8.0.41)
  File Encoding         : 65001
 
- Date: 05/12/2025 23:11:56
+ Date: 08/12/2025 20:45:58
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for gen_table
+-- ----------------------------
+DROP TABLE IF EXISTS `gen_table`;
+CREATE TABLE `gen_table`  (
+  `table_id` bigint NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `table_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '表名称',
+  `table_comment` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '表描述',
+  `sub_table_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '关联子表的表名',
+  `sub_table_fk_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '子表关联的外键名',
+  `class_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '实体类名称',
+  `tpl_category` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT 'crud' COMMENT '使用的模板（crud单表 tree树表 sub主子表）',
+  `tpl_web_type` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '前端模板类型（element-ui element-plus）',
+  `package_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '生成包路径',
+  `module_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '生成模块名',
+  `business_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '生成业务名',
+  `function_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '生成功能名',
+  `function_author` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '生成功能作者',
+  `gen_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '0' COMMENT '生成代码方式（0zip压缩包 1自定义路径）',
+  `gen_path` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '/' COMMENT '生成路径（不填默认项目路径）',
+  `options` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '其它生成选项（JSON格式）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`table_id`) USING BTREE,
+  INDEX `idx_gen_table_name`(`table_name` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '代码生成业务表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of gen_table
+-- ----------------------------
+INSERT INTO `gen_table` VALUES (1, 'sys_dept', '结构表', NULL, NULL, 'Dept', 'crud', 'element-plus', 'com.zhangjiajie.system', 'sys', 'dept', '结构表', 'admin', '0', '/', NULL, 'admin', '2025-12-08 20:18:40', 'admin', '2025-12-08 20:18:40', NULL);
+
+-- ----------------------------
+-- Table structure for gen_table_column
+-- ----------------------------
+DROP TABLE IF EXISTS `gen_table_column`;
+CREATE TABLE `gen_table_column`  (
+  `column_id` bigint NOT NULL AUTO_INCREMENT COMMENT '编号',
+  `table_id` bigint NULL DEFAULT NULL COMMENT '归属表编号',
+  `column_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '列名称',
+  `column_comment` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '列描述',
+  `column_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '列类型',
+  `java_type` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'JAVA类型',
+  `java_field` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'JAVA字段名',
+  `is_pk` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '是否主键（1是）',
+  `is_increment` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '是否自增（1是）',
+  `is_required` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '是否必填（1是）',
+  `is_insert` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '是否为插入字段（1是）',
+  `is_edit` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '是否编辑字段（1是）',
+  `is_list` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '是否列表字段（1是）',
+  `is_query` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '是否查询字段（1是）',
+  `query_type` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT 'EQ' COMMENT '查询方式（等于、不等于、大于、小于、范围）',
+  `html_type` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '显示类型（文本框、文本域、下拉框、复选框、单选框、日期控件）',
+  `dict_type` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '字典类型',
+  `sort` int NULL DEFAULT NULL COMMENT '排序',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`column_id`) USING BTREE,
+  INDEX `idx_gen_column_table_id`(`table_id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '代码生成业务表字段' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of gen_table_column
+-- ----------------------------
+INSERT INTO `gen_table_column` VALUES (1, 1, 'id', '结构ID', 'bigint', 'Long', 'id', '1', '1', '0', '1', '0', '0', '0', 'EQ', 'input', '', 0, 'admin', '2025-12-08 20:18:40', NULL, '2025-12-08 20:18:40');
+INSERT INTO `gen_table_column` VALUES (2, 1, 'parent_id', '父结构ID (0=根节点)', 'bigint', 'Long', 'parentId', '0', '0', '0', '1', '1', '1', '0', 'EQ', 'input', '', 1, 'admin', '2025-12-08 20:18:40', NULL, '2025-12-08 20:18:40');
+INSERT INTO `gen_table_column` VALUES (3, 1, 'ancestors', '祖先节点列表 (如: 0,1,2)', 'varchar(500)', 'String', 'ancestors', '0', '0', '0', '1', '1', '1', '0', 'EQ', 'input', '', 2, 'admin', '2025-12-08 20:18:40', NULL, '2025-12-08 20:18:40');
+INSERT INTO `gen_table_column` VALUES (4, 1, 'dept_name', '结构名称', 'varchar(50)', 'String', 'deptName', '0', '0', '1', '1', '1', '1', '1', 'LIKE', 'input', '', 3, 'admin', '2025-12-08 20:18:40', NULL, '2025-12-08 20:18:40');
+INSERT INTO `gen_table_column` VALUES (5, 1, 'dept_code', '结构编码', 'varchar(50)', 'String', 'deptCode', '0', '0', '0', '1', '1', '1', '0', 'EQ', 'input', '', 4, 'admin', '2025-12-08 20:18:40', NULL, '2025-12-08 20:18:40');
+INSERT INTO `gen_table_column` VALUES (6, 1, 'leader', '负责人', 'varchar(50)', 'String', 'leader', '0', '0', '0', '1', '1', '1', '0', 'EQ', 'input', '', 5, 'admin', '2025-12-08 20:18:40', NULL, '2025-12-08 20:18:40');
+INSERT INTO `gen_table_column` VALUES (7, 1, 'phone', '联系电话', 'varchar(20)', 'String', 'phone', '0', '0', '0', '1', '1', '1', '0', 'EQ', 'input', '', 6, 'admin', '2025-12-08 20:18:40', NULL, '2025-12-08 20:18:40');
+INSERT INTO `gen_table_column` VALUES (8, 1, 'email', '邮箱', 'varchar(100)', 'String', 'email', '0', '0', '0', '1', '1', '1', '0', 'EQ', 'input', '', 7, 'admin', '2025-12-08 20:18:40', NULL, '2025-12-08 20:18:40');
+INSERT INTO `gen_table_column` VALUES (9, 1, 'sort_order', '排序', 'int', 'Integer', 'sortOrder', '0', '0', '0', '1', '1', '1', '0', 'EQ', 'input', '', 8, 'admin', '2025-12-08 20:18:40', NULL, '2025-12-08 20:18:40');
+INSERT INTO `gen_table_column` VALUES (10, 1, 'status', '状态：0-禁用，1-启用', 'tinyint', 'Integer', 'status', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'radio', '', 9, 'admin', '2025-12-08 20:18:40', NULL, '2025-12-08 20:18:40');
+INSERT INTO `gen_table_column` VALUES (11, 1, 'create_time', '创建时间', 'datetime', 'LocalDateTime', 'createTime', '0', '0', '0', '1', '0', '1', '0', 'BETWEEN', 'datetime', '', 10, 'admin', '2025-12-08 20:18:40', NULL, '2025-12-08 20:18:40');
+INSERT INTO `gen_table_column` VALUES (12, 1, 'update_time', '更新时间', 'datetime', 'LocalDateTime', 'updateTime', '0', '0', '0', '1', '0', '1', '0', 'BETWEEN', 'datetime', '', 11, 'admin', '2025-12-08 20:18:40', NULL, '2025-12-08 20:18:40');
+INSERT INTO `gen_table_column` VALUES (13, 1, 'deleted', '逻辑删除：0-未删除，1-已删除', 'tinyint', 'Integer', 'deleted', '0', '0', '0', '1', '0', '0', '0', 'EQ', 'input', '', 12, 'admin', '2025-12-08 20:18:40', NULL, '2025-12-08 20:18:40');
+INSERT INTO `gen_table_column` VALUES (14, 1, 'remark', '备注', 'varchar(500)', 'String', 'remark', '0', '0', '0', '1', '1', '1', '0', 'EQ', 'textarea', '', 13, 'admin', '2025-12-08 20:18:40', NULL, '2025-12-08 20:18:40');
+
+-- ----------------------------
+-- Table structure for sys_dept
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_dept`;
+CREATE TABLE `sys_dept`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '结构ID',
+  `parent_id` bigint NULL DEFAULT 0 COMMENT '父结构ID (0=根节点)',
+  `ancestors` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '祖先节点列表 (如: 0,1,2)',
+  `dept_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '结构名称',
+  `dept_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '结构编码',
+  `leader` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '负责人',
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '联系电话',
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '邮箱',
+  `sort_order` int NULL DEFAULT 0 COMMENT '排序',
+  `status` tinyint NULL DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` tinyint NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_dept_code`(`dept_code` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '结构表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of sys_dept
+-- ----------------------------
+INSERT INTO `sys_dept` VALUES (1, 0, '0', '张家界旅游公司', 'HQ', '总经理', '0744-8888888', 'admin@zjj.com', 1, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, '总公司');
+INSERT INTO `sys_dept` VALUES (2, 1, '0,1', '技术部', 'TECH', '技术总监', NULL, NULL, 1, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
+INSERT INTO `sys_dept` VALUES (3, 1, '0,1', '产品部', 'PRODUCT', '产品总监', NULL, NULL, 2, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
+INSERT INTO `sys_dept` VALUES (4, 1, '0,1', '运营部', 'OPERATION', '运营总监', NULL, NULL, 3, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
+INSERT INTO `sys_dept` VALUES (5, 2, '0,1,2', '后端组', 'TECH_BE', '后端负责人', NULL, NULL, 1, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
+INSERT INTO `sys_dept` VALUES (6, 2, '0,1,2', '前端组', 'TECH_FE', '前端负责人', NULL, NULL, 2, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
 
 -- ----------------------------
 -- Table structure for sys_file_info
@@ -42,7 +159,7 @@ CREATE TABLE `sys_file_info`  (
   INDEX `idx_file_hash`(`file_hash` ASC) USING BTREE,
   INDEX `idx_upload_user_id`(`upload_user_id` ASC) USING BTREE,
   INDEX `idx_create_time`(`create_time` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文件信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文件信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_file_info
@@ -67,7 +184,7 @@ CREATE TABLE `sys_login_log`  (
   `deleted` int NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
   `remark` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '登录日志表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 25 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '登录日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_login_log
@@ -84,6 +201,68 @@ INSERT INTO `sys_login_log` VALUES (9, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Loca
 INSERT INTO `sys_login_log` VALUES (10, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:50:51', '2025-12-05 19:50:51', 0, NULL);
 INSERT INTO `sys_login_log` VALUES (11, 'yushuang', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 20:14:05', '2025-12-05 20:14:05', 0, NULL);
 INSERT INTO `sys_login_log` VALUES (12, 'yushuang', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 20:50:28', '2025-12-05 20:50:28', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (13, 'admin', '127.0.0.1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:32:03', '2025-12-07 14:32:03', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (14, 'yushuang', '127.0.0.1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 0, '账号已被禁用，请联系管理员', '2025-12-07 14:49:22', '2025-12-07 14:49:22', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (15, 'yushuang', '127.0.0.1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 0, '账号已被禁用，请联系管理员', '2025-12-07 14:49:30', '2025-12-07 14:49:30', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (16, 'admin', '127.0.0.1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:49:36', '2025-12-07 14:49:36', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (17, 'yushuang', '127.0.0.1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 0, '账号已被禁用，请联系管理员', '2025-12-07 14:50:15', '2025-12-07 14:50:15', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (18, 'yushuang', '127.0.0.1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 0, '账号已被禁用，请联系管理员', '2025-12-07 14:50:21', '2025-12-07 14:50:21', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (19, 'yushuang', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 0, '用户名或密码错误', '2025-12-08 20:17:00', '2025-12-08 20:17:00', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (20, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:17:08', '2025-12-08 20:17:08', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (21, 'yushuang', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 0, '用户名或密码错误', '2025-12-08 20:38:03', '2025-12-08 20:38:03', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (22, 'yushuang', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:08', '2025-12-08 20:38:08', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (23, 'yushuang', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:26', '2025-12-08 20:38:26', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (24, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:39:17', '2025-12-08 20:39:17', 0, NULL);
+
+-- ----------------------------
+-- Table structure for sys_menu
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_menu`;
+CREATE TABLE `sys_menu`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '菜单ID',
+  `menu_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '菜单名称',
+  `parent_id` bigint NULL DEFAULT 0 COMMENT '父菜单ID',
+  `order_num` int NULL DEFAULT 0 COMMENT '显示顺序',
+  `path` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '路由地址',
+  `component` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '组件路径',
+  `query` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '路由参数',
+  `is_frame` tinyint NULL DEFAULT 1 COMMENT '是否为外链（0是 1否）',
+  `is_cache` tinyint NULL DEFAULT 0 COMMENT '是否缓存（0缓存 1不缓存）',
+  `menu_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '菜单类型（M目录 C菜单 F按钮）',
+  `visible` tinyint NULL DEFAULT 1 COMMENT '菜单状态（0隐藏 1显示）',
+  `status` tinyint NULL DEFAULT 1 COMMENT '菜单状态（0停用 1正常）',
+  `perms` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '权限标识',
+  `icon` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '#' COMMENT '菜单图标',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` tinyint NULL DEFAULT 0 COMMENT '逻辑删除',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '备注',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1025 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单权限表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sys_menu
+-- ----------------------------
+INSERT INTO `sys_menu` VALUES (1, '仪表盘', 0, 1, '/dashboard', 'Dashboard', NULL, 1, 0, 'C', 1, 1, NULL, 'House', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (2, '个人中心', 0, 2, '/profile', 'Profile', NULL, 1, 0, 'C', 1, 1, NULL, 'User', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (3, '系统管理', 0, 3, '/system', NULL, NULL, 1, 0, 'M', 1, 1, NULL, 'Setting', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (100, '用户管理', 3, 1, '/users', 'Users', NULL, 1, 0, 'C', 1, 1, 'user:view', 'UserFilled', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (101, '角色管理', 3, 2, '/roles', 'Roles', NULL, 1, 0, 'C', 1, 1, 'role:view', 'Avatar', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (102, '菜单管理', 3, 3, '/menus', 'Menus', NULL, 1, 0, 'C', 1, 1, 'menu:view', 'Menu', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (103, '权限管理', 3, 4, '/permissions', 'Permissions', NULL, 1, 0, 'C', 1, 1, 'permission:view', 'Key', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (104, '代码生成器', 3, 5, '/generator', 'Generator', NULL, 1, 0, 'C', 1, 1, 'generator:view', 'Cpu', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1001, '用户查询', 100, 1, '', NULL, NULL, 1, 0, 'F', 1, 1, 'user:view', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1002, '用户新增', 100, 2, '', NULL, NULL, 1, 0, 'F', 1, 1, 'user:create', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1003, '用户修改', 100, 3, '', NULL, NULL, 1, 0, 'F', 1, 1, 'user:update', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1004, '用户删除', 100, 4, '', NULL, NULL, 1, 0, 'F', 1, 1, 'user:delete', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1011, '角色查询', 101, 1, '', NULL, NULL, 1, 0, 'F', 1, 1, 'role:view', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1012, '角色新增', 101, 2, '', NULL, NULL, 1, 0, 'F', 1, 1, 'role:create', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1013, '角色修改', 101, 3, '', NULL, NULL, 1, 0, 'F', 1, 1, 'role:update', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1014, '角色删除', 101, 4, '', NULL, NULL, 1, 0, 'F', 1, 1, 'role:delete', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1021, '菜单查询', 102, 1, '', NULL, NULL, 1, 0, 'F', 1, 1, 'menu:view', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1022, '菜单新增', 102, 2, '', NULL, NULL, 1, 0, 'F', 1, 1, 'menu:create', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1023, '菜单修改', 102, 3, '', NULL, NULL, 1, 0, 'F', 1, 1, 'menu:update', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1024, '菜单删除', 102, 4, '', NULL, NULL, 1, 0, 'F', 1, 1, 'menu:delete', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 
 -- ----------------------------
 -- Table structure for sys_operation_log
@@ -94,6 +273,9 @@ CREATE TABLE `sys_operation_log`  (
   `user_id` bigint NULL DEFAULT NULL COMMENT '操作用户ID',
   `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '操作用户名',
   `operation` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '操作类型',
+  `module` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '模块名称',
+  `request_method` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '请求方法(GET/POST/PUT/DELETE)',
+  `request_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '请求URL',
   `method` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '请求方法',
   `params` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '请求参数',
   `time` bigint NULL DEFAULT NULL COMMENT '执行时长(毫秒)',
@@ -106,23 +288,48 @@ CREATE TABLE `sys_operation_log`  (
   `deleted` int NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
   `remark` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 38 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_operation_log
 -- ----------------------------
-INSERT INTO `sys_operation_log` VALUES (1, NULL, 'anonymousUser', '用户登录', 'com.yushuang.demo.controller.AuthController.login', NULL, 311, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 18:01:22', '2025-12-05 18:01:22', 0, NULL);
-INSERT INTO `sys_operation_log` VALUES (2, NULL, 'anonymousUser', '用户登录', 'com.yushuang.demo.controller.AuthController.login', NULL, 56, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 18:05:07', '2025-12-05 18:05:07', 0, NULL);
-INSERT INTO `sys_operation_log` VALUES (3, NULL, 'anonymousUser', '用户登录', 'com.yushuang.demo.controller.AuthController.login', NULL, 57, '0:0:0:0:0:0:0:1', 'curl/8.16.0', 1, NULL, '2025-12-05 18:11:15', '2025-12-05 18:11:15', 0, NULL);
-INSERT INTO `sys_operation_log` VALUES (4, NULL, 'anonymousUser', '用户登录', 'com.yushuang.demo.controller.AuthController.login', NULL, 250, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 18:18:03', '2025-12-05 18:18:03', 0, NULL);
-INSERT INTO `sys_operation_log` VALUES (5, NULL, 'anonymousUser', '用户登录', 'com.yushuang.demo.controller.AuthController.login', NULL, 246, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:28:07', '2025-12-05 19:28:07', 0, NULL);
-INSERT INTO `sys_operation_log` VALUES (6, NULL, 'anonymousUser', '用户登录', 'com.yushuang.demo.controller.AuthController.login', NULL, 102, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:37:21', '2025-12-05 19:37:21', 0, NULL);
-INSERT INTO `sys_operation_log` VALUES (7, NULL, 'anonymousUser', '用户登录', 'com.yushuang.demo.controller.AuthController.login', NULL, 58, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:38:38', '2025-12-05 19:38:38', 0, NULL);
-INSERT INTO `sys_operation_log` VALUES (8, NULL, 'anonymousUser', '用户登录', 'com.yushuang.demo.controller.AuthController.login', NULL, 58, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:39:23', '2025-12-05 19:39:23', 0, NULL);
-INSERT INTO `sys_operation_log` VALUES (9, NULL, 'anonymousUser', '用户登录', 'com.yushuang.demo.controller.AuthController.login', NULL, 60, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:50:01', '2025-12-05 19:50:01', 0, NULL);
-INSERT INTO `sys_operation_log` VALUES (10, NULL, 'anonymousUser', '用户登录', 'com.yushuang.demo.controller.AuthController.login', NULL, 58, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:50:51', '2025-12-05 19:50:51', 0, NULL);
-INSERT INTO `sys_operation_log` VALUES (11, NULL, 'anonymousUser', '用户登录', 'com.yushuang.demo.controller.AuthController.login', NULL, 260, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 20:14:05', '2025-12-05 20:14:05', 0, NULL);
-INSERT INTO `sys_operation_log` VALUES (12, NULL, 'anonymousUser', '用户登录', 'com.yushuang.demo.controller.AuthController.login', NULL, 129, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 20:50:28', '2025-12-05 20:50:28', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (1, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 311, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 18:01:22', '2025-12-05 18:01:22', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (2, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 56, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 18:05:07', '2025-12-05 18:05:07', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (3, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 57, '0:0:0:0:0:0:0:1', 'curl/8.16.0', 1, NULL, '2025-12-05 18:11:15', '2025-12-05 18:11:15', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (4, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 250, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 18:18:03', '2025-12-05 18:18:03', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (5, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 246, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:28:07', '2025-12-05 19:28:07', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (6, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 102, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:37:21', '2025-12-05 19:37:21', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (7, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 58, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:38:38', '2025-12-05 19:38:38', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (8, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 58, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:39:23', '2025-12-05 19:39:23', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (9, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 60, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:50:01', '2025-12-05 19:50:01', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (10, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 58, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:50:51', '2025-12-05 19:50:51', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (11, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 260, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 20:14:05', '2025-12-05 20:14:05', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (12, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 129, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 20:50:28', '2025-12-05 20:50:28', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (13, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 141, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:32:03', '2025-12-07 14:32:03', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (14, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 245, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:49:22', '2025-12-07 14:49:22', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (15, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 56, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:49:30', '2025-12-07 14:49:30', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (16, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 112, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:49:36', '2025-12-07 14:49:36', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (17, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 54, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:50:15', '2025-12-07 14:50:15', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (18, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 54, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:50:21', '2025-12-07 14:50:21', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (19, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 363, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:17:00', '2025-12-08 20:17:00', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (20, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 78, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:17:08', '2025-12-08 20:17:08', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (21, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 3, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:17:08', '2025-12-08 20:17:08', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (22, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 4, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:18:34', '2025-12-08 20:18:34', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (23, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 2, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:20:27', '2025-12-08 20:20:27', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (24, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 2, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:23:21', '2025-12-08 20:23:21', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (25, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 2, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:24:51', '2025-12-08 20:24:51', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (26, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 7, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:34:41', '2025-12-08 20:34:41', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (27, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 68, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:03', '2025-12-08 20:38:03', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (28, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 73, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:08', '2025-12-08 20:38:08', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (29, NULL, 'yushuang', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 3, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:08', '2025-12-08 20:38:08', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (30, NULL, 'yushuang', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 2, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:19', '2025-12-08 20:38:19', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (31, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 61, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:26', '2025-12-08 20:38:26', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (32, NULL, 'yushuang', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 3, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:26', '2025-12-08 20:38:26', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (33, NULL, 'yushuang', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 2, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:39:00', '2025-12-08 20:39:00', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (34, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 62, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:39:17', '2025-12-08 20:39:17', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (35, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 1, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:39:17', '2025-12-08 20:39:17', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (36, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 2, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:39:38', '2025-12-08 20:39:38', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (37, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 3, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:41:16', '2025-12-08 20:41:16', 0, NULL);
 
 -- ----------------------------
 -- Table structure for sys_permission
@@ -145,7 +352,7 @@ CREATE TABLE `sys_permission`  (
   `remark` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `permission_code`(`permission_code` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '权限表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '权限表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_permission
@@ -185,7 +392,7 @@ CREATE TABLE `sys_role`  (
   `remark` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `role_code`(`role_code` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_role
@@ -193,6 +400,43 @@ CREATE TABLE `sys_role`  (
 INSERT INTO `sys_role` VALUES (1, 'Super Admin', 'SUPER_ADMIN', 'System super administrator with all permissions', 1, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
 INSERT INTO `sys_role` VALUES (2, 'Admin', 'ADMIN', 'System administrator with most permissions', 2, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
 INSERT INTO `sys_role` VALUES (3, 'User', 'USER', 'Regular user with basic permissions', 3, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
+
+-- ----------------------------
+-- Table structure for sys_role_menu
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_role_menu`;
+CREATE TABLE `sys_role_menu`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `role_id` bigint NOT NULL COMMENT '角色ID',
+  `menu_id` bigint NOT NULL COMMENT '菜单ID',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_role_menu`(`role_id` ASC, `menu_id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 32 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色和菜单关联表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sys_role_menu
+-- ----------------------------
+INSERT INTO `sys_role_menu` VALUES (1, 1, 1, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (2, 1, 2, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (3, 1, 3, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (4, 1, 100, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (5, 1, 101, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (6, 1, 102, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (7, 1, 103, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (8, 1, 104, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (9, 1, 1001, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (10, 1, 1002, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (11, 1, 1003, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (12, 1, 1004, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (13, 1, 1011, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (14, 1, 1012, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (15, 1, 1013, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (16, 1, 1014, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (17, 1, 1021, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (18, 1, 1022, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (19, 1, 1023, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (20, 1, 1024, '2025-12-07 14:31:39');
 
 -- ----------------------------
 -- Table structure for sys_role_permission
@@ -207,7 +451,7 @@ CREATE TABLE `sys_role_permission`  (
   `deleted` tinyint NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_role_permission`(`role_id` ASC, `permission_id` ASC, `deleted` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 42 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色权限关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 42 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色权限关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_role_permission
@@ -267,13 +511,13 @@ CREATE TABLE `sys_user`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `username`(`username` ASC) USING BTREE,
   INDEX `idx_dept_id`(`dept_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
 INSERT INTO `sys_user` VALUES (1, 'admin', '$2a$10$jeHWtKljDN1X.HLBbexeFuUmfx/T0Ea6TjtAxicJ6my8HF3Frl83m', NULL, '系统管理员', '超级管理员', 'admin@example.com', '13800138000', NULL, 1, 0, NULL, 1, NULL, NULL, '2025-12-05 17:59:19', '2025-12-05 20:00:47', 0, NULL);
-INSERT INTO `sys_user` VALUES (6, 'yushuang', '$2a$10$fXzw5k5bJGkiB7357Mk0Geey1pVBvN2ehHePLEBL9tGfsBoBPoWy2', NULL, NULL, NULL, '18888888@qq.com', NULL, NULL, NULL, 0, NULL, 0, NULL, NULL, '2025-12-05 20:50:23', '2025-12-05 21:06:49', 0, NULL);
+INSERT INTO `sys_user` VALUES (6, 'yushuang', '$2a$10$QkJUrmOjNl1bCtDSMDonYuFfk/Gb7NxSsswy2RSJp04xZ4GJQ1Y4.', NULL, NULL, NULL, '18888888@qq.com', NULL, NULL, NULL, 0, NULL, 1, NULL, NULL, '2025-12-05 20:50:23', '2025-12-08 20:38:00', 0, NULL);
 
 -- ----------------------------
 -- Table structure for sys_user_role
@@ -288,7 +532,7 @@ CREATE TABLE `sys_user_role`  (
   `deleted` tinyint NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_user_role`(`user_id` ASC, `role_id` ASC, `deleted` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户角色关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user_role
@@ -297,99 +541,5 @@ INSERT INTO `sys_user_role` VALUES (1, 1, 1, '2025-12-05 17:59:19', '2025-12-05 
 INSERT INTO `sys_user_role` VALUES (2, 4, 3, NULL, '2025-12-05 19:35:53', 0);
 INSERT INTO `sys_user_role` VALUES (3, 5, 3, NULL, '2025-12-05 19:38:34', 0);
 INSERT INTO `sys_user_role` VALUES (4, 6, 3, NULL, '2025-12-05 20:14:00', 0);
-
--- ----------------------------
--- Table structure for sys_dept
--- ----------------------------
-DROP TABLE IF EXISTS `sys_dept`;
-CREATE TABLE `sys_dept` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '结构ID',
-  `parent_id` bigint DEFAULT 0 COMMENT '父结构ID (0=根节点)',
-  `ancestors` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '祖先节点列表 (如: 0,1,2)',
-  `dept_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '结构名称',
-  `dept_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '结构编码',
-  `leader` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '负责人',
-  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '联系电话',
-  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '邮箱',
-  `sort_order` int DEFAULT 0 COMMENT '排序',
-  `status` tinyint DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
-  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `deleted` tinyint DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_dept_code` (`dept_code`)
-) ENGINE=InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT='结构表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of sys_dept
--- ----------------------------
-INSERT INTO `sys_dept` VALUES (1, 0, '0', '张家界旅游公司', 'HQ', '总经理', '0744-8888888', 'admin@zjj.com', 1, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, '总公司');
-INSERT INTO `sys_dept` VALUES (2, 1, '0,1', '技术部', 'TECH', '技术总监', NULL, NULL, 1, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
-INSERT INTO `sys_dept` VALUES (3, 1, '0,1', '产品部', 'PRODUCT', '产品总监', NULL, NULL, 2, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
-INSERT INTO `sys_dept` VALUES (4, 1, '0,1', '运营部', 'OPERATION', '运营总监', NULL, NULL, 3, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
-INSERT INTO `sys_dept` VALUES (5, 2, '0,1,2', '后端组', 'TECH_BE', '后端负责人', NULL, NULL, 1, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
-INSERT INTO `sys_dept` VALUES (6, 2, '0,1,2', '前端组', 'TECH_FE', '前端负责人', NULL, NULL, 2, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
-
--- ----------------------------
--- Table structure for gen_table (代码生成业务表)
--- ----------------------------
-DROP TABLE IF EXISTS `gen_table`;
-CREATE TABLE `gen_table` (
-    `table_id`          BIGINT          NOT NULL AUTO_INCREMENT    COMMENT '编号',
-    `table_name`        VARCHAR(200)    DEFAULT ''                 COMMENT '表名称',
-    `table_comment`     VARCHAR(500)    DEFAULT ''                 COMMENT '表描述',
-    `sub_table_name`    VARCHAR(64)     DEFAULT NULL               COMMENT '关联子表的表名',
-    `sub_table_fk_name` VARCHAR(64)     DEFAULT NULL               COMMENT '子表关联的外键名',
-    `class_name`        VARCHAR(100)    DEFAULT ''                 COMMENT '实体类名称',
-    `tpl_category`      VARCHAR(200)    DEFAULT 'crud'             COMMENT '使用的模板（crud单表 tree树表 sub主子表）',
-    `tpl_web_type`      VARCHAR(30)     DEFAULT ''                 COMMENT '前端模板类型（element-ui element-plus）',
-    `package_name`      VARCHAR(100)                               COMMENT '生成包路径',
-    `module_name`       VARCHAR(30)                                COMMENT '生成模块名',
-    `business_name`     VARCHAR(30)                                COMMENT '生成业务名',
-    `function_name`     VARCHAR(50)                                COMMENT '生成功能名',
-    `function_author`   VARCHAR(50)                                COMMENT '生成功能作者',
-    `gen_type`          CHAR(1)         DEFAULT '0'                COMMENT '生成代码方式（0zip压缩包 1自定义路径）',
-    `gen_path`          VARCHAR(200)    DEFAULT '/'                COMMENT '生成路径（不填默认项目路径）',
-    `options`           VARCHAR(1000)                              COMMENT '其它生成选项（JSON格式）',
-    `create_by`         VARCHAR(64)     DEFAULT ''                 COMMENT '创建者',
-    `create_time`       DATETIME                                   COMMENT '创建时间',
-    `update_by`         VARCHAR(64)     DEFAULT ''                 COMMENT '更新者',
-    `update_time`       DATETIME                                   COMMENT '更新时间',
-    `remark`            VARCHAR(500)    DEFAULT NULL               COMMENT '备注',
-    PRIMARY KEY (`table_id`),
-    INDEX `idx_gen_table_name` (`table_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 COMMENT='代码生成业务表';
-
--- ----------------------------
--- Table structure for gen_table_column (代码生成业务表字段)
--- ----------------------------
-DROP TABLE IF EXISTS `gen_table_column`;
-CREATE TABLE `gen_table_column` (
-    `column_id`         BIGINT          NOT NULL AUTO_INCREMENT    COMMENT '编号',
-    `table_id`          BIGINT                                     COMMENT '归属表编号',
-    `column_name`       VARCHAR(200)                               COMMENT '列名称',
-    `column_comment`    VARCHAR(500)                               COMMENT '列描述',
-    `column_type`       VARCHAR(100)                               COMMENT '列类型',
-    `java_type`         VARCHAR(500)                               COMMENT 'JAVA类型',
-    `java_field`        VARCHAR(200)                               COMMENT 'JAVA字段名',
-    `is_pk`             CHAR(1)                                    COMMENT '是否主键（1是）',
-    `is_increment`      CHAR(1)                                    COMMENT '是否自增（1是）',
-    `is_required`       CHAR(1)                                    COMMENT '是否必填（1是）',
-    `is_insert`         CHAR(1)                                    COMMENT '是否为插入字段（1是）',
-    `is_edit`           CHAR(1)                                    COMMENT '是否编辑字段（1是）',
-    `is_list`           CHAR(1)                                    COMMENT '是否列表字段（1是）',
-    `is_query`          CHAR(1)                                    COMMENT '是否查询字段（1是）',
-    `query_type`        VARCHAR(200)    DEFAULT 'EQ'               COMMENT '查询方式（等于、不等于、大于、小于、范围）',
-    `html_type`         VARCHAR(200)                               COMMENT '显示类型（文本框、文本域、下拉框、复选框、单选框、日期控件）',
-    `dict_type`         VARCHAR(200)    DEFAULT ''                 COMMENT '字典类型',
-    `sort`              INT                                        COMMENT '排序',
-    `create_by`         VARCHAR(64)     DEFAULT ''                 COMMENT '创建者',
-    `create_time`       DATETIME                                   COMMENT '创建时间',
-    `update_by`         VARCHAR(64)     DEFAULT ''                 COMMENT '更新者',
-    `update_time`       DATETIME                                   COMMENT '更新时间',
-    PRIMARY KEY (`column_id`),
-    INDEX `idx_gen_column_table_id` (`table_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 COMMENT='代码生成业务表字段';
 
 SET FOREIGN_KEY_CHECKS = 1;

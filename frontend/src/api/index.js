@@ -424,6 +424,67 @@ export const fileApi = {
   }
 }
 
+// 部门管理API
+export const deptApi = {
+  // 获取部门树
+  getDeptTree() {
+    return request({
+      url: '/depts/tree',
+      method: 'get'
+    })
+  },
+  
+  // 获取部门下拉选项
+  getDeptOptions() {
+    return request({
+      url: '/depts/options',
+      method: 'get'
+    })
+  },
+
+  // 获取部门详情
+  getDeptById(id) {
+    return request({
+      url: `/depts/${id}`,
+      method: 'get'
+    })
+  },
+
+  // 创建部门
+  createDept(data) {
+    return request({
+      url: '/depts',
+      method: 'post',
+      data
+    })
+  },
+
+  // 更新部门
+  updateDept(id, data) {
+    return request({
+      url: `/depts/${id}`,
+      method: 'put',
+      data
+    })
+  },
+
+  // 删除部门
+  deleteDept(id) {
+    return request({
+      url: `/depts/${id}`,
+      method: 'delete'
+    })
+  },
+  
+  // 获取子部门ID列表
+  getChildDeptIds(id) {
+    return request({
+      url: `/depts/${id}/children/ids`,
+      method: 'get'
+    })
+  }
+}
+
 // 仪表板API
 export const dashboardApi = {
   // 获取仪表板统计数据

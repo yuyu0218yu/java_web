@@ -58,6 +58,12 @@ const routes = [
         meta: { title: '菜单管理', requiresAuth: true, requiredPermissions: ['menu:view'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
       },
       {
+        path: 'depts',
+        name: 'Depts',
+        component: () => import('@/views/Depts.vue'),
+        meta: { title: '部门管理', requiresAuth: true, requiredPermissions: ['dept:view'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
+      },
+      {
         path: 'profile',
         name: 'Profile',
         component: () => import('@/views/Profile.vue'),
