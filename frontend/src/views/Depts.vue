@@ -39,12 +39,29 @@
         >
           <el-table-column prop="deptName" label="部门名称" min-width="200">
              <template #default="scope">
-               <span style="font-weight: 500;">{{ scope.row.deptName }}</span>
+               <div style="display: flex; align-items: center; gap: 8px;">
+                 <el-icon v-if="scope.row.children && scope.row.children.length > 0" style="color: #409EFF;">
+                   <Folder />
+                 </el-icon>
+                 <el-icon v-else style="color: #67C23A;">
+                   <Document />
+                 </el-icon>
+                 <span style="font-weight: 500;">{{ scope.row.deptName }}</span>
+                 <el-tag v-if="scope.row.children && scope.row.children.length > 0" size="small" type="primary" effect="plain">
+                   {{ scope.row.children.length }} 个下级
+                 </el-tag>
+               </div>
              </template>
           </el-table-column>
           <el-table-column prop="deptCode" label="部门编码" width="120">
             <template #default="scope">
               <el-tag size="small" type="info" effect="plain">{{ scope.row.deptCode }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="leader" label="负责人" width="120" align="center">
+            <template #default="scope">
+              <span v-if="scope.row.leader">{{ scope.row.leader }}</span>
+              <span v-else style="color: #c0c4cc;">未设置</span>
             </template>
           </el-table-column>
           <el-table-column prop="sortOrder" label="排序" width="80" align="center" />
@@ -172,7 +189,7 @@ import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   Plus, Edit, Delete, Search, Refresh, 
-  OfficeBuilding, Clock, Sort 
+  OfficeBuilding, Clock, Sort, Folder, Document 
 } from '@element-plus/icons-vue'
 import { deptApi } from '@/api'
 
