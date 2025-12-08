@@ -389,6 +389,7 @@ CREATE TABLE `sys_role`  (
   `role_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '角色名称',
   `role_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '角色编码',
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '角色描述',
+  `data_scope` tinyint NULL DEFAULT 1 COMMENT '数据范围：1-全部数据 2-本部门及下级 3-本部门 4-仅本人',
   `sort_order` int NULL DEFAULT 0 COMMENT '排序',
   `status` tinyint NULL DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -402,9 +403,9 @@ CREATE TABLE `sys_role`  (
 -- ----------------------------
 -- Records of sys_role
 -- ----------------------------
-INSERT INTO `sys_role` VALUES (1, 'Super Admin', 'SUPER_ADMIN', 'System super administrator with all permissions', 1, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_role` VALUES (2, 'Admin', 'ADMIN', 'System administrator with most permissions', 2, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_role` VALUES (3, 'User', 'USER', 'Regular user with basic permissions', 3, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
+INSERT INTO `sys_role` VALUES (1, 'Super Admin', 'SUPER_ADMIN', 'System super administrator with all permissions', 1, 1, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
+INSERT INTO `sys_role` VALUES (2, 'Admin', 'ADMIN', 'System administrator with most permissions', 2, 2, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
+INSERT INTO `sys_role` VALUES (3, 'User', 'USER', 'Regular user with basic permissions', 4, 3, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
 
 -- ----------------------------
 -- Table structure for sys_role_menu
