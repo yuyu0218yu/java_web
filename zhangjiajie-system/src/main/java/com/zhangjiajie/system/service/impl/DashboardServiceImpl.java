@@ -215,7 +215,6 @@ public class DashboardServiceImpl implements DashboardService {
      * 获取用户增长趋势数据（最近7天）- 每日新增用户数
      */
     private List<DashboardStatistics.ChartData> getUserGrowthDataByWeek() {
-        List<DashboardStatistics.ChartData> chartDataList = new ArrayList<>();
         LocalDate now = LocalDate.now();
         
         long maxCount = 0;
@@ -248,7 +247,6 @@ public class DashboardServiceImpl implements DashboardService {
      * 获取用户增长趋势数据（最近12个月）- 每月新增用户数
      */
     private List<DashboardStatistics.ChartData> getUserGrowthDataByMonth() {
-        List<DashboardStatistics.ChartData> chartDataList = new ArrayList<>();
         LocalDate now = LocalDate.now();
         
         long maxCount = 0;
@@ -281,7 +279,6 @@ public class DashboardServiceImpl implements DashboardService {
      * 获取用户增长趋势数据（最近5年）- 每年新增用户数
      */
     private List<DashboardStatistics.ChartData> getUserGrowthDataByYear() {
-        List<DashboardStatistics.ChartData> chartDataList = new ArrayList<>();
         LocalDate now = LocalDate.now();
         
         long maxCount = 0;

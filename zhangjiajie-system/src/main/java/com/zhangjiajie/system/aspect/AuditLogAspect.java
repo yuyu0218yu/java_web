@@ -101,7 +101,7 @@ public class AuditLogAspect {
             operationLog.setRequestMethod(request.getMethod());
             operationLog.setRequestUrl(request.getRequestURI());
 
-            if (auditLog.saveRequestData()) {
+            if (auditLog != null && auditLog.saveRequestData()) {
                 operationLog.setParams(serializeArgs(joinPoint.getArgs(), auditLog));
             }
         }

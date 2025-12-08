@@ -1,9 +1,5 @@
 package com.zhangjiajie.common.util;
 
-import lombok.extern.slf4j.Slf4j;
-
-import java.util.regex.Pattern;
-
 /**
  * 用户代理工具类
  * 用于解析浏览器和操作系统信息
@@ -11,32 +7,7 @@ import java.util.regex.Pattern;
  * @author yushuang
  * @since 2025-12-05
  */
-@Slf4j
 public class UserAgentUtil {
-
-    // 浏览器匹配规则
-    private static final Pattern[] BROWSER_PATTERNS = {
-            Pattern.compile(".*MSIE ([\\d.]+).*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*Trident/([\\d.]+).*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*Edge/([\\d.]+).*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*Edg/([\\d.]+).*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*Chrome/([\\d.]+).*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*Firefox/([\\d.]+).*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*Opera/([\\d.]+).*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*OPR/([\\d.]+).*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*Safari/([\\d.]+).*", Pattern.CASE_INSENSITIVE)
-    };
-
-    // 操作系统匹配规则
-    private static final Pattern[] OS_PATTERNS = {
-            Pattern.compile(".*Windows NT ([\\d.]+).*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*Mac OS X ([\\d._]+).*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*Linux.*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*Ubuntu.*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*Android ([\\d.]+).*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*iPhone OS ([\\d._]+).*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*iPad.*", Pattern.CASE_INSENSITIVE)
-    };
 
     /**
      * 解析用户代理字符串

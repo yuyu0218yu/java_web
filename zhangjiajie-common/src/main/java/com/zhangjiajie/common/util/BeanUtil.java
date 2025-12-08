@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
  * @author yushuang
  * @since 2025-12-06
  */
+@SuppressWarnings("null")
 public final class BeanUtil {
 
     private BeanUtil() {

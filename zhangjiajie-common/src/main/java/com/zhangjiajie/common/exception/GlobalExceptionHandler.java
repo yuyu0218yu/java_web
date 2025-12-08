@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
  */
 @RestControllerAdvice
 @Slf4j
+@SuppressWarnings("null")
 public class GlobalExceptionHandler {
 
     private static final String FIELD_ERROR_SEPARATOR = "; ";
