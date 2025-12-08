@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 结构实体类
+ * 部门实体类
  *
  * @author yushuang
  * @since 2025-12-06
@@ -20,13 +20,13 @@ public class Dept implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 结构ID
+     * 部门ID
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     /**
-     * 父结构ID (0=根节点)
+     * 父部门ID (0=根节点)
      */
     @TableField("parent_id")
     private Long parentId;
@@ -38,13 +38,13 @@ public class Dept implements Serializable {
     private String ancestors;
 
     /**
-     * 结构名称
+     * 部门名称
      */
     @TableField("dept_name")
     private String deptName;
 
     /**
-     * 结构编码
+     * 部门编码
      */
     @TableField("dept_code")
     private String deptCode;
@@ -105,7 +105,7 @@ public class Dept implements Serializable {
     private String remark;
 
     /**
-     * 子结构列表（非数据库字段）
+     * 子部门列表（非数据库字段）
      */
     @TableField(exist = false)
     private List<Dept> children;
