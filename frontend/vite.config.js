@@ -14,7 +14,12 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
-        changeOrigin: true
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('error', () => {
+            // 静默处理代理错误，避免大量输出
+          })
+        }
       }
     }
   }
