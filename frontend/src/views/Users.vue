@@ -226,6 +226,23 @@
               </el-option>
             </el-select>
           </el-form-item>
+          <el-form-item label="部门" prop="deptId">
+            <el-tree-select
+              v-model="form.deptId"
+              :data="deptOptions"
+              placeholder="请选择部门"
+              style="width: 100%"
+              :props="{ label: 'deptName', value: 'id' }"
+              check-strictly
+              clearable
+              :render-after-expand="false"
+            >
+              <template #default="{ data }">
+                <el-icon style="margin-right: 8px;"><OfficeBuilding /></el-icon>
+                <span>{{ data.deptName }}</span>
+              </template>
+            </el-tree-select>
+          </el-form-item>
           <el-form-item label="状态" prop="status">
             <el-radio-group v-model="form.status" class="status-radio-group">
               <el-radio :label="1">
@@ -262,9 +279,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   Search, Refresh, Plus, Delete, Download, Edit, Key, Lock, 
   User, Message, Phone, Avatar, Clock, CircleCheck, CircleClose,
-  Close, Check
+  Close, Check, OfficeBuilding
 } from '@element-plus/icons-vue'
-import { userApi, roleApi } from '@/api'
+import { userApi, roleApi, deptApi } from '@/api'
 
 // 响应式数据
 const loading = ref(false)
@@ -289,6 +306,7 @@ const form = reactive({
   phone: '',
   password: '',
   roleId: null,
+  deptId: null,
   status: 1
 })
 
@@ -302,6 +320,7 @@ const pagination = reactive({
 // 表格数据
 const tableData = ref([])
 const roleOptions = ref([])
+const deptOptions = ref([])
 
 // 表单验证规则
 const rules = {
@@ -380,6 +399,15 @@ const loadRoles = async () => {
   }
 }
 
+const loadDepts = async () => {
+  try {
+    const response = await deptApi.getDeptTree()
+    deptOptions.value = response.data || []
+  } catch (error) {
+    console.error('加载部门数据失败:', error)
+  }
+}
+
 const handleSearch = () => {
   pagination.current = 1
   loadData()
@@ -404,6 +432,7 @@ const handleAdd = () => {
     phone: '',
     password: '',
     roleId: null,
+    deptId: null,
     status: 1
   })
 }
@@ -418,6 +447,7 @@ const handleEdit = (row) => {
     phone: row.phone,
     password: '',
     roleId: row.roleId,
+    deptId: row.deptId,
     status: row.status
   })
 }
@@ -564,6 +594,7 @@ const handleDialogClose = () => {
 onMounted(() => {
   loadData()
   loadRoles()
+  loadDepts()
 })
 </script>
 
