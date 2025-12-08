@@ -89,10 +89,17 @@ public class AuditLogAspect {
     }
 
     private void setRequestInfo(ProceedingJoinPoint joinPoint, OperationLog operationLog, AuditLog auditLog) {
+        // 设置模块名
+        if (auditLog != null && !auditLog.module().isEmpty()) {
+            operationLog.setModule(auditLog.module());
+        }
+        
         HttpServletRequest request = WebUtil.getRequest();
         if (request != null) {
             operationLog.setIp(IpUtil.getClientIp(request));
             operationLog.setUserAgent(request.getHeader("User-Agent"));
+            operationLog.setRequestMethod(request.getMethod());
+            operationLog.setRequestUrl(request.getRequestURI());
 
             if (auditLog.saveRequestData()) {
                 operationLog.setParams(serializeArgs(joinPoint.getArgs(), auditLog));

@@ -220,20 +220,34 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="module" label="模块" width="120" />
-        <el-table-column prop="operation" label="操作" width="150" />
-        <el-table-column prop="method" label="请求方法" width="100">
+        <el-table-column prop="module" label="模块" width="120">
           <template #default="scope">
-            <el-tag size="small" :type="getMethodType(scope.row.method)">
-              {{ scope.row.method }}
-            </el-tag>
+            <span>{{ scope.row.module || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="requestUrl" label="请求路径" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="ip" label="IP地址" width="140" />
-        <el-table-column prop="executionTime" label="耗时" width="100">
+        <el-table-column prop="operation" label="操作" width="150" />
+        <el-table-column prop="requestMethod" label="请求方法" width="100">
           <template #default="scope">
-            <span>{{ scope.row.executionTime }}ms</span>
+            <el-tag v-if="scope.row.requestMethod" size="small" :type="getMethodType(scope.row.requestMethod)">
+              {{ scope.row.requestMethod }}
+            </el-tag>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="requestUrl" label="请求路径" min-width="200" show-overflow-tooltip>
+          <template #default="scope">
+            <span>{{ scope.row.requestUrl || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="ip" label="IP地址" width="140" />
+        <el-table-column prop="time" label="耗时" width="100">
+          <template #default="scope">
+            <span>{{ scope.row.time || 0 }}ms</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="userAgent" label="浏览器" min-width="150" show-overflow-tooltip>
+          <template #default="scope">
+            <span>{{ getBrowserInfo(scope.row.userAgent) }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
@@ -531,6 +545,17 @@ const getMethodType = (method) => {
     'DELETE': 'danger'
   }
   return types[method] || 'info'
+}
+
+// 解析浏览器信息
+const getBrowserInfo = (userAgent) => {
+  if (!userAgent) return '-'
+  if (userAgent.includes('Chrome')) return 'Chrome'
+  if (userAgent.includes('Firefox')) return 'Firefox'
+  if (userAgent.includes('Safari')) return 'Safari'
+  if (userAgent.includes('Edge')) return 'Edge'
+  if (userAgent.includes('MSIE') || userAgent.includes('Trident')) return 'IE'
+  return userAgent.substring(0, 30) + '...'
 }
 
 onMounted(() => {

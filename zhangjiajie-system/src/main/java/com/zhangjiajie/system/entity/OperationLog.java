@@ -47,7 +47,25 @@ public class OperationLog implements Serializable {
     private String operation;
 
     /**
-     * 请求方法
+     * 模块名称
+     */
+    @TableField("module")
+    private String module;
+
+    /**
+     * 请求方法（GET/POST/PUT/DELETE）
+     */
+    @TableField("request_method")
+    private String requestMethod;
+
+    /**
+     * 请求URL
+     */
+    @TableField("request_url")
+    private String requestUrl;
+
+    /**
+     * 方法名称
      */
     @TableField("method")
     private String method;
