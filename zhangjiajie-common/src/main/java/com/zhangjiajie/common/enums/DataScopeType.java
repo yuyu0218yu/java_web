@@ -47,6 +47,6 @@ public enum DataScopeType implements CodeEnum<Integer> {
     }
 
     public static DataScopeType getByCode(Integer code) {
-        return CodeEnum.getByCode(DataScopeType.class, code, ALL);
+        return CodeEnum.getByCode(DataScopeType.class, code, SELF);
     }
 }

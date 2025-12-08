@@ -140,6 +140,12 @@ public class DataScopeAspect {
 
         // 获取所有子部门ID (已包含本部门)
         List<Long> deptIds = deptMapper.selectChildDeptIds(currentUser.getDeptId());
+        
+        // 安全检查：如果返回null或空列表，降级为仅本人权限
+        if (deptIds == null || deptIds.isEmpty()) {
+            log.debug("未找到部门信息，降级为仅本人权限");
+            return buildSelfOnlySql(currentUser, dataScope);
+        }
 
         String deptIdsStr = deptIds.stream()
                 .map(String::valueOf)
