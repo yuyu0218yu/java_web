@@ -3,7 +3,8 @@
     "allow": [
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(gh pr view:*)",
-      "Bash(mvn compile:*)"
+      "Bash(mvn compile:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []

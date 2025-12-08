@@ -1,11 +1,14 @@
 package com.zhangjiajie.system.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhangjiajie.common.service.CodeCheckService;
 import com.zhangjiajie.common.util.Assert;
 import com.zhangjiajie.common.util.TreeUtil;
 import com.zhangjiajie.system.entity.Dept;
+import com.zhangjiajie.system.entity.User;
 import com.zhangjiajie.system.mapper.DeptMapper;
+import com.zhangjiajie.system.mapper.UserMapper;
 import com.zhangjiajie.system.service.DeptService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +30,8 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 @Slf4j
 public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements DeptService {
+
+    private final UserMapper userMapper;
 
     @Override
     public List<Dept> getDeptTree() {
@@ -100,9 +105,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
         }
 
         // 不能将自己设为父部门
-        if (dept.getParentId() != null && dept.getParentId().equals(id)) {
-            throw new IllegalArgumentException("不能将自己设为父部门");
-        }
+        Assert.isFalse(dept.getParentId() != null && dept.getParentId().equals(id), "不能将自己设为父部门");
 
         // 如果父部门变更，需要更新 ancestors
         if (dept.getParentId() != null && !dept.getParentId().equals(existing.getParentId())) {
@@ -140,9 +143,11 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
         long childCount = lambdaQuery().eq(Dept::getParentId, id).count();
         Assert.isTrue(childCount == 0, "存在子部门，无法删除");
 
-        // TODO: 检查是否有用户属于该部门
-        // long userCount = userMapper.countByDeptId(id);
-        // Assert.isTrue(userCount == 0, "部门下存在用户，无法删除");
+        // 检查是否有用户属于该部门
+        long userCount = userMapper.selectCount(
+                new LambdaQueryWrapper<User>().eq(User::getDeptId, id)
+        );
+        Assert.isTrue(userCount == 0, "部门下存在用户，无法删除");
 
         removeById(id);
         log.info("删除部门成功: {}", dept.getDeptName());
