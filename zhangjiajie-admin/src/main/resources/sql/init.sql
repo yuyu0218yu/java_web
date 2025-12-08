@@ -263,6 +263,11 @@ INSERT INTO `sys_menu` VALUES (1021, '菜单查询', 102, 1, '', NULL, NULL, 1, 
 INSERT INTO `sys_menu` VALUES (1022, '菜单新增', 102, 2, '', NULL, NULL, 1, 0, 'F', 1, 1, 'menu:create', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (1023, '菜单修改', 102, 3, '', NULL, NULL, 1, 0, 'F', 1, 1, 'menu:update', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (1024, '菜单删除', 102, 4, '', NULL, NULL, 1, 0, 'F', 1, 1, 'menu:delete', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (105, '组织结构', 3, 6, '/depts', 'Depts', NULL, 1, 0, 'C', 1, 1, 'dept:view', 'OfficeBuilding', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1051, '组织查询', 105, 1, '', NULL, NULL, 1, 0, 'F', 1, 1, 'dept:view', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1052, '组织新增', 105, 2, '', NULL, NULL, 1, 0, 'F', 1, 1, 'dept:create', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1053, '组织修改', 105, 3, '', NULL, NULL, 1, 0, 'F', 1, 1, 'dept:edit', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (1054, '组织删除', 105, 4, '', NULL, NULL, 1, 0, 'F', 1, 1, 'dept:delete', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 
 -- ----------------------------
 -- Table structure for sys_operation_log
@@ -437,6 +442,11 @@ INSERT INTO `sys_role_menu` VALUES (17, 1, 1021, '2025-12-07 14:31:39');
 INSERT INTO `sys_role_menu` VALUES (18, 1, 1022, '2025-12-07 14:31:39');
 INSERT INTO `sys_role_menu` VALUES (19, 1, 1023, '2025-12-07 14:31:39');
 INSERT INTO `sys_role_menu` VALUES (20, 1, 1024, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (21, 1, 105, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (22, 1, 1051, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (23, 1, 1052, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (24, 1, 1053, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (25, 1, 1054, '2025-12-07 14:31:39');
 
 -- ----------------------------
 -- Table structure for sys_role_permission
