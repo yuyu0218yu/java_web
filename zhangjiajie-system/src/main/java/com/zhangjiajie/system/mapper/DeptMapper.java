@@ -43,4 +43,21 @@ public interface DeptMapper extends BaseMapper<Dept> {
      */
     @Select("SELECT * FROM sys_dept WHERE deleted = 0 AND FIND_IN_SET(#{deptId}, ancestors) ORDER BY sort_order")
     List<Dept> selectChildDepts(@Param("deptId") Long deptId);
+
+    /**
+     * 获取部门完整路径（包含所有父级部门名称）
+     *
+     * @param deptId 部门ID
+     * @return 部门路径，如：张家界旅游公司/技术部/后端组
+     */
+    @Select("SELECT CASE " +
+            "  WHEN d.ancestors IS NULL OR d.ancestors = '' THEN d.dept_name " +
+            "  ELSE CONCAT(" +
+            "    (SELECT GROUP_CONCAT(dept_name ORDER BY id SEPARATOR '/') " +
+            "     FROM sys_dept " +
+            "     WHERE FIND_IN_SET(id, d.ancestors) AND deleted = 0), " +
+            "    '/', d.dept_name) " +
+            "END as dept_path " +
+            "FROM sys_dept d WHERE d.id = #{deptId} AND d.deleted = 0")
+    String selectDeptPathById(@Param("deptId") Long deptId);
 }

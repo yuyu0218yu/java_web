@@ -151,23 +151,49 @@
           <el-form-item label="数据范围" prop="dataScope">
             <el-select v-model="form.dataScope" placeholder="请选择数据范围" style="width: 100%">
               <el-option :value="1" label="全部数据">
-                <el-icon style="margin-right: 8px;"><Grid /></el-icon>
-                <span>全部数据</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                  <div>
+                    <el-icon style="margin-right: 8px;"><Grid /></el-icon>
+                    <span>全部数据</span>
+                  </div>
+                  <el-tag size="small" type="danger" effect="plain">最高权限</el-tag>
+                </div>
               </el-option>
               <el-option :value="2" label="本部门及下级">
-                <el-icon style="margin-right: 8px;"><OfficeBuilding /></el-icon>
-                <span>本部门及下级</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                  <div>
+                    <el-icon style="margin-right: 8px;"><OfficeBuilding /></el-icon>
+                    <span>本部门及下级</span>
+                  </div>
+                  <el-tag size="small" type="warning" effect="plain">部门管理</el-tag>
+                </div>
               </el-option>
               <el-option :value="3" label="本部门">
-                <el-icon style="margin-right: 8px;"><OfficeBuilding /></el-icon>
-                <span>本部门</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                  <div>
+                    <el-icon style="margin-right: 8px;"><OfficeBuilding /></el-icon>
+                    <span>仅本部门</span>
+                  </div>
+                  <el-tag size="small" type="primary" effect="plain">部门内</el-tag>
+                </div>
               </el-option>
               <el-option :value="4" label="仅本人">
-                <el-icon style="margin-right: 8px;"><User /></el-icon>
-                <span>仅本人</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                  <div>
+                    <el-icon style="margin-right: 8px;"><User /></el-icon>
+                    <span>仅本人</span>
+                  </div>
+                  <el-tag size="small" type="info" effect="plain">个人</el-tag>
+                </div>
               </el-option>
             </el-select>
           </el-form-item>
+          <el-alert
+            :title="getDataScopeHelp(form.dataScope)"
+            type="info"
+            :closable="false"
+            show-icon
+          />
           <el-form-item label="状态" prop="status">
             <el-radio-group v-model="form.status" class="status-radio-group">
               <el-radio :label="1">
@@ -352,6 +378,17 @@ const getRoleColor = (roleName) => {
     '普通用户': '#67C23A'
   }
   return colorMap[roleName] || '#909399'
+}
+
+// 获取数据范围帮助信息
+const getDataScopeHelp = (dataScope) => {
+  const helps = {
+    1: '该角色可以查看和管理系统中所有部门的数据，拥有最高的数据访问权限',
+    2: '该角色可以查看和管理用户所在部门及其下级部门的数据。例如：技术部的角色可以管理后端组、前端组等下级部门',
+    3: '该角色只能查看和管理用户所在部门的数据，不能访问其他部门或下级部门的数据',
+    4: '该角色只能查看和管理自己创建的数据，无法访问其他用户的数据'
+  }
+  return helps[dataScope] || '请选择数据范围'
 }
 
 // 表格行样式
