@@ -47,6 +47,12 @@ public class Role implements Serializable {
     private String description;
 
     /**
+     * 数据范围：1-全部数据，2-本部门及下级，3-本部门，4-仅本人
+     */
+    @TableField("data_scope")
+    private Integer dataScope;
+
+    /**
      * 排序
      */
     @TableField("sort_order")
