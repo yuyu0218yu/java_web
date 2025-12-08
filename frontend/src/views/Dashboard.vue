@@ -128,7 +128,6 @@
                 <div class="header-title">
                   <el-icon class="header-icon pulse"><Bell /></el-icon>
                   <span>最近活动</span>
-                  <el-badge :value="recentActivities.length" class="activity-badge" />
                 </div>
                 <el-button type="primary" link @click="handleViewAllActivities">
                   查看全部
@@ -193,53 +192,73 @@
     <el-dialog 
       v-model="showAllActivitiesDialog" 
       title="全部活动记录" 
-      width="800px"
+      width="95%"
+      top="5vh"
       destroy-on-close
     >
-      <el-table :data="recentActivities" style="width: 100%">
-        <el-table-column prop="time" label="时间" width="180">
+      <el-table 
+        v-loading="allActivitiesLoading"
+        :data="allActivities" 
+        style="width: 100%"
+        max-height="60vh"
+      >
+        <el-table-column prop="createTime" label="时间" width="180">
           <template #default="scope">
             <div class="time-cell">
               <el-icon><Clock /></el-icon>
-              <span>{{ scope.row.time }}</span>
+              <span>{{ formatTime(scope.row.createTime) }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="user" label="用户" width="120">
+        <el-table-column prop="username" label="用户" width="120">
           <template #default="scope">
             <div class="user-cell">
-              <el-avatar :size="24" :style="{ backgroundColor: getAvatarColor(scope.row.user) }">
-                {{ scope.row.user.charAt(0).toUpperCase() }}
+              <el-avatar :size="24" :style="{ backgroundColor: getAvatarColor(scope.row.username || '未知') }">
+                {{ (scope.row.username || '?').charAt(0).toUpperCase() }}
               </el-avatar>
-              <span>{{ scope.row.user }}</span>
+              <span>{{ scope.row.username || '未知' }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="action" label="操作">
+        <el-table-column prop="module" label="模块" width="120" />
+        <el-table-column prop="operation" label="操作" width="150" />
+        <el-table-column prop="method" label="请求方法" width="100">
           <template #default="scope">
-            <div class="action-cell">
-              <el-icon :style="{ color: getActionColor(scope.row.action) }">
-                <component :is="getActionIcon(scope.row.action)" />
-              </el-icon>
-              <span>{{ scope.row.action }}</span>
-            </div>
+            <el-tag size="small" :type="getMethodType(scope.row.method)">
+              {{ scope.row.method }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="120">
+        <el-table-column prop="requestUrl" label="请求路径" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="ip" label="IP地址" width="140" />
+        <el-table-column prop="executionTime" label="耗时" width="100">
+          <template #default="scope">
+            <span>{{ scope.row.executionTime }}ms</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">
             <el-tag 
-              :type="scope.row.status === '成功' ? 'success' : 'danger'" 
+              :type="scope.row.status === 1 ? 'success' : 'danger'" 
               size="small"
               effect="light"
               round
             >
-              <el-icon v-if="scope.row.status === '成功'"><CircleCheck /></el-icon>
-              <el-icon v-else><CircleClose /></el-icon>
-              {{ scope.row.status }}
+              {{ scope.row.status === 1 ? '成功' : '失败' }}
             </el-tag>
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        v-model:current-page="activitiesPagination.current"
+        v-model:page-size="activitiesPagination.size"
+        :total="activitiesPagination.total"
+        :page-sizes="[20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        style="margin-top: 16px; justify-content: flex-end"
+        @current-change="fetchAllActivities"
+        @size-change="fetchAllActivities"
+      />
       <template #footer>
         <el-button @click="showAllActivitiesDialog = false">关闭</el-button>
       </template>
@@ -265,6 +284,15 @@ const chartPeriod = ref('month')
 
 // 是否显示全部活动对话框
 const showAllActivitiesDialog = ref(false)
+
+// 全部活动数据
+const allActivities = ref([])
+const allActivitiesLoading = ref(false)
+const activitiesPagination = ref({
+  current: 1,
+  size: 20,
+  total: 0
+})
 
 // 动画帧ID列表，用于清理
 const animationFrameIds = ref([])
@@ -462,8 +490,47 @@ watch(chartPeriod, (newPeriod) => {
 })
 
 // 查看全部活动
-const handleViewAllActivities = () => {
+const handleViewAllActivities = async () => {
   showAllActivitiesDialog.value = true
+  activitiesPagination.value.current = 1
+  await fetchAllActivities()
+}
+
+// 获取全部活动数据
+const fetchAllActivities = async () => {
+  allActivitiesLoading.value = true
+  try {
+    const res = await dashboardApi.getAllActivities({
+      current: activitiesPagination.value.current,
+      size: activitiesPagination.value.size
+    })
+    if (res.code === 200 && res.data) {
+      allActivities.value = res.data.records || []
+      activitiesPagination.value.total = res.data.total || 0
+    }
+  } catch (error) {
+    console.error('获取全部活动失败:', error)
+    ElMessage.error('获取活动记录失败')
+  } finally {
+    allActivitiesLoading.value = false
+  }
+}
+
+// 格式化时间
+const formatTime = (time) => {
+  if (!time) return '-'
+  return new Date(time).toLocaleString('zh-CN')
+}
+
+// 获取请求方法类型颜色
+const getMethodType = (method) => {
+  const types = {
+    'GET': 'success',
+    'POST': 'primary',
+    'PUT': 'warning',
+    'DELETE': 'danger'
+  }
+  return types[method] || 'info'
 }
 
 onMounted(() => {
@@ -681,10 +748,6 @@ onUnmounted(() => {
   50% {
     transform: scale(1.2);
   }
-}
-
-.activity-badge {
-  margin-left: 8px;
 }
 
 /* 迷你柱状图 */

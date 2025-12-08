@@ -433,6 +433,14 @@ export const dashboardApi = {
       method: 'get',
       params: { period }
     })
+  },
+  // 获取全部操作日志（分页）
+  getAllActivities(params) {
+    return request({
+      url: '/dashboard/activities',
+      method: 'get',
+      params
+    })
   }
 }
 

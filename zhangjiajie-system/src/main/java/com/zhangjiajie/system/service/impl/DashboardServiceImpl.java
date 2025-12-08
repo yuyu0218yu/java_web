@@ -14,6 +14,8 @@ import com.zhangjiajie.system.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -210,7 +212,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     /**
-     * 获取用户增长趋势数据（最近7天）
+     * 获取用户增长趋势数据（最近7天）- 每日新增用户数
      */
     private List<DashboardStatistics.ChartData> getUserGrowthDataByWeek() {
         List<DashboardStatistics.ChartData> chartDataList = new ArrayList<>();
@@ -220,13 +222,14 @@ public class DashboardServiceImpl implements DashboardService {
         long[] dailyCounts = new long[7];
         String[] labels = new String[7];
         
-        // 获取过去7天的数据
+        // 获取过去7天每天新增的用户数
         for (int i = 6; i >= 0; i--) {
             LocalDate dayStart = now.minusDays(i);
             LocalDate dayEnd = dayStart.plusDays(1);
             
             LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(User::getDeleted, 0);
+            wrapper.ge(User::getCreateTime, dayStart.atStartOfDay());
             wrapper.lt(User::getCreateTime, dayEnd.atStartOfDay());
             
             long count = userMapper.selectCount(wrapper);
@@ -242,7 +245,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     /**
-     * 获取用户增长趋势数据（最近12个月）
+     * 获取用户增长趋势数据（最近12个月）- 每月新增用户数
      */
     private List<DashboardStatistics.ChartData> getUserGrowthDataByMonth() {
         List<DashboardStatistics.ChartData> chartDataList = new ArrayList<>();
@@ -252,13 +255,14 @@ public class DashboardServiceImpl implements DashboardService {
         long[] monthlyCounts = new long[12];
         String[] labels = new String[12];
         
-        // 获取过去12个月的数据
+        // 获取过去12个月每月新增的用户数
         for (int i = 11; i >= 0; i--) {
             LocalDate monthStart = now.minusMonths(i).withDayOfMonth(1);
             LocalDate monthEnd = monthStart.plusMonths(1);
             
             LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(User::getDeleted, 0);
+            wrapper.ge(User::getCreateTime, monthStart.atStartOfDay());
             wrapper.lt(User::getCreateTime, monthEnd.atStartOfDay());
             
             long count = userMapper.selectCount(wrapper);
@@ -274,7 +278,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     /**
-     * 获取用户增长趋势数据（最近5年）
+     * 获取用户增长趋势数据（最近5年）- 每年新增用户数
      */
     private List<DashboardStatistics.ChartData> getUserGrowthDataByYear() {
         List<DashboardStatistics.ChartData> chartDataList = new ArrayList<>();
@@ -284,13 +288,14 @@ public class DashboardServiceImpl implements DashboardService {
         long[] yearlyCounts = new long[5];
         String[] labels = new String[5];
         
-        // 获取过去5年的数据
+        // 获取过去5年每年新增的用户数
         for (int i = 4; i >= 0; i--) {
             LocalDate yearStart = now.minusYears(i).withDayOfYear(1);
             LocalDate yearEnd = yearStart.plusYears(1);
             
             LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(User::getDeleted, 0);
+            wrapper.ge(User::getCreateTime, yearStart.atStartOfDay());
             wrapper.lt(User::getCreateTime, yearEnd.atStartOfDay());
             
             long count = userMapper.selectCount(wrapper);
@@ -408,5 +413,14 @@ public class DashboardServiceImpl implements DashboardService {
         }
         
         return activities;
+    }
+
+    @Override
+    public Page<OperationLog> getAllActivities(Integer current, Integer size) {
+        Page<OperationLog> page = new Page<>(current, size);
+        LambdaQueryWrapper<OperationLog> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OperationLog::getDeleted, 0);
+        wrapper.orderByDesc(OperationLog::getCreateTime);
+        return operationLogMapper.selectPage(page, wrapper);
     }
 }

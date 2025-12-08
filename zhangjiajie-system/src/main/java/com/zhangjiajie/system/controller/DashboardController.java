@@ -1,7 +1,9 @@
 package com.zhangjiajie.system.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhangjiajie.common.core.Result;
 import com.zhangjiajie.system.dto.DashboardStatistics;
+import com.zhangjiajie.system.entity.OperationLog;
 import com.zhangjiajie.system.service.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -43,6 +45,23 @@ public class DashboardController {
         } catch (Exception e) {
             log.error("获取仪表板统计数据失败", e);
             return Result.error("获取统计数据失败");
+        }
+    }
+
+    /**
+     * 获取全部操作日志（分页）
+     */
+    @GetMapping("/activities")
+    @Operation(summary = "获取全部操作日志", description = "获取全部操作日志，支持分页")
+    public Result<Page<OperationLog>> getAllActivities(
+            @Parameter(description = "页码") @RequestParam(value = "current", defaultValue = "1") Integer current,
+            @Parameter(description = "每页数量") @RequestParam(value = "size", defaultValue = "20") Integer size) {
+        try {
+            Page<OperationLog> page = dashboardService.getAllActivities(current, size);
+            return Result.success(page);
+        } catch (Exception e) {
+            log.error("获取操作日志失败", e);
+            return Result.error("获取操作日志失败");
         }
     }
 }
