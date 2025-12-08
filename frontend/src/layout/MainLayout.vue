@@ -214,6 +214,7 @@ watch(
 )
 
 const handleLogout = () => {
+  menuStore.reset()  // 重置菜单状态
   authStore.logout()
   router.push('/login')
 }

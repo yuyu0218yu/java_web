@@ -51,7 +51,8 @@ export const useMenuStore = defineStore('menu', () => {
 
   // 初始化菜单和权限
   const init = async () => {
-    if (isLoaded.value) return true
+    // 如果已加载且菜单不为空，直接返回
+    if (isLoaded.value && menus.value.length > 0) return true
     await Promise.all([fetchMenus(), fetchPermissions()])
     return true
   }
