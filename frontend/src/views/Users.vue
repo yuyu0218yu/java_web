@@ -421,10 +421,8 @@ const selectedRole = computed(() => {
 
 // 角色改变时的处理
 const handleRoleChange = (roleId) => {
-  const role = roleOptions.value.find(r => r.id === roleId)
-  if (role) {
-    // Role selected, data scope information is now visible via selectedRole computed property
-  }
+  // Role selection triggers the computed property 'selectedRole'
+  // which displays the data scope information in the UI
 }
 
 // 方法
