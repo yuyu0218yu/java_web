@@ -102,6 +102,7 @@ public class UserController {
             user.setBirthday(request.getBirthday());
             user.setAvatar(request.getAvatar());
             user.setRemark(request.getRemark());
+            user.setDeptId(request.getDeptId());
 
             boolean success = userService.createUser(user, request.getRoleId());
             if (success) {
@@ -131,6 +132,7 @@ public class UserController {
             user.setBirthday(request.getBirthday());
             user.setAvatar(request.getAvatar());
             user.setRemark(request.getRemark());
+            user.setDeptId(request.getDeptId());
 
             boolean success = userService.updateUser(user, request.getRoleIds());
             if (success) {

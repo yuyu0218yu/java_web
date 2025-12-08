@@ -147,6 +147,36 @@ public final class SecurityUtils {
     }
 
     /**
+     * 获取当前用户部门ID
+     *
+     * @return 部门ID，未登录返回null
+     */
+    public static Long getDeptId() {
+        LoginUser loginUser = getLoginUser();
+        return loginUser != null ? loginUser.getDeptId() : null;
+    }
+
+    /**
+     * 获取当前用户角色ID
+     *
+     * @return 角色ID，未登录返回null
+     */
+    public static Long getRoleId() {
+        LoginUser loginUser = getLoginUser();
+        return loginUser != null ? loginUser.getRoleId() : null;
+    }
+
+    /**
+     * 获取当前用户数据范围
+     *
+     * @return 数据范围，未登录返回null
+     */
+    public static Integer getDataScope() {
+        LoginUser loginUser = getLoginUser();
+        return loginUser != null ? loginUser.getDataScope() : null;
+    }
+
+    /**
      * 判断当前用户是否已登录
      *
      * @return true-已登录，false-未登录

@@ -37,4 +37,9 @@ public class UpdateUserRequest {
     private String remark;
 
     private List<Long> roleIds;
+
+    /**
+     * 部门ID
+     */
+    private Long deptId;
 }

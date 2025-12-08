@@ -40,7 +40,7 @@ public interface UserMapper extends BaseMapper<User> {
     @Select("SELECT u.id, u.username, u.password, u.salt, u.real_name, u.nickname, " +
             "u.email, u.phone, u.avatar, u.dept_id, u.gender, u.birthday, u.status, " +
             "u.last_login_time, u.last_login_ip, u.create_time, u.update_time, " +
-            "u.deleted, u.remark, r.role_name, r.role_code, d.dept_name " +
+            "u.deleted, u.remark, r.id as role_id, r.role_name, r.role_code, r.data_scope, d.dept_name " +
             "FROM sys_user u " +
             "LEFT JOIN sys_user_role ur ON u.id = ur.user_id AND ur.deleted = 0 " +
             "LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0 " +
@@ -73,4 +73,25 @@ public interface UserMapper extends BaseMapper<User> {
      */
     @org.apache.ibatis.annotations.Update("UPDATE sys_user SET last_login_time = NOW(), last_login_ip = #{loginIp} WHERE id = #{userId}")
     int updateLastLoginInfo(@Param("userId") Long userId, @Param("loginIp") String loginIp);
+
+    /**
+     * 带数据权限过滤的用户分页查询
+     * 使用XML配置，支持动态数据权限SQL
+     *
+     * @param page 分页对象
+     * @param username 用户名（模糊查询）
+     * @param email 邮箱（模糊查询）
+     * @param status 状态
+     * @param deptId 部门ID
+     * @param dataScopeSql 数据权限SQL
+     * @return 用户分页数据
+     */
+    IPage<UserWithRole> selectUserPageWithDataScope(
+            Page<UserWithRole> page,
+            @Param("username") String username,
+            @Param("email") String email,
+            @Param("status") Integer status,
+            @Param("deptId") Long deptId,
+            @Param("dataScopeSql") String dataScopeSql
+    );
 }

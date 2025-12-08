@@ -55,6 +55,16 @@ public class LoginUser implements UserDetails {
     private String phone;
 
     /**
+     * 部门ID
+     */
+    private Long deptId;
+
+    /**
+     * 角色ID
+     */
+    private Long roleId;
+
+    /**
      * 角色编码
      */
     private String roleCode;
@@ -63,6 +73,11 @@ public class LoginUser implements UserDetails {
      * 角色名称
      */
     private String roleName;
+
+    /**
+     * 数据范围：1-全部数据 2-本部门及下级 3-本部门 4-仅本人
+     */
+    private Integer dataScope;
 
     /**
      * 用户状态（1正常 0禁用）

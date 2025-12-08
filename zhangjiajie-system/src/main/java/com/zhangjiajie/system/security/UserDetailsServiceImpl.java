@@ -70,8 +70,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         loginUser.setAvatar(user.getAvatar());
         loginUser.setEmail(user.getEmail());
         loginUser.setPhone(user.getPhone());
+        loginUser.setDeptId(user.getDeptId());
+        loginUser.setRoleId(user.getRoleId());
         loginUser.setRoleCode(user.getRoleCode());
         loginUser.setRoleName(user.getRoleName());
+        loginUser.setDataScope(user.getDataScope());
         loginUser.setStatus(user.getStatus());
         loginUser.setPermissions(permissionSet);
         loginUser.setLoginTime(System.currentTimeMillis());

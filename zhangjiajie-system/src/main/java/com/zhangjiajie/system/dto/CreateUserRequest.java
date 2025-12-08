@@ -42,4 +42,9 @@ public class CreateUserRequest {
 
     @NotNull(message = "角色不能为空")
     private Long roleId;
+
+    /**
+     * 部门ID
+     */
+    private Long deptId;
 }

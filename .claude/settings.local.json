@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(Select-Object -ExpandProperty FullName)"
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(gh pr view:*)",
+      "Bash(mvn compile:*)"
     ],
     "deny": [],
     "ask": []

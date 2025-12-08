@@ -12,6 +12,7 @@ import com.zhangjiajie.system.event.LoginEvent;
 import com.zhangjiajie.system.mapper.UserMapper;
 import com.zhangjiajie.system.mapper.UserRoleMapper;
 import com.zhangjiajie.system.service.AuthService;
+import com.zhangjiajie.system.service.DeptService;
 import com.zhangjiajie.system.service.RoleService;
 import com.zhangjiajie.system.service.UserService;
 import com.zhangjiajie.common.util.IpUtil;
@@ -47,6 +48,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRoleMapper userRoleMapper;
     private final UserService userService;
     private final RoleService roleService;
+    private final DeptService deptService;
     private final ApplicationEventPublisher eventPublisher;
     private final PasswordEncoder passwordEncoder;
 
@@ -186,7 +188,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     /**
-     * 用户注册（默认普通用户）
+     * 默认部门编码
+     */
+    private static final String DEFAULT_DEPT_CODE = "DEFAULT";
+
+    /**
+     * 用户注册（默认普通用户，默认部门）
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -207,12 +214,27 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("普通用户角色不存在，请先初始化角色数据");
         }
 
+        // 查找默认部门
+        Long defaultDeptId = null;
+        try {
+            var defaultDept = deptService.lambdaQuery()
+                    .eq(com.zhangjiajie.system.entity.Dept::getDeptCode, DEFAULT_DEPT_CODE)
+                    .eq(com.zhangjiajie.system.entity.Dept::getStatus, 1)
+                    .one();
+            if (defaultDept != null) {
+                defaultDeptId = defaultDept.getId();
+            }
+        } catch (Exception e) {
+            log.warn("查找默认部门失败: {}", e.getMessage());
+        }
+
         // 创建用户
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setEmail(registerRequest.getEmail());
         user.setPhone(registerRequest.getPhone());
+        user.setDeptId(defaultDeptId);
         user.setStatus(User.Status.ENABLED.getCode());
 
         try {
@@ -233,7 +255,7 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("用户名已存在");
         }
 
-        log.info("用户 {} 注册成功", registerRequest.getUsername());
+        log.info("用户 {} 注册成功，默认部门ID: {}", registerRequest.getUsername(), defaultDeptId);
     }
 
     /**
