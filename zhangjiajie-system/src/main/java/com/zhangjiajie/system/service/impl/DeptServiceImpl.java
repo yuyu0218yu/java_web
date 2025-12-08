@@ -1,7 +1,7 @@
 package com.zhangjiajie.system.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zhangjiajie.common.service.CodeCheckService;
 import com.zhangjiajie.common.util.Assert;
 import com.zhangjiajie.common.util.TreeUtil;
 import com.zhangjiajie.system.entity.Dept;
@@ -154,15 +154,13 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
 
     @Override
     public boolean checkDeptCodeExists(String deptCode, Long excludeId) {
-        if (!StringUtils.hasText(deptCode)) {
-            return false;
-        }
-        LambdaQueryWrapper<Dept> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Dept::getDeptCode, deptCode);
-        if (excludeId != null) {
-            wrapper.ne(Dept::getId, excludeId);
-        }
-        return count(wrapper) > 0;
+        return CodeCheckService.checkCodeExists(
+                this,
+                deptCode,
+                Dept::getDeptCode,
+                Dept::getId,
+                excludeId
+        );
     }
 
     @Override
@@ -189,9 +187,13 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
             // 批量更新子部门的ancestors字段
             List<Dept> updateList = new ArrayList<>();
             for (Dept child : children) {
-                String childAncestors = child.getAncestors().replace(oldPrefix, newPrefix);
-                child.setAncestors(childAncestors);
-                updateList.add(child);
+                String childAncestors = child.getAncestors();
+                // 确保只替换开头部分，避免误替换
+                if (childAncestors.startsWith(oldPrefix + ",") || childAncestors.equals(oldPrefix)) {
+                    childAncestors = childAncestors.replaceFirst("^" + oldPrefix.replace(",", "\\,"), newPrefix);
+                    child.setAncestors(childAncestors);
+                    updateList.add(child);
+                }
             }
             
             // 使用MyBatis-Plus的批量更新
