@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -173,7 +174,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     }
 
     /**
-     * 更新子部门的祖先节点
+     * 更新子部门的祖先节点（批量更新优化）
      *
      * @param deptId       部门ID
      * @param oldAncestors 旧祖先节点
@@ -184,10 +185,18 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
         if (children != null && !children.isEmpty()) {
             String oldPrefix = oldAncestors + "," + deptId;
             String newPrefix = newAncestors + "," + deptId;
+            
+            // 批量更新子部门的ancestors字段
+            List<Dept> updateList = new ArrayList<>();
             for (Dept child : children) {
                 String childAncestors = child.getAncestors().replace(oldPrefix, newPrefix);
                 child.setAncestors(childAncestors);
-                updateById(child);
+                updateList.add(child);
+            }
+            
+            // 使用MyBatis-Plus的批量更新
+            if (!updateList.isEmpty()) {
+                updateBatchById(updateList);
             }
         }
     }
