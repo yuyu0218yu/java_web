@@ -6,16 +6,12 @@
       "Bash(mvn compile:*)",
       "Bash(git pull:*)",
       "Bash(dir /b \"C:\\Users\\Administrator\\Desktop\\DD\\java_web\\frontend\\src\\config\")",
-      "Bash(del \"C:\\Users\\Administrator\\Desktop\\DD\\java_web\\zhangjiajie-system\\src\\main\\java\\com\\zhangjiajie\\system\\controller\\PermissionController.java\")",
-      "Bash(del \"C:\\Users\\Administrator\\Desktop\\DD\\java_web\\zhangjiajie-system\\src\\main\\java\\com\\zhangjiajie\\system\\entity\\Permission.java\")",
-      "Bash(del \"C:\\Users\\Administrator\\Desktop\\DD\\java_web\\zhangjiajie-system\\src\\main\\java\\com\\zhangjiajie\\system\\entity\\RolePermission.java\")",
-      "Bash(del \"C:\\Users\\Administrator\\Desktop\\DD\\java_web\\zhangjiajie-system\\src\\main\\java\\com\\zhangjiajie\\system\\mapper\\PermissionMapper.java\")",
-      "Bash(del \"C:\\Users\\Administrator\\Desktop\\DD\\java_web\\zhangjiajie-system\\src\\main\\java\\com\\zhangjiajie\\system\\mapper\\RolePermissionMapper.java\")",
-      "Bash(del \"C:\\Users\\Administrator\\Desktop\\DD\\java_web\\zhangjiajie-system\\src\\main\\java\\com\\zhangjiajie\\system\\service\\PermissionService.java\")",
-      "Bash(del \"C:\\Users\\Administrator\\Desktop\\DD\\java_web\\zhangjiajie-system\\src\\main\\java\\com\\zhangjiajie\\system\\service\\impl\\PermissionServiceImpl.java\")",
+
       "Bash(rm:*)",
       "Bash(find:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(mvn clean compile:*)",
+      "Bash(del \"C:\\Users\\Administrator\\Desktop\\DD\\java_web\\zhangjiajie-admin\\src\\main\\resources\\sql\\new_menus.sql\")"
     ],
     "deny": [],
     "ask": []

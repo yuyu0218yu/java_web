@@ -582,4 +582,117 @@ INSERT INTO `sys_job` (`job_name`, `job_group`, `invoke_target`, `cron_expressio
 ('日志清理任务', 'SYSTEM', 'logCleanTask.clean(30)', '0 0 2 * * ?', 1, 1, 1, 'admin', '每天凌晨2点清理30天前的日志'),
 ('数据备份任务', 'SYSTEM', 'dataBackupTask.backup()', '0 0 3 * * ?', 1, 1, 0, 'admin', '每天凌晨3点备份数据（暂停状态）');
 
+-- ===========================================
+-- 新增模块菜单权限配置
+-- 包含：字典管理、日志管理、通知公告、定时任务
+-- ===========================================
+
+-- ----------------------------
+-- 1. 日志管理目录
+-- ----------------------------
+INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_time`, `update_time`, `deleted`, `remark`) VALUES
+(4, '日志管理', 0, 4, '/logs', NULL, NULL, 1, 0, 'M', 1, 1, NULL, 'Document', NOW(), NOW(), 0, '日志管理目录');
+
+-- 操作日志菜单
+INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_time`, `update_time`, `deleted`, `remark`) VALUES
+(106, '操作日志', 4, 1, '/logs/operation', 'OperationLog', NULL, 1, 0, 'C', 1, 1, 'log:operation:view', 'List', NOW(), NOW(), 0, '操作日志菜单');
+
+-- 操作日志按钮权限
+INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_time`, `update_time`, `deleted`, `remark`) VALUES
+(1061, '操作日志查询', 106, 1, '', NULL, NULL, 1, 0, 'F', 1, 1, 'log:operation:view', '#', NOW(), NOW(), 0, ''),
+(1062, '操作日志删除', 106, 2, '', NULL, NULL, 1, 0, 'F', 1, 1, 'log:operation:delete', '#', NOW(), NOW(), 0, ''),
+(1063, '操作日志清空', 106, 3, '', NULL, NULL, 1, 0, 'F', 1, 1, 'log:operation:clean', '#', NOW(), NOW(), 0, '');
+
+-- 登录日志菜单
+INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_time`, `update_time`, `deleted`, `remark`) VALUES
+(107, '登录日志', 4, 2, '/logs/login', 'LoginLog', NULL, 1, 0, 'C', 1, 1, 'log:login:view', 'UserFilled', NOW(), NOW(), 0, '登录日志菜单');
+
+-- 登录日志按钮权限
+INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_time`, `update_time`, `deleted`, `remark`) VALUES
+(1071, '登录日志查询', 107, 1, '', NULL, NULL, 1, 0, 'F', 1, 1, 'log:login:view', '#', NOW(), NOW(), 0, ''),
+(1072, '登录日志删除', 107, 2, '', NULL, NULL, 1, 0, 'F', 1, 1, 'log:login:delete', '#', NOW(), NOW(), 0, ''),
+(1073, '登录日志清空', 107, 3, '', NULL, NULL, 1, 0, 'F', 1, 1, 'log:login:clean', '#', NOW(), NOW(), 0, '');
+
+-- ----------------------------
+-- 2. 字典管理菜单 (挂在系统管理下)
+-- ----------------------------
+INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_time`, `update_time`, `deleted`, `remark`) VALUES
+(108, '字典管理', 3, 6, '/dicts', 'DictType', NULL, 1, 0, 'C', 1, 1, 'dict:view', 'Collection', NOW(), NOW(), 0, '字典类型菜单');
+
+-- 字典类型按钮权限
+INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_time`, `update_time`, `deleted`, `remark`) VALUES
+(1081, '字典查询', 108, 1, '', NULL, NULL, 1, 0, 'F', 1, 1, 'dict:view', '#', NOW(), NOW(), 0, ''),
+(1082, '字典新增', 108, 2, '', NULL, NULL, 1, 0, 'F', 1, 1, 'dict:create', '#', NOW(), NOW(), 0, ''),
+(1083, '字典修改', 108, 3, '', NULL, NULL, 1, 0, 'F', 1, 1, 'dict:update', '#', NOW(), NOW(), 0, ''),
+(1084, '字典删除', 108, 4, '', NULL, NULL, 1, 0, 'F', 1, 1, 'dict:delete', '#', NOW(), NOW(), 0, '');
+
+-- ----------------------------
+-- 3. 通知公告菜单 (挂在系统管理下)
+-- ----------------------------
+INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_time`, `update_time`, `deleted`, `remark`) VALUES
+(109, '通知公告', 3, 7, '/notices', 'Notice', NULL, 1, 0, 'C', 1, 1, 'notice:view', 'Bell', NOW(), NOW(), 0, '通知公告菜单');
+
+-- 通知公告按钮权限
+INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_time`, `update_time`, `deleted`, `remark`) VALUES
+(1091, '公告查询', 109, 1, '', NULL, NULL, 1, 0, 'F', 1, 1, 'notice:view', '#', NOW(), NOW(), 0, ''),
+(1092, '公告新增', 109, 2, '', NULL, NULL, 1, 0, 'F', 1, 1, 'notice:create', '#', NOW(), NOW(), 0, ''),
+(1093, '公告修改', 109, 3, '', NULL, NULL, 1, 0, 'F', 1, 1, 'notice:update', '#', NOW(), NOW(), 0, ''),
+(1094, '公告删除', 109, 4, '', NULL, NULL, 1, 0, 'F', 1, 1, 'notice:delete', '#', NOW(), NOW(), 0, '');
+
+-- ----------------------------
+-- 4. 定时任务菜单 (挂在系统管理下)
+-- ----------------------------
+INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_time`, `update_time`, `deleted`, `remark`) VALUES
+(110, '定时任务', 3, 8, '/jobs', 'Job', NULL, 1, 0, 'C', 1, 1, 'job:view', 'Timer', NOW(), NOW(), 0, '定时任务菜单');
+
+-- 定时任务按钮权限
+INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_time`, `update_time`, `deleted`, `remark`) VALUES
+(1101, '任务查询', 110, 1, '', NULL, NULL, 1, 0, 'F', 1, 1, 'job:view', '#', NOW(), NOW(), 0, ''),
+(1102, '任务新增', 110, 2, '', NULL, NULL, 1, 0, 'F', 1, 1, 'job:create', '#', NOW(), NOW(), 0, ''),
+(1103, '任务修改', 110, 3, '', NULL, NULL, 1, 0, 'F', 1, 1, 'job:update', '#', NOW(), NOW(), 0, ''),
+(1104, '任务删除', 110, 4, '', NULL, NULL, 1, 0, 'F', 1, 1, 'job:delete', '#', NOW(), NOW(), 0, ''),
+(1105, '任务执行', 110, 5, '', NULL, NULL, 1, 0, 'F', 1, 1, 'job:run', '#', NOW(), NOW(), 0, '');
+
+-- 任务日志菜单
+INSERT INTO `sys_menu` (`id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_time`, `update_time`, `deleted`, `remark`) VALUES
+(111, '任务日志', 3, 9, '/jobs/logs', 'JobLog', NULL, 1, 0, 'C', 1, 1, 'job:view', 'Tickets', NOW(), NOW(), 0, '定时任务日志菜单');
+
+-- ----------------------------
+-- 5. 给超级管理员(role_id=1)分配新菜单权限
+-- ----------------------------
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`, `create_time`) VALUES
+-- 日志管理目录
+(1, 4, NOW()),
+-- 操作日志
+(1, 106, NOW()),
+(1, 1061, NOW()),
+(1, 1062, NOW()),
+(1, 1063, NOW()),
+-- 登录日志
+(1, 107, NOW()),
+(1, 1071, NOW()),
+(1, 1072, NOW()),
+(1, 1073, NOW()),
+-- 字典管理
+(1, 108, NOW()),
+(1, 1081, NOW()),
+(1, 1082, NOW()),
+(1, 1083, NOW()),
+(1, 1084, NOW()),
+-- 通知公告
+(1, 109, NOW()),
+(1, 1091, NOW()),
+(1, 1092, NOW()),
+(1, 1093, NOW()),
+(1, 1094, NOW()),
+-- 定时任务
+(1, 110, NOW()),
+(1, 1101, NOW()),
+(1, 1102, NOW()),
+(1, 1103, NOW()),
+(1, 1104, NOW()),
+(1, 1105, NOW()),
+-- 任务日志
+(1, 111, NOW());
+
 SET FOREIGN_KEY_CHECKS = 1;
