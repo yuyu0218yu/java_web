@@ -151,23 +151,49 @@
           <el-form-item label="数据范围" prop="dataScope">
             <el-select v-model="form.dataScope" placeholder="请选择数据范围" style="width: 100%">
               <el-option :value="1" label="全部数据">
-                <el-icon style="margin-right: 8px;"><Grid /></el-icon>
-                <span>全部数据</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                  <div>
+                    <el-icon style="margin-right: 8px;"><Grid /></el-icon>
+                    <span>全部数据</span>
+                  </div>
+                  <el-tag size="small" type="danger" effect="plain">最高权限</el-tag>
+                </div>
               </el-option>
               <el-option :value="2" label="本部门及下级">
-                <el-icon style="margin-right: 8px;"><OfficeBuilding /></el-icon>
-                <span>本部门及下级</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                  <div>
+                    <el-icon style="margin-right: 8px;"><OfficeBuilding /></el-icon>
+                    <span>本部门及下级</span>
+                  </div>
+                  <el-tag size="small" type="warning" effect="plain">部门管理</el-tag>
+                </div>
               </el-option>
               <el-option :value="3" label="本部门">
-                <el-icon style="margin-right: 8px;"><OfficeBuilding /></el-icon>
-                <span>本部门</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                  <div>
+                    <el-icon style="margin-right: 8px;"><OfficeBuilding /></el-icon>
+                    <span>仅本部门</span>
+                  </div>
+                  <el-tag size="small" type="primary" effect="plain">部门内</el-tag>
+                </div>
               </el-option>
               <el-option :value="4" label="仅本人">
-                <el-icon style="margin-right: 8px;"><User /></el-icon>
-                <span>仅本人</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                  <div>
+                    <el-icon style="margin-right: 8px;"><User /></el-icon>
+                    <span>仅本人</span>
+                  </div>
+                  <el-tag size="small" type="info" effect="plain">个人</el-tag>
+                </div>
               </el-option>
             </el-select>
           </el-form-item>
+          <el-alert
+            :title="getDataScopeHelp(form.dataScope)"
+            type="info"
+            :closable="false"
+            show-icon
+          />
           <el-form-item label="状态" prop="status">
             <el-radio-group v-model="form.status" class="status-radio-group">
               <el-radio :label="1">
@@ -294,6 +320,7 @@ import {
   Connection, Search, Select, OfficeBuilding, Grid, User
 } from '@element-plus/icons-vue'
 import { roleApi, permissionApi } from '@/api'
+import { getDataScopeHelp } from '@/utils/dataScope'
 
 // 响应式数据
 const loading = ref(false)

@@ -4,7 +4,16 @@
 
     <!-- 带数据权限过滤的用户分页查询 -->
     <select id="selectUserPageWithDataScope" resultType="com.zhangjiajie.system.dto.UserWithRole">
-        SELECT u.*, r.id as role_id, r.role_name, r.role_code, r.data_scope, d.dept_name
+        SELECT u.*, r.id as role_id, r.role_name, r.role_code, r.data_scope, 
+               d.dept_name, d.dept_code,
+               CASE 
+                 WHEN d.ancestors IS NULL OR d.ancestors = '' THEN d.dept_name 
+                 ELSE CONCAT(
+                   (SELECT GROUP_CONCAT(dept_name ORDER BY id SEPARATOR '/') 
+                    FROM sys_dept 
+                    WHERE FIND_IN_SET(id, d.ancestors) AND deleted = 0), 
+                   '/', d.dept_name) 
+               END as dept_path
         FROM sys_user u
         LEFT JOIN sys_user_role ur ON u.id = ur.user_id AND ur.deleted = 0
         LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0

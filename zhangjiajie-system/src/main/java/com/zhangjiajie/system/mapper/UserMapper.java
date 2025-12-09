@@ -21,10 +21,19 @@ import java.util.List;
 public interface UserMapper extends BaseMapper<User> {
 
     /**
-     * 分页查询用户列表（包含角色信息）
+     * 分页查询用户列表（包含角色信息和部门完整信息）
      * 复杂JOIN查询，无法用LambdaQueryWrapper替代
      */
-    @Select("SELECT u.*, r.role_name, r.role_code, d.dept_name " +
+    @Select("SELECT u.*, r.id as role_id, r.role_name, r.role_code, r.data_scope, " +
+            "d.dept_name, d.dept_code, " +
+            "CASE " +
+            "  WHEN d.ancestors IS NULL OR d.ancestors = '' THEN d.dept_name " +
+            "  ELSE CONCAT(" +
+            "    (SELECT GROUP_CONCAT(dept_name ORDER BY id SEPARATOR '/') " +
+            "     FROM sys_dept " +
+            "     WHERE FIND_IN_SET(id, d.ancestors) AND deleted = 0), " +
+            "    '/', d.dept_name) " +
+            "END as dept_path " +
             "FROM sys_user u " +
             "LEFT JOIN sys_user_role ur ON u.id = ur.user_id AND ur.deleted = 0 " +
             "LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0 " +
@@ -34,13 +43,22 @@ public interface UserMapper extends BaseMapper<User> {
     IPage<UserWithRole> selectUserPageWithRole(Page<UserWithRole> page);
 
     /**
-     * 根据用户名查询用户（包含角色信息）
+     * 根据用户名查询用户（包含角色信息和部门完整信息）
      * 复杂JOIN查询，无法用LambdaQueryWrapper替代
      */
     @Select("SELECT u.id, u.username, u.password, u.salt, u.real_name, u.nickname, " +
             "u.email, u.phone, u.avatar, u.dept_id, u.gender, u.birthday, u.status, " +
             "u.last_login_time, u.last_login_ip, u.create_time, u.update_time, " +
-            "u.deleted, u.remark, r.id as role_id, r.role_name, r.role_code, r.data_scope, d.dept_name " +
+            "u.deleted, u.remark, r.id as role_id, r.role_name, r.role_code, r.data_scope, " +
+            "d.dept_name, d.dept_code, " +
+            "CASE " +
+            "  WHEN d.ancestors IS NULL OR d.ancestors = '' THEN d.dept_name " +
+            "  ELSE CONCAT(" +
+            "    (SELECT GROUP_CONCAT(dept_name ORDER BY id SEPARATOR '/') " +
+            "     FROM sys_dept " +
+            "     WHERE FIND_IN_SET(id, d.ancestors) AND deleted = 0), " +
+            "    '/', d.dept_name) " +
+            "END as dept_path " +
             "FROM sys_user u " +
             "LEFT JOIN sys_user_role ur ON u.id = ur.user_id AND ur.deleted = 0 " +
             "LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0 " +

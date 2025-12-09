@@ -107,6 +107,17 @@
               </div>
             </template>
           </el-table-column>
+          <el-table-column prop="deptPath" label="部门" min-width="180">
+            <template #default="scope">
+              <div class="dept-cell" v-if="scope.row.deptPath">
+                <el-icon style="color: #409EFF;"><OfficeBuilding /></el-icon>
+                <el-tooltip :content="scope.row.deptPath" placement="top">
+                  <span class="dept-path-text">{{ scope.row.deptPath }}</span>
+                </el-tooltip>
+              </div>
+              <span v-else style="color: #c0c4cc;">未分配</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="roleName" label="角色" min-width="120">
             <template #default="scope">
               <el-tag 
@@ -117,6 +128,19 @@
                 <el-icon style="margin-right: 4px;"><Avatar /></el-icon>
                 {{ scope.row.roleName || '未分配' }}
               </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="dataScopeDesc" label="数据范围" min-width="130">
+            <template #default="scope">
+              <el-tooltip :content="getDataScopeTooltip(scope.row.dataScope)" placement="top">
+                <el-tag 
+                  :type="getDataScopeTagType(scope.row.dataScope)" 
+                  effect="plain"
+                  size="small"
+                >
+                  {{ getDataScopeLabel(scope.row.dataScope) }}
+                </el-tag>
+              </el-tooltip>
             </template>
           </el-table-column>
           <el-table-column prop="status" label="状态" width="100">
@@ -213,19 +237,6 @@
           <el-form-item label="密码" prop="password" v-if="!form.id">
             <el-input v-model="form.password" type="password" placeholder="请输入密码" show-password :prefix-icon="Lock" />
           </el-form-item>
-          <el-form-item label="角色" prop="roleId">
-            <el-select v-model="form.roleId" placeholder="请选择角色" style="width: 100%">
-              <el-option
-                v-for="role in roleOptions"
-                :key="role.id"
-                :label="role.roleName"
-                :value="role.id"
-              >
-                <el-icon style="margin-right: 8px;"><Avatar /></el-icon>
-                <span>{{ role.roleName }}</span>
-              </el-option>
-            </el-select>
-          </el-form-item>
           <el-form-item label="部门" prop="deptId">
             <el-tree-select
               v-model="form.deptId"
@@ -243,6 +254,39 @@
               </template>
             </el-tree-select>
           </el-form-item>
+          <el-form-item label="角色" prop="roleId">
+            <el-select 
+              v-model="form.roleId" 
+              placeholder="请选择角色" 
+              style="width: 100%"
+              @change="handleRoleChange"
+            >
+              <el-option
+                v-for="role in roleOptions"
+                :key="role.id"
+                :label="role.roleName"
+                :value="role.id"
+              >
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <el-icon style="margin-right: 8px;"><Avatar /></el-icon>
+                    <span>{{ role.roleName }}</span>
+                  </div>
+                  <el-tag size="small" :type="getDataScopeTagType(role.dataScope)" effect="plain">
+                    {{ getDataScopeLabel(role.dataScope) }}
+                  </el-tag>
+                </div>
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-alert
+            v-if="selectedRole"
+            :title="`数据权限说明：${getDataScopeTooltip(selectedRole.dataScope)}`"
+            type="info"
+            :closable="false"
+            show-icon
+            style="margin-bottom: 20px;"
+          />
           <el-form-item label="状态" prop="status">
             <el-radio-group v-model="form.status" class="status-radio-group">
               <el-radio :label="1">
@@ -274,7 +318,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   Search, Refresh, Plus, Delete, Download, Edit, Key, Lock, 
@@ -282,6 +326,7 @@ import {
   Close, Check, OfficeBuilding
 } from '@element-plus/icons-vue'
 import { userApi, roleApi, deptApi } from '@/api'
+import { getDataScopeLabel, getDataScopeTagType, getDataScopeTooltip } from '@/utils/dataScope'
 
 // 响应式数据
 const loading = ref(false)
@@ -366,6 +411,18 @@ const getRoleTagType = (roleName) => {
 // 表格行样式
 const tableRowClassName = ({ row, rowIndex }) => {
   return `animate-row delay-${rowIndex % 10}`
+}
+
+// 当前选中的角色
+const selectedRole = computed(() => {
+  if (!form.roleId) return null
+  return roleOptions.value.find(role => role.id === form.roleId)
+})
+
+// 角色改变时的处理
+const handleRoleChange = (roleId) => {
+  // Role selection triggers the computed property 'selectedRole'
+  // which displays the data scope information in the UI
 }
 
 // 方法
@@ -685,11 +742,23 @@ onMounted(() => {
 
 .email-cell,
 .phone-cell,
-.time-cell {
+.time-cell,
+.dept-cell {
   display: flex;
   align-items: center;
   gap: 8px;
   color: #606266;
+}
+
+.dept-cell .el-icon {
+  flex-shrink: 0;
+}
+
+.dept-path-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
 }
 
 .email-cell .el-icon,
