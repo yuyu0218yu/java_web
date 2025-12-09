@@ -10,11 +10,31 @@
             <el-tag type="info" size="small" effect="plain" round style="margin-left: 12px;">
               共 {{ getTotalMenus() }} 个菜单
             </el-tag>
+            <el-tag type="success" size="small" effect="plain" round style="margin-left: 8px;">
+              {{ getPermissionCount() }} 个权限
+            </el-tag>
           </div>
           <div class="action-buttons">
             <el-button type="primary" @click="handleAdd()" class="action-btn primary-gradient">
               <el-icon><Plus /></el-icon>
               新增菜单
+            </el-button>
+            <el-dropdown @command="handleQuickAdd" style="margin-left: 10px;">
+              <el-button type="success" class="action-btn">
+                <el-icon><Lightning /></el-icon>
+                快速添加
+                <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="crud">批量添加 CRUD 按钮</el-dropdown-item>
+                  <el-dropdown-item command="module">添加功能模块</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            <el-button type="info" @click="showPermStats = true" class="action-btn">
+              <el-icon><DataAnalysis /></el-icon>
+              权限统计
             </el-button>
             <el-button type="success" @click="handleExpandAll" class="action-btn">
               <el-icon><Expand /></el-icon>
@@ -116,12 +136,17 @@
               />
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="180">
+          <el-table-column label="操作" width="220">
             <template #default="scope">
               <div class="operation-buttons">
                 <el-tooltip content="新增子菜单" placement="top">
                   <el-button type="success" size="small" circle @click="handleAdd(scope.row)">
                     <el-icon><Plus /></el-icon>
+                  </el-button>
+                </el-tooltip>
+                <el-tooltip v-if="scope.row.menuType === 'C'" content="批量添加CRUD" placement="top">
+                  <el-button type="primary" size="small" circle @click="handleBatchAddCrud(scope.row)">
+                    <el-icon><Lightning /></el-icon>
                   </el-button>
                 </el-tooltip>
                 <el-tooltip content="编辑" placement="top">
@@ -226,7 +251,32 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="权限标识" prop="perms">
-                <el-input v-model="form.perms" placeholder="如：user:view" />
+                <el-select
+                  v-model="form.perms"
+                  placeholder="请选择或输入权限"
+                  filterable
+                  allow-create
+                  clearable
+                  style="width: 100%"
+                >
+                  <el-option-group
+                    v-for="group in permissionSuggestions"
+                    :key="group.label"
+                    :label="group.label"
+                  >
+                    <el-option
+                      v-for="item in group.options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    >
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>{{ item.label }}</span>
+                        <span style="color: #909399; font-size: 12px;">{{ item.value }}</span>
+                      </div>
+                    </el-option>
+                  </el-option-group>
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="12" v-if="form.menuType !== 'F'">
@@ -291,16 +341,191 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 批量添加 CRUD 对话框 -->
+    <el-dialog
+      v-model="crudDialogVisible"
+      title="批量添加 CRUD 按钮权限"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-form :model="crudForm" label-width="100px">
+        <el-form-item label="目标菜单">
+          <el-tag type="success" size="large">{{ crudForm.parentMenuName }}</el-tag>
+        </el-form-item>
+        <el-form-item label="权限前缀">
+          <el-input v-model="crudForm.prefix" placeholder="如：user, role, menu">
+            <template #prepend>权限格式</template>
+            <template #append>:操作</template>
+          </el-input>
+          <div class="perm-preview">
+            预览: <el-tag size="small" v-for="action in ['view', 'create', 'update', 'delete']" :key="action" style="margin: 2px;">
+              {{ crudForm.prefix }}:{{ action }}
+            </el-tag>
+          </div>
+        </el-form-item>
+        <el-form-item label="选择操作">
+          <el-checkbox-group v-model="crudForm.actions">
+            <el-checkbox label="view">查询 (view)</el-checkbox>
+            <el-checkbox label="create">新增 (create)</el-checkbox>
+            <el-checkbox label="update">修改 (update)</el-checkbox>
+            <el-checkbox label="delete">删除 (delete)</el-checkbox>
+            <el-checkbox label="export">导出 (export)</el-checkbox>
+            <el-checkbox label="import">导入 (import)</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="crudDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitBatchCrud" :loading="crudLoading">
+          批量创建
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 快速添加模块对话框 -->
+    <el-dialog
+      v-model="moduleDialogVisible"
+      title="快速添加功能模块"
+      width="550px"
+      :close-on-click-modal="false"
+    >
+      <el-form :model="moduleForm" label-width="100px">
+        <el-form-item label="上级菜单">
+          <el-tree-select
+            v-model="moduleForm.parentId"
+            :data="menuTreeOptions"
+            :props="treeSelectProps"
+            placeholder="请选择上级菜单"
+            clearable
+            check-strictly
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item label="模块名称">
+          <el-input v-model="moduleForm.moduleName" placeholder="如：产品、订单、客户" />
+        </el-form-item>
+        <el-form-item label="权限前缀">
+          <el-input v-model="moduleForm.prefix" placeholder="如：product, order, customer" />
+        </el-form-item>
+        <el-form-item label="路由路径">
+          <el-input v-model="moduleForm.path" placeholder="如：/products">
+            <template #prepend>/</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="组件名称">
+          <el-input v-model="moduleForm.component" placeholder="如：Products" />
+        </el-form-item>
+        <el-form-item label="包含操作">
+          <el-checkbox-group v-model="moduleForm.actions">
+            <el-checkbox label="view">查询</el-checkbox>
+            <el-checkbox label="create">新增</el-checkbox>
+            <el-checkbox label="update">修改</el-checkbox>
+            <el-checkbox label="delete">删除</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="moduleDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitModule" :loading="moduleLoading">
+          创建模块
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 权限统计对话框 -->
+    <el-dialog
+      v-model="showPermStats"
+      title="权限使用统计"
+      width="700px"
+    >
+      <div class="perm-stats">
+        <!-- 概览卡片 -->
+        <el-row :gutter="20" class="stats-overview">
+          <el-col :span="6">
+            <div class="stat-card stat-total">
+              <div class="stat-value">{{ permStats.total }}</div>
+              <div class="stat-label">总权限数</div>
+            </div>
+          </el-col>
+          <el-col :span="6">
+            <div class="stat-card stat-dir">
+              <div class="stat-value">{{ permStats.dir }}</div>
+              <div class="stat-label">目录</div>
+            </div>
+          </el-col>
+          <el-col :span="6">
+            <div class="stat-card stat-menu">
+              <div class="stat-value">{{ permStats.menu }}</div>
+              <div class="stat-label">菜单</div>
+            </div>
+          </el-col>
+          <el-col :span="6">
+            <div class="stat-card stat-btn">
+              <div class="stat-value">{{ permStats.button }}</div>
+              <div class="stat-label">按钮</div>
+            </div>
+          </el-col>
+        </el-row>
+
+        <!-- 权限列表 -->
+        <div class="perm-list-section">
+          <div class="section-title">
+            <el-icon><Key /></el-icon>
+            所有权限标识
+          </div>
+          <div class="perm-tags">
+            <el-tag
+              v-for="perm in permStats.allPerms"
+              :key="perm"
+              effect="plain"
+              size="small"
+              style="margin: 4px;"
+            >
+              {{ perm }}
+            </el-tag>
+            <el-empty v-if="permStats.allPerms.length === 0" description="暂无权限" :image-size="60" />
+          </div>
+        </div>
+
+        <!-- 按模块分组 -->
+        <div class="perm-list-section">
+          <div class="section-title">
+            <el-icon><Collection /></el-icon>
+            按模块分组
+          </div>
+          <el-collapse>
+            <el-collapse-item
+              v-for="(perms, module) in permStats.byModule"
+              :key="module"
+              :title="`${module} (${perms.length}个权限)`"
+              :name="module"
+            >
+              <el-tag
+                v-for="perm in perms"
+                :key="perm"
+                effect="light"
+                size="small"
+                style="margin: 4px;"
+              >
+                {{ perm }}
+              </el-tag>
+            </el-collapse-item>
+          </el-collapse>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  Plus, Expand, Fold, Refresh, Edit, Delete, Menu, Pointer, 
+import {
+  Plus, Expand, Fold, Refresh, Edit, Delete, Menu, Pointer,
   Folder, Document, CircleCheck, CircleClose, Close, Check,
-  House, User, Setting, UserFilled, Avatar, Key
+  House, User, Setting, UserFilled, Avatar, Key, Lightning,
+  ArrowDown, DataAnalysis, Collection
 } from '@element-plus/icons-vue'
 import { menuApi } from '@/api'
 import { fetchComponents, fetchIcons, viewComponents, iconList } from '@/config/components'
@@ -326,6 +551,124 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const tableRef = ref()
 const formRef = ref()
+
+// 权限标识建议模板
+const permissionSuggestions = ref([
+  {
+    label: '用户管理',
+    options: [
+      { label: '用户查看', value: 'user:view' },
+      { label: '用户新增', value: 'user:create' },
+      { label: '用户修改', value: 'user:update' },
+      { label: '用户删除', value: 'user:delete' },
+      { label: '用户导出', value: 'user:export' },
+    ]
+  },
+  {
+    label: '角色管理',
+    options: [
+      { label: '角色查看', value: 'role:view' },
+      { label: '角色新增', value: 'role:create' },
+      { label: '角色修改', value: 'role:update' },
+      { label: '角色删除', value: 'role:delete' },
+    ]
+  },
+  {
+    label: '菜单管理',
+    options: [
+      { label: '菜单查看', value: 'menu:view' },
+      { label: '菜单新增', value: 'menu:create' },
+      { label: '菜单修改', value: 'menu:update' },
+      { label: '菜单删除', value: 'menu:delete' },
+    ]
+  },
+  {
+    label: '部门管理',
+    options: [
+      { label: '部门查看', value: 'dept:view' },
+      { label: '部门新增', value: 'dept:create' },
+      { label: '部门修改', value: 'dept:update' },
+      { label: '部门删除', value: 'dept:delete' },
+    ]
+  },
+  {
+    label: '系统监控',
+    options: [
+      { label: '仪表盘', value: 'dashboard:view' },
+      { label: '日志查看', value: 'log:view' },
+      { label: '系统配置', value: 'config:view' },
+    ]
+  },
+  {
+    label: '通用操作',
+    options: [
+      { label: '导出', value: 'export' },
+      { label: '导入', value: 'import' },
+      { label: '打印', value: 'print' },
+    ]
+  }
+])
+
+// 批量添加 CRUD 相关
+const crudDialogVisible = ref(false)
+const crudLoading = ref(false)
+const crudForm = reactive({
+  parentId: null,
+  parentMenuName: '',
+  prefix: '',
+  actions: ['view', 'create', 'update', 'delete']
+})
+
+// 快速添加模块相关
+const moduleDialogVisible = ref(false)
+const moduleLoading = ref(false)
+const moduleForm = reactive({
+  parentId: 0,
+  moduleName: '',
+  prefix: '',
+  path: '',
+  component: '',
+  actions: ['view', 'create', 'update', 'delete']
+})
+
+// 权限统计相关
+const showPermStats = ref(false)
+const permStats = computed(() => {
+  const stats = {
+    total: 0,
+    dir: 0,
+    menu: 0,
+    button: 0,
+    allPerms: [],
+    byModule: {}
+  }
+
+  const collectStats = (nodes) => {
+    nodes.forEach(node => {
+      stats.total++
+      if (node.menuType === 'M') stats.dir++
+      else if (node.menuType === 'C') stats.menu++
+      else if (node.menuType === 'F') stats.button++
+
+      if (node.perms) {
+        stats.allPerms.push(node.perms)
+        // 按模块分组
+        const module = node.perms.split(':')[0]
+        if (!stats.byModule[module]) {
+          stats.byModule[module] = []
+        }
+        stats.byModule[module].push(node.perms)
+      }
+
+      if (node.children) {
+        collectStats(node.children)
+      }
+    })
+  }
+
+  collectStats(tableData.value)
+  return stats
+})
 
 // 表单数据
 const form = reactive({
@@ -415,6 +758,151 @@ const getTotalMenus = () => {
     return count
   }
   return countNodes(tableData.value)
+}
+
+// 获取权限数量
+const getPermissionCount = () => {
+  return permStats.value.allPerms.length
+}
+
+// 快速添加处理
+const handleQuickAdd = (command) => {
+  if (command === 'crud') {
+    // 选择一个菜单后批量添加 CRUD
+    ElMessageBox.prompt('请输入目标菜单ID', '批量添加 CRUD', {
+      confirmButtonText: '下一步',
+      cancelButtonText: '取消',
+      inputPlaceholder: '请先在表格中选择菜单，然后点击闪电图标'
+    }).then(() => {
+      ElMessage.info('请在菜单行点击闪电图标来批量添加 CRUD 按钮')
+    }).catch(() => {})
+  } else if (command === 'module') {
+    moduleDialogVisible.value = true
+    Object.assign(moduleForm, {
+      parentId: 0,
+      moduleName: '',
+      prefix: '',
+      path: '',
+      component: '',
+      actions: ['view', 'create', 'update', 'delete']
+    })
+  }
+}
+
+// 批量添加 CRUD 按钮
+const handleBatchAddCrud = (row) => {
+  crudDialogVisible.value = true
+  // 从菜单的权限标识中提取前缀
+  const prefix = row.perms ? row.perms.split(':')[0] : ''
+  Object.assign(crudForm, {
+    parentId: row.id,
+    parentMenuName: row.menuName,
+    prefix: prefix,
+    actions: ['view', 'create', 'update', 'delete']
+  })
+}
+
+// 提交批量 CRUD
+const submitBatchCrud = async () => {
+  if (!crudForm.prefix) {
+    ElMessage.warning('请输入权限前缀')
+    return
+  }
+
+  const actionLabels = {
+    view: '查询',
+    create: '新增',
+    update: '修改',
+    delete: '删除',
+    export: '导出',
+    import: '导入'
+  }
+
+  crudLoading.value = true
+  try {
+    let order = 1
+    for (const action of crudForm.actions) {
+      const menuData = {
+        parentId: crudForm.parentId,
+        menuType: 'F',
+        menuName: `${crudForm.parentMenuName}${actionLabels[action]}`,
+        perms: `${crudForm.prefix}:${action}`,
+        orderNum: order++,
+        visible: 1,
+        status: 1
+      }
+      await menuApi.createMenu(menuData)
+    }
+
+    ElMessage.success(`成功创建 ${crudForm.actions.length} 个按钮权限`)
+    crudDialogVisible.value = false
+    loadData()
+  } catch (error) {
+    console.error('批量创建失败:', error)
+    ElMessage.error('批量创建失败')
+  } finally {
+    crudLoading.value = false
+  }
+}
+
+// 提交功能模块
+const submitModule = async () => {
+  if (!moduleForm.moduleName || !moduleForm.prefix) {
+    ElMessage.warning('请填写模块名称和权限前缀')
+    return
+  }
+
+  const actionLabels = {
+    view: '查询',
+    create: '新增',
+    update: '修改',
+    delete: '删除'
+  }
+
+  moduleLoading.value = true
+  try {
+    // 1. 创建菜单
+    const menuData = {
+      parentId: moduleForm.parentId,
+      menuType: 'C',
+      menuName: `${moduleForm.moduleName}管理`,
+      path: moduleForm.path.startsWith('/') ? moduleForm.path : `/${moduleForm.path}`,
+      component: moduleForm.component,
+      perms: `${moduleForm.prefix}:view`,
+      icon: 'Document',
+      orderNum: 0,
+      visible: 1,
+      status: 1
+    }
+    const response = await menuApi.createMenu(menuData)
+    const newMenuId = response.data?.id || response.data
+
+    // 2. 创建按钮权限
+    if (newMenuId) {
+      let order = 1
+      for (const action of moduleForm.actions) {
+        const buttonData = {
+          parentId: newMenuId,
+          menuType: 'F',
+          menuName: `${moduleForm.moduleName}${actionLabels[action]}`,
+          perms: `${moduleForm.prefix}:${action}`,
+          orderNum: order++,
+          visible: 1,
+          status: 1
+        }
+        await menuApi.createMenu(buttonData)
+      }
+    }
+
+    ElMessage.success(`成功创建 ${moduleForm.moduleName} 模块及 ${moduleForm.actions.length} 个按钮权限`)
+    moduleDialogVisible.value = false
+    loadData()
+  } catch (error) {
+    console.error('创建模块失败:', error)
+    ElMessage.error('创建模块失败')
+  } finally {
+    moduleLoading.value = false
+  }
 }
 
 // 方法
@@ -779,5 +1267,89 @@ onMounted(() => {
   to {
     opacity: 1;
   }
+}
+
+/* 权限预览 */
+.perm-preview {
+  margin-top: 8px;
+  padding: 8px;
+  background: #f5f7fa;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #606266;
+}
+
+/* 权限统计样式 */
+.perm-stats {
+  padding: 10px;
+}
+
+.stats-overview {
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 20px;
+  border-radius: 12px;
+  color: white;
+}
+
+.stat-card.stat-total {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-card.stat-dir {
+  background: linear-gradient(135deg, #409EFF 0%, #53a8ff 100%);
+}
+
+.stat-card.stat-menu {
+  background: linear-gradient(135deg, #67C23A 0%, #85ce61 100%);
+}
+
+.stat-card.stat-btn {
+  background: linear-gradient(135deg, #E6A23C 0%, #ebb563 100%);
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-top: 4px;
+}
+
+.perm-list-section {
+  margin-top: 20px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.perm-tags {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 10px;
+  background: #f5f7fa;
+  border-radius: 8px;
+}
+
+/* 操作按钮样式 */
+.operation-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 </style>

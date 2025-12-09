@@ -258,9 +258,8 @@ INSERT INTO `sys_menu` VALUES (3, '系统管理', 0, 3, '/system', NULL, NULL, 1
 INSERT INTO `sys_menu` VALUES (100, '用户管理', 3, 1, '/users', 'Users', NULL, 1, 0, 'C', 1, 1, 'user:view', 'UserFilled', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (101, '角色管理', 3, 2, '/roles', 'Roles', NULL, 1, 0, 'C', 1, 1, 'role:view', 'Avatar', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (102, '菜单管理', 3, 3, '/menus', 'Menus', NULL, 1, 0, 'C', 1, 1, 'menu:view', 'Menu', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
-INSERT INTO `sys_menu` VALUES (103, '权限管理', 3, 4, '/permissions', 'Permissions', NULL, 1, 0, 'C', 1, 1, 'permission:view', 'Key', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
-INSERT INTO `sys_menu` VALUES (104, '代码生成器', 3, 5, '/generator', 'Generator', NULL, 1, 0, 'C', 1, 1, 'generator:view', 'Cpu', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
-INSERT INTO `sys_menu` VALUES (105, '组织结构', 3, 6, '/depts', 'Depts', NULL, 1, 0, 'C', 1, 1, 'dept:view', 'OfficeBuilding', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (104, '代码生成器', 3, 4, '/generator', 'Generator', NULL, 1, 0, 'C', 1, 1, 'generator:view', 'Cpu', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (105, '组织结构', 3, 5, '/depts', 'Depts', NULL, 1, 0, 'C', 1, 1, 'dept:view', 'OfficeBuilding', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (1001, '用户查询', 100, 1, '', NULL, NULL, 1, 0, 'F', 1, 1, 'user:view', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (1002, '用户新增', 100, 2, '', NULL, NULL, 1, 0, 'F', 1, 1, 'user:create', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (1003, '用户修改', 100, 3, '', NULL, NULL, 1, 0, 'F', 1, 1, 'user:update', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
@@ -361,49 +360,6 @@ INSERT INTO `sys_operation_log` VALUES (51, NULL, 'anonymousUser', '用户登录
 INSERT INTO `sys_operation_log` VALUES (52, NULL, 'admin', '获取用户信息', '认证管理', 'GET', '/api/auth/userinfo', 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 4, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 23:39:34', '2025-12-08 23:39:34', 0, NULL);
 INSERT INTO `sys_operation_log` VALUES (53, NULL, 'admin', '获取用户信息', '认证管理', 'GET', '/api/auth/userinfo', 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 8, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 23:42:54', '2025-12-08 23:42:54', 0, NULL);
 
--- ----------------------------
--- Table structure for sys_permission
--- ----------------------------
-DROP TABLE IF EXISTS `sys_permission`;
-CREATE TABLE `sys_permission`  (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '权限ID',
-  `permission_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '权限名称',
-  `permission_code` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '权限编码',
-  `resource_type` tinyint NULL DEFAULT 1 COMMENT '资源类型：1-菜单，2-按钮，3-接口',
-  `parent_id` bigint NULL DEFAULT 0 COMMENT '父级ID',
-  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '路径',
-  `component` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '组件',
-  `icon` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '图标',
-  `sort_order` int NULL DEFAULT 0 COMMENT '排序',
-  `status` tinyint NULL DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
-  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `deleted` tinyint NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
-  `remark` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '备注',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `permission_code`(`permission_code` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '权限表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of sys_permission
--- ----------------------------
-INSERT INTO `sys_permission` VALUES (1, '系统管理', 'system', 1, 0, '/system', NULL, NULL, 1, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (2, '用户管理', 'user', 1, 1, '/system/user', 'system/user/index', NULL, 2, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (3, '角色管理', 'role', 1, 1, '/system/role', 'system/role/index', NULL, 3, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (4, '权限管理', 'permission', 1, 1, '/system/permission', 'system/permission/index', NULL, 4, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (5, '用户查看', 'user:view', 2, 2, NULL, NULL, NULL, 5, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (6, '用户创建', 'user:create', 2, 2, NULL, NULL, NULL, 6, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (7, '用户编辑', 'user:edit', 2, 2, NULL, NULL, NULL, 7, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (8, '用户删除', 'user:delete', 2, 2, NULL, NULL, NULL, 8, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (9, '角色查看', 'role:view', 2, 3, NULL, NULL, NULL, 9, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (10, '角色创建', 'role:create', 2, 3, NULL, NULL, NULL, 10, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (11, '角色编辑', 'role:edit', 2, 3, NULL, NULL, NULL, 11, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (12, '角色删除', 'role:delete', 2, 3, NULL, NULL, NULL, 12, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (13, '权限查看', 'permission:view', 2, 4, NULL, NULL, NULL, 13, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (14, '权限创建', 'permission:create', 2, 4, NULL, NULL, NULL, 14, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (15, '权限编辑', 'permission:edit', 2, 4, NULL, NULL, NULL, 15, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (16, '权限删除', 'permission:delete', 2, 4, NULL, NULL, NULL, 16, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_permission` VALUES (17, '全部权限', '*', 3, 0, NULL, NULL, NULL, 99, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -454,8 +410,7 @@ INSERT INTO `sys_role_menu` VALUES (3, 1, 3, '2025-12-07 14:31:39');
 INSERT INTO `sys_role_menu` VALUES (4, 1, 100, '2025-12-07 14:31:39');
 INSERT INTO `sys_role_menu` VALUES (5, 1, 101, '2025-12-07 14:31:39');
 INSERT INTO `sys_role_menu` VALUES (6, 1, 102, '2025-12-07 14:31:39');
-INSERT INTO `sys_role_menu` VALUES (7, 1, 103, '2025-12-07 14:31:39');
-INSERT INTO `sys_role_menu` VALUES (8, 1, 104, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (7, 1, 104, '2025-12-07 14:31:39');
 INSERT INTO `sys_role_menu` VALUES (9, 1, 1001, '2025-12-07 14:31:39');
 INSERT INTO `sys_role_menu` VALUES (10, 1, 1002, '2025-12-07 14:31:39');
 INSERT INTO `sys_role_menu` VALUES (11, 1, 1003, '2025-12-07 14:31:39');
@@ -474,51 +429,6 @@ INSERT INTO `sys_role_menu` VALUES (34, 1, 1052, '2025-12-08 21:10:31');
 INSERT INTO `sys_role_menu` VALUES (35, 1, 1053, '2025-12-08 21:10:31');
 INSERT INTO `sys_role_menu` VALUES (36, 1, 1054, '2025-12-08 21:10:31');
 
--- ----------------------------
--- Table structure for sys_role_permission
--- ----------------------------
-DROP TABLE IF EXISTS `sys_role_permission`;
-CREATE TABLE `sys_role_permission`  (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `role_id` bigint NOT NULL COMMENT '角色ID',
-  `permission_id` bigint NOT NULL COMMENT '权限ID',
-  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `deleted` tinyint NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_role_permission`(`role_id` ASC, `permission_id` ASC, `deleted` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 42 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色权限关联表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of sys_role_permission
--- ----------------------------
-INSERT INTO `sys_role_permission` VALUES (1, 1, 17, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (2, 1, 4, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (3, 1, 14, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (4, 1, 16, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (5, 1, 15, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (6, 1, 13, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (7, 1, 3, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (8, 1, 10, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (9, 1, 12, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (10, 1, 11, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (11, 1, 9, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (12, 1, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (13, 1, 2, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (14, 1, 6, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (15, 1, 8, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (16, 1, 7, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (17, 1, 5, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (32, 2, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (33, 2, 2, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (34, 2, 3, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (35, 2, 5, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (36, 2, 6, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (37, 2, 7, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (38, 2, 9, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (39, 2, 10, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (40, 2, 11, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
-INSERT INTO `sys_role_permission` VALUES (41, 3, 5, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0);
 
 -- ----------------------------
 -- Table structure for sys_user

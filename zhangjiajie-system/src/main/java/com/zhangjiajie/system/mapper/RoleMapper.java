@@ -36,14 +36,14 @@ public interface RoleMapper extends BaseMapper<Role> {
     Role selectByRoleCode(@Param("roleCode") String roleCode);
 
     /**
-     * 查询所有角色及其权限数量
-     * 返回角色列表，每个角色包含其拥有的权限数量
+     * 查询所有角色及其菜单权限数量
+     * 返回角色列表，每个角色包含其拥有的菜单权限数量
      */
-    @Select("SELECT r.*, COUNT(DISTINCT rp.permission_id) as permission_count " +
+    @Select("SELECT r.*, COUNT(DISTINCT rm.menu_id) as permission_count " +
             "FROM sys_role r " +
-            "LEFT JOIN sys_role_permission rp ON r.id = rp.role_id AND rp.deleted = 0 " +
+            "LEFT JOIN sys_role_menu rm ON r.id = rm.role_id " +
             "WHERE r.deleted = 0 " +
-            "GROUP BY r.id, r.role_name, r.role_code, r.description, r.sort_order, r.status, r.create_time, r.update_time, r.deleted " +
+            "GROUP BY r.id, r.role_name, r.role_code, r.description, r.data_scope, r.sort_order, r.status, r.create_time, r.update_time, r.deleted " +
             "ORDER BY r.sort_order ASC")
     List<RoleWithPermissionsDTO> selectRolesWithPermissionCount();
 }

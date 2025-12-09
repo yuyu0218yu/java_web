@@ -2,12 +2,12 @@ package com.zhangjiajie.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zhangjiajie.system.dto.DashboardStatistics;
+import com.zhangjiajie.system.entity.Menu;
 import com.zhangjiajie.system.entity.OperationLog;
-import com.zhangjiajie.system.entity.Permission;
 import com.zhangjiajie.system.entity.Role;
 import com.zhangjiajie.system.entity.User;
+import com.zhangjiajie.system.mapper.MenuMapper;
 import com.zhangjiajie.system.mapper.OperationLogMapper;
-import com.zhangjiajie.system.mapper.PermissionMapper;
 import com.zhangjiajie.system.mapper.RoleMapper;
 import com.zhangjiajie.system.mapper.UserMapper;
 import com.zhangjiajie.system.service.DashboardService;
@@ -44,7 +44,7 @@ public class DashboardServiceImpl implements DashboardService {
 
     private final UserMapper userMapper;
     private final RoleMapper roleMapper;
-    private final PermissionMapper permissionMapper;
+    private final MenuMapper menuMapper;
     private final OperationLogMapper operationLogMapper;
 
     @Override
@@ -91,10 +91,12 @@ public class DashboardServiceImpl implements DashboardService {
         long roleCount = roleMapper.selectCount(roleWrapper);
         stats.setRoleCount(roleCount);
         
-        // 权限数量
-        LambdaQueryWrapper<Permission> permWrapper = new LambdaQueryWrapper<>();
-        permWrapper.eq(Permission::getDeleted, 0);
-        long permissionCount = permissionMapper.selectCount(permWrapper);
+        // 权限数量（使用菜单表中有perms字段的记录）
+        LambdaQueryWrapper<Menu> permWrapper = new LambdaQueryWrapper<>();
+        permWrapper.eq(Menu::getDeleted, 0);
+        permWrapper.isNotNull(Menu::getPerms);
+        permWrapper.ne(Menu::getPerms, "");
+        long permissionCount = menuMapper.selectCount(permWrapper);
         stats.setPermissionCount(permissionCount);
         
         // 计算所有趋势
@@ -162,25 +164,29 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     /**
-     * 计算权限趋势
+     * 计算权限趋势（基于菜单表）
      */
     private Double calculatePermissionTrend() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime lastMonth = now.minusMonths(1);
-        
-        // 本月新增权限
-        LambdaQueryWrapper<Permission> currentWrapper = new LambdaQueryWrapper<>();
-        currentWrapper.eq(Permission::getDeleted, 0);
-        currentWrapper.ge(Permission::getCreateTime, lastMonth);
-        long currentMonthPermissions = permissionMapper.selectCount(currentWrapper);
-        
-        // 上月新增权限
-        LambdaQueryWrapper<Permission> lastWrapper = new LambdaQueryWrapper<>();
-        lastWrapper.eq(Permission::getDeleted, 0);
-        lastWrapper.ge(Permission::getCreateTime, lastMonth.minusMonths(1));
-        lastWrapper.lt(Permission::getCreateTime, lastMonth);
-        long lastMonthPermissions = permissionMapper.selectCount(lastWrapper);
-        
+
+        // 本月新增权限（菜单）
+        LambdaQueryWrapper<Menu> currentWrapper = new LambdaQueryWrapper<>();
+        currentWrapper.eq(Menu::getDeleted, 0);
+        currentWrapper.isNotNull(Menu::getPerms);
+        currentWrapper.ne(Menu::getPerms, "");
+        currentWrapper.ge(Menu::getCreateTime, lastMonth);
+        long currentMonthPermissions = menuMapper.selectCount(currentWrapper);
+
+        // 上月新增权限（菜单）
+        LambdaQueryWrapper<Menu> lastWrapper = new LambdaQueryWrapper<>();
+        lastWrapper.eq(Menu::getDeleted, 0);
+        lastWrapper.isNotNull(Menu::getPerms);
+        lastWrapper.ne(Menu::getPerms, "");
+        lastWrapper.ge(Menu::getCreateTime, lastMonth.minusMonths(1));
+        lastWrapper.lt(Menu::getCreateTime, lastMonth);
+        long lastMonthPermissions = menuMapper.selectCount(lastWrapper);
+
         return calculateTrendPercentage(currentMonthPermissions, lastMonthPermissions);
     }
 
@@ -333,54 +339,54 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     /**
-     * 获取权限分布数据
+     * 获取权限分布数据（基于菜单类型）
      */
     private List<DashboardStatistics.PermissionDistribution> getPermissionDistribution() {
         List<DashboardStatistics.PermissionDistribution> distributions = new ArrayList<>();
-        
-        // 菜单权限数量
-        LambdaQueryWrapper<Permission> menuWrapper = new LambdaQueryWrapper<>();
-        menuWrapper.eq(Permission::getDeleted, 0);
-        menuWrapper.eq(Permission::getResourceType, Permission.PermissionType.MENU.getCode());
-        long menuCount = permissionMapper.selectCount(menuWrapper);
-        
-        // 按钮权限数量
-        LambdaQueryWrapper<Permission> buttonWrapper = new LambdaQueryWrapper<>();
-        buttonWrapper.eq(Permission::getDeleted, 0);
-        buttonWrapper.eq(Permission::getResourceType, Permission.PermissionType.BUTTON.getCode());
-        long buttonCount = permissionMapper.selectCount(buttonWrapper);
-        
-        // 接口权限数量
-        LambdaQueryWrapper<Permission> apiWrapper = new LambdaQueryWrapper<>();
-        apiWrapper.eq(Permission::getDeleted, 0);
-        apiWrapper.eq(Permission::getResourceType, Permission.PermissionType.API.getCode());
-        long apiCount = permissionMapper.selectCount(apiWrapper);
-        
-        long total = menuCount + buttonCount + apiCount;
-        
+
+        // 目录数量 (M)
+        LambdaQueryWrapper<Menu> dirWrapper = new LambdaQueryWrapper<>();
+        dirWrapper.eq(Menu::getDeleted, 0);
+        dirWrapper.eq(Menu::getMenuType, Menu.TYPE_DIR);
+        long dirCount = menuMapper.selectCount(dirWrapper);
+
+        // 菜单数量 (C)
+        LambdaQueryWrapper<Menu> menuWrapper = new LambdaQueryWrapper<>();
+        menuWrapper.eq(Menu::getDeleted, 0);
+        menuWrapper.eq(Menu::getMenuType, Menu.TYPE_MENU);
+        long menuCount = menuMapper.selectCount(menuWrapper);
+
+        // 按钮数量 (F)
+        LambdaQueryWrapper<Menu> btnWrapper = new LambdaQueryWrapper<>();
+        btnWrapper.eq(Menu::getDeleted, 0);
+        btnWrapper.eq(Menu::getMenuType, Menu.TYPE_BTN);
+        long buttonCount = menuMapper.selectCount(btnWrapper);
+
+        long total = dirCount + menuCount + buttonCount;
+
         if (total > 0) {
+            DashboardStatistics.PermissionDistribution dirDist = new DashboardStatistics.PermissionDistribution();
+            dirDist.setName("目录");
+            dirDist.setValue(dirCount);
+            dirDist.setColor("#409EFF");
+            dirDist.setPercent((int) Math.round((double) dirCount / total * 100));
+            distributions.add(dirDist);
+
             DashboardStatistics.PermissionDistribution menuDist = new DashboardStatistics.PermissionDistribution();
-            menuDist.setName("菜单权限");
+            menuDist.setName("菜单");
             menuDist.setValue(menuCount);
-            menuDist.setColor("#409EFF");
+            menuDist.setColor("#67C23A");
             menuDist.setPercent((int) Math.round((double) menuCount / total * 100));
             distributions.add(menuDist);
-            
+
             DashboardStatistics.PermissionDistribution buttonDist = new DashboardStatistics.PermissionDistribution();
-            buttonDist.setName("按钮权限");
+            buttonDist.setName("按钮");
             buttonDist.setValue(buttonCount);
-            buttonDist.setColor("#67C23A");
+            buttonDist.setColor("#E6A23C");
             buttonDist.setPercent((int) Math.round((double) buttonCount / total * 100));
             distributions.add(buttonDist);
-            
-            DashboardStatistics.PermissionDistribution apiDist = new DashboardStatistics.PermissionDistribution();
-            apiDist.setName("接口权限");
-            apiDist.setValue(apiCount);
-            apiDist.setColor("#E6A23C");
-            apiDist.setPercent((int) Math.round((double) apiCount / total * 100));
-            distributions.add(apiDist);
         }
-        
+
         return distributions;
     }
 
