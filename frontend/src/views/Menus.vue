@@ -51,8 +51,8 @@
             <template #default="scope">
               <div class="menu-name-cell">
                 <div class="menu-icon" :class="getTypeClass(scope.row.menuType)">
-                  <el-icon v-if="getSafeIcon(scope.row.icon)">
-                    <component :is="getSafeIcon(scope.row.icon)" />
+                  <el-icon v-if="getIconName(scope.row.icon)">
+                    <component :is="getIconName(scope.row.icon)" />
                   </el-icon>
                   <el-icon v-else-if="scope.row.menuType === 'M'"><Folder /></el-icon>
                   <el-icon v-else-if="scope.row.menuType === 'C'"><Document /></el-icon>
@@ -207,7 +207,21 @@
             </el-col>
             <el-col :span="12" v-if="form.menuType === 'C'">
               <el-form-item label="组件路径" prop="component">
-                <el-input v-model="form.component" placeholder="如：Users" />
+                <el-select
+                  v-model="form.component"
+                  placeholder="请选择组件"
+                  filterable
+                  allow-create
+                  clearable
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="item in componentOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -217,7 +231,26 @@
             </el-col>
             <el-col :span="12" v-if="form.menuType !== 'F'">
               <el-form-item label="图标" prop="icon">
-                <el-input v-model="form.icon" placeholder="图标名称" />
+                <el-select
+                  v-model="form.icon"
+                  placeholder="请选择图标"
+                  filterable
+                  allow-create
+                  clearable
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="item in iconOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  >
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <el-icon><component :is="item.value" /></el-icon>
+                      <span>{{ item.label }}</span>
+                    </div>
+                  </el-option>
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -270,18 +303,12 @@ import {
   House, User, Setting, UserFilled, Avatar, Key
 } from '@element-plus/icons-vue'
 import { menuApi } from '@/api'
+import { fetchComponents, fetchIcons, viewComponents, iconList } from '@/config/components'
 
-// 允许的图标白名单
-const allowedIcons = [
-  'House', 'User', 'Setting', 'UserFilled', 'Avatar', 'Key', 'Menu',
-  'Folder', 'Document', 'Pointer', 'Plus', 'Edit', 'Delete', 'Refresh',
-  'CircleCheck', 'CircleClose', 'Close', 'Check', 'Expand', 'Fold'
-]
-
-// 验证并获取安全的图标名称
-const getSafeIcon = (iconName) => {
+// 获取图标名称（验证后返回，无效返回 null）
+const getIconName = (iconName) => {
   if (!iconName || iconName === '#') return null
-  return allowedIcons.includes(iconName) ? iconName : null
+  return iconName
 }
 
 // HTML实体编码，防止XSS
@@ -318,6 +345,32 @@ const form = reactive({
 // 表格数据
 const tableData = ref([])
 const menuTreeOptions = ref([])
+
+// 可选组件列表（从后端 API 加载）
+const componentOptions = ref(viewComponents)
+
+// 可选图标列表（从后端 API 加载）
+const iconOptions = ref(iconList)
+
+// 验证图标是否在允许列表中
+const isValidIcon = (iconName) => {
+  if (!iconName || iconName === '#') return false
+  return iconOptions.value.some(icon => icon.value === iconName)
+}
+
+// 加载配置选项
+const loadConfigOptions = async () => {
+  try {
+    const [components, icons] = await Promise.all([
+      fetchComponents(),
+      fetchIcons()
+    ])
+    componentOptions.value = components
+    iconOptions.value = icons
+  } catch (error) {
+    console.warn('加载配置选项失败:', error)
+  }
+}
 
 // 树形选择组件配置
 const treeSelectProps = {
@@ -555,6 +608,7 @@ const handleDialogClose = () => {
 // 生命周期
 onMounted(() => {
   loadData()
+  loadConfigOptions()  // 从后端加载组件和图标选项
 })
 </script>
 

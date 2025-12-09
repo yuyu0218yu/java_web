@@ -485,6 +485,41 @@ export const deptApi = {
   }
 }
 
+// 系统配置API
+export const configApi = {
+  // 获取组件列表
+  getComponents() {
+    return request({
+      url: '/config/components',
+      method: 'get'
+    })
+  },
+
+  // 获取图标列表
+  getIcons() {
+    return request({
+      url: '/config/icons',
+      method: 'get'
+    })
+  },
+
+  // 获取权限标识列表
+  getPermissions() {
+    return request({
+      url: '/config/permissions',
+      method: 'get'
+    })
+  },
+
+  // 通用：根据字典类型获取数据
+  getDictByType(dictType) {
+    return request({
+      url: `/config/dict/${dictType}`,
+      method: 'get'
+    })
+  }
+}
+
 // 仪表板API
 export const dashboardApi = {
   // 获取仪表板统计数据

@@ -88,8 +88,8 @@
           </el-table-column>
           <el-table-column prop="icon" label="图标" width="80" align="center">
             <template #default="scope">
-              <el-icon v-if="scope.row.icon" :size="20" class="icon-preview">
-                <component :is="scope.row.icon" />
+              <el-icon v-if="getIconName(scope.row.icon)" :size="20" class="icon-preview">
+                <component :is="getIconName(scope.row.icon)" />
               </el-icon>
               <span v-else class="no-icon">-</span>
             </template>
@@ -205,12 +205,45 @@
             </el-col>
             <el-col :span="12" v-if="form.resourceType === 1">
               <el-form-item label="组件" prop="component">
-                <el-input v-model="form.component" placeholder="如：views/Users" />
+                <el-select
+                  v-model="form.component"
+                  placeholder="请选择组件"
+                  filterable
+                  allow-create
+                  clearable
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="item in componentOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="12" v-if="form.resourceType === 1">
               <el-form-item label="图标" prop="icon">
-                <el-input v-model="form.icon" placeholder="图标名称" />
+                <el-select
+                  v-model="form.icon"
+                  placeholder="请选择图标"
+                  filterable
+                  allow-create
+                  clearable
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="item in iconOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  >
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <el-icon><component :is="item.value" /></el-icon>
+                      <span>{{ item.label }}</span>
+                    </div>
+                  </el-option>
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -268,9 +301,13 @@ import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   Plus, Expand, Fold, Download, Edit, Delete, Menu, Pointer, 
-  Key, Connection, Tickets, CircleCheck, CircleClose, Close, Check
+  Key, Connection, Tickets, CircleCheck, CircleClose, Close, Check,
+  House, User, UserFilled, Avatar, Setting, Lock, OfficeBuilding, Cpu,
+  Document, Files, Folder, DataLine, TrendCharts, Monitor, Tools, Operation,
+  Grid, List, Search, View, Message, Bell, Calendar, Clock, Location, Link, Share, Star, Warning, InfoFilled
 } from '@element-plus/icons-vue'
 import { permissionApi } from '@/api'
+import { fetchComponents, fetchIcons, viewComponents, iconList } from '@/config/components'
 
 // 响应式数据
 const loading = ref(false)
@@ -298,6 +335,32 @@ const form = reactive({
 // 表格数据
 const tableData = ref([])
 const permissionTreeOptions = ref([])
+
+// 可选组件列表（从后端 API 加载）
+const componentOptions = ref(viewComponents)
+
+// 可选图标列表（从后端 API 加载）
+const iconOptions = ref(iconList)
+
+// 获取图标名称（验证后返回，无效返回 null）
+const getIconName = (iconName) => {
+  if (!iconName || iconName === '#') return null
+  return iconName
+}
+
+// 加载配置选项
+const loadConfigOptions = async () => {
+  try {
+    const [components, icons] = await Promise.all([
+      fetchComponents(),
+      fetchIcons()
+    ])
+    componentOptions.value = components
+    iconOptions.value = icons
+  } catch (error) {
+    console.warn('加载配置选项失败:', error)
+  }
+}
 
 // 树形选择组件配置
 const treeSelectProps = {
@@ -547,6 +610,7 @@ const handleDialogClose = () => {
 // 生命周期
 onMounted(() => {
   loadData()
+  loadConfigOptions()  // 从后端加载组件和图标选项
 })
 </script>
 

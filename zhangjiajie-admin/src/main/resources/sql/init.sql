@@ -1,17 +1,17 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : MYSQL
+ Source Server         : localhost_3306
  Source Server Type    : MySQL
- Source Server Version : 80041 (8.0.41)
+ Source Server Version : 80043 (8.0.43)
  Source Host           : localhost:3306
  Source Schema         : java_web
 
  Target Server Type    : MySQL
- Target Server Version : 80041 (8.0.41)
+ Target Server Version : 80043 (8.0.43)
  File Encoding         : 65001
 
- Date: 08/12/2025 20:45:58
+ Date: 09/12/2025 14:33:26
 */
 
 SET NAMES utf8mb4;
@@ -45,7 +45,7 @@ CREATE TABLE `gen_table`  (
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`table_id`) USING BTREE,
   INDEX `idx_gen_table_name`(`table_name` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '代码生成业务表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '代码生成业务表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of gen_table
@@ -81,7 +81,7 @@ CREATE TABLE `gen_table_column`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`column_id`) USING BTREE,
   INDEX `idx_gen_column_table_id`(`table_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '代码生成业务表字段' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '代码生成业务表字段' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of gen_table_column
@@ -122,7 +122,7 @@ CREATE TABLE `sys_dept`  (
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_dept_code`(`dept_code` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '结构表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '结构表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_dept
@@ -134,7 +134,6 @@ INSERT INTO `sys_dept` VALUES (4, 1, '0,1', '运营部', 'OPERATION', '运营总
 INSERT INTO `sys_dept` VALUES (5, 2, '0,1,2', '后端组', 'TECH_BE', '后端负责人', NULL, NULL, 1, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
 INSERT INTO `sys_dept` VALUES (6, 2, '0,1,2', '前端组', 'TECH_FE', '前端负责人', NULL, NULL, 2, 1, '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0, NULL);
 INSERT INTO `sys_dept` VALUES (7, 1, '0,1', '默认用户部', 'DEFAULT', '系统管理员', NULL, NULL, 99, 1, '2025-12-08 00:00:00', '2025-12-08 00:00:00', 0, '新注册用户默认归属部门');
-
 
 -- ----------------------------
 -- Table structure for sys_file_info
@@ -186,12 +185,43 @@ CREATE TABLE `sys_login_log`  (
   `deleted` int NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
   `remark` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 25 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '登录日志表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 33 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '登录日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_login_log
 -- ----------------------------
 INSERT INTO `sys_login_log` VALUES (1, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 0, 'Bad credentials', '2025-12-05 18:01:22', '2025-12-05 18:01:22', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (2, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 0, 'Bad credentials', '2025-12-05 18:05:07', '2025-12-05 18:05:07', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (3, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Unknown Browser', 'Unknown OS', 'curl/8.16.0', 0, 'Bad credentials', '2025-12-05 18:11:15', '2025-12-05 18:11:15', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (4, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 0, '用户名或密码错误', '2025-12-05 18:18:03', '2025-12-05 18:18:03', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (5, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 0, '用户名或密码错误', '2025-12-05 19:28:07', '2025-12-05 19:28:07', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (6, 'yushuang', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:37:21', '2025-12-05 19:37:21', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (7, 'yushuang1', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:38:38', '2025-12-05 19:38:38', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (8, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:39:23', '2025-12-05 19:39:23', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (9, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:50:01', '2025-12-05 19:50:01', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (10, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:50:51', '2025-12-05 19:50:51', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (11, 'yushuang', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 20:14:05', '2025-12-05 20:14:05', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (12, 'yushuang', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 20:50:28', '2025-12-05 20:50:28', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (13, 'admin', '127.0.0.1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:32:03', '2025-12-07 14:32:03', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (14, 'yushuang', '127.0.0.1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 0, '账号已被禁用，请联系管理员', '2025-12-07 14:49:22', '2025-12-07 14:49:22', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (15, 'yushuang', '127.0.0.1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 0, '账号已被禁用，请联系管理员', '2025-12-07 14:49:30', '2025-12-07 14:49:30', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (16, 'admin', '127.0.0.1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:49:36', '2025-12-07 14:49:36', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (17, 'yushuang', '127.0.0.1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 0, '账号已被禁用，请联系管理员', '2025-12-07 14:50:15', '2025-12-07 14:50:15', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (18, 'yushuang', '127.0.0.1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 0, '账号已被禁用，请联系管理员', '2025-12-07 14:50:21', '2025-12-07 14:50:21', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (19, 'yushuang', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 0, '用户名或密码错误', '2025-12-08 20:17:00', '2025-12-08 20:17:00', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (20, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:17:08', '2025-12-08 20:17:08', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (21, 'yushuang', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 0, '用户名或密码错误', '2025-12-08 20:38:03', '2025-12-08 20:38:03', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (22, 'yushuang', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:08', '2025-12-08 20:38:08', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (23, 'yushuang', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:26', '2025-12-08 20:38:26', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (24, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:39:17', '2025-12-08 20:39:17', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (25, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 21:05:51', '2025-12-08 21:05:51', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (26, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 21:09:31', '2025-12-08 21:09:31', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (27, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 0, '\r\n### Error querying database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'r.data_scope\' in \'field list\'\r\n### The error may exist in com/zhangjiajie/system/mapper/UserMapper.java (best guess)\r\n### The error may involve com.zhangjiajie.system.mapper.UserMapper.selectUserWithRoleByUsername-Inline\r\n### The error occurred while setting parameters\r\n### SQL: SELECT u.id, u.username, u.password, u.salt, u.real_name, u.nickname, u.email, u.phone, u.avatar, u.dept_id, u.gender, u.birthday, u.status, u.last_login_time, u.last_login_ip, u.create_time, u.update_time, u.deleted, u.remark, r.id as role_id, r.role_name, r.role_code, r.data_scope, d.dept_name FROM sys_user u LEFT JOIN sys_user_role ur ON u.id = ur.user_id AND ur.deleted = 0 LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0 LEFT JOIN sys_dept d ON u.dept_id = d.id AND d.deleted = 0 WHERE u.deleted = 0 AND u.username = ?\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'r.data_scope\' in \'field list\'\n; bad SQL grammar []', '2025-12-08 23:35:24', '2025-12-08 23:35:24', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (28, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 0, '\r\n### Error querying database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'r.data_scope\' in \'field list\'\r\n### The error may exist in com/zhangjiajie/system/mapper/UserMapper.java (best guess)\r\n### The error may involve com.zhangjiajie.system.mapper.UserMapper.selectUserWithRoleByUsername-Inline\r\n### The error occurred while setting parameters\r\n### SQL: SELECT u.id, u.username, u.password, u.salt, u.real_name, u.nickname, u.email, u.phone, u.avatar, u.dept_id, u.gender, u.birthday, u.status, u.last_login_time, u.last_login_ip, u.create_time, u.update_time, u.deleted, u.remark, r.id as role_id, r.role_name, r.role_code, r.data_scope, d.dept_name FROM sys_user u LEFT JOIN sys_user_role ur ON u.id = ur.user_id AND ur.deleted = 0 LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0 LEFT JOIN sys_dept d ON u.dept_id = d.id AND d.deleted = 0 WHERE u.deleted = 0 AND u.username = ?\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'r.data_scope\' in \'field list\'\n; bad SQL grammar []', '2025-12-08 23:35:28', '2025-12-08 23:35:28', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (29, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 0, '\r\n### Error querying database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'r.data_scope\' in \'field list\'\r\n### The error may exist in com/zhangjiajie/system/mapper/UserMapper.java (best guess)\r\n### The error may involve com.zhangjiajie.system.mapper.UserMapper.selectUserWithRoleByUsername-Inline\r\n### The error occurred while setting parameters\r\n### SQL: SELECT u.id, u.username, u.password, u.salt, u.real_name, u.nickname, u.email, u.phone, u.avatar, u.dept_id, u.gender, u.birthday, u.status, u.last_login_time, u.last_login_ip, u.create_time, u.update_time, u.deleted, u.remark, r.id as role_id, r.role_name, r.role_code, r.data_scope, d.dept_name FROM sys_user u LEFT JOIN sys_user_role ur ON u.id = ur.user_id AND ur.deleted = 0 LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0 LEFT JOIN sys_dept d ON u.dept_id = d.id AND d.deleted = 0 WHERE u.deleted = 0 AND u.username = ?\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'r.data_scope\' in \'field list\'\n; bad SQL grammar []', '2025-12-08 23:35:35', '2025-12-08 23:35:35', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (30, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 0, '\r\n### Error querying database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'r.data_scope\' in \'field list\'\r\n### The error may exist in com/zhangjiajie/system/mapper/UserMapper.java (best guess)\r\n### The error may involve com.zhangjiajie.system.mapper.UserMapper.selectUserWithRoleByUsername-Inline\r\n### The error occurred while setting parameters\r\n### SQL: SELECT u.id, u.username, u.password, u.salt, u.real_name, u.nickname, u.email, u.phone, u.avatar, u.dept_id, u.gender, u.birthday, u.status, u.last_login_time, u.last_login_ip, u.create_time, u.update_time, u.deleted, u.remark, r.id as role_id, r.role_name, r.role_code, r.data_scope, d.dept_name FROM sys_user u LEFT JOIN sys_user_role ur ON u.id = ur.user_id AND ur.deleted = 0 LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0 LEFT JOIN sys_dept d ON u.dept_id = d.id AND d.deleted = 0 WHERE u.deleted = 0 AND u.username = ?\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'r.data_scope\' in \'field list\'\n; bad SQL grammar []', '2025-12-08 23:35:38', '2025-12-08 23:35:38', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (31, 'yushuang', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 0, '\r\n### Error querying database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'r.data_scope\' in \'field list\'\r\n### The error may exist in com/zhangjiajie/system/mapper/UserMapper.java (best guess)\r\n### The error may involve com.zhangjiajie.system.mapper.UserMapper.selectUserWithRoleByUsername-Inline\r\n### The error occurred while setting parameters\r\n### SQL: SELECT u.id, u.username, u.password, u.salt, u.real_name, u.nickname, u.email, u.phone, u.avatar, u.dept_id, u.gender, u.birthday, u.status, u.last_login_time, u.last_login_ip, u.create_time, u.update_time, u.deleted, u.remark, r.id as role_id, r.role_name, r.role_code, r.data_scope, d.dept_name FROM sys_user u LEFT JOIN sys_user_role ur ON u.id = ur.user_id AND ur.deleted = 0 LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0 LEFT JOIN sys_dept d ON u.dept_id = d.id AND d.deleted = 0 WHERE u.deleted = 0 AND u.username = ?\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'r.data_scope\' in \'field list\'\n; bad SQL grammar []', '2025-12-08 23:35:52', '2025-12-08 23:35:52', 0, NULL);
+INSERT INTO `sys_login_log` VALUES (32, 'admin', '0:0:0:0:0:0:0:1', 'Unknown Location', 'Google Chrome', 'Windows 10', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 23:39:34', '2025-12-08 23:39:34', 0, NULL);
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -217,7 +247,7 @@ CREATE TABLE `sys_menu`  (
   `deleted` tinyint NULL DEFAULT 0 COMMENT '逻辑删除',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1025 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单权限表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1055 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单权限表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_menu
@@ -230,6 +260,7 @@ INSERT INTO `sys_menu` VALUES (101, '角色管理', 3, 2, '/roles', 'Roles', NUL
 INSERT INTO `sys_menu` VALUES (102, '菜单管理', 3, 3, '/menus', 'Menus', NULL, 1, 0, 'C', 1, 1, 'menu:view', 'Menu', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (103, '权限管理', 3, 4, '/permissions', 'Permissions', NULL, 1, 0, 'C', 1, 1, 'permission:view', 'Key', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (104, '代码生成器', 3, 5, '/generator', 'Generator', NULL, 1, 0, 'C', 1, 1, 'generator:view', 'Cpu', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
+INSERT INTO `sys_menu` VALUES (105, '组织结构', 3, 6, '/depts', 'Depts', NULL, 1, 0, 'C', 1, 1, 'dept:view', 'OfficeBuilding', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (1001, '用户查询', 100, 1, '', NULL, NULL, 1, 0, 'F', 1, 1, 'user:view', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (1002, '用户新增', 100, 2, '', NULL, NULL, 1, 0, 'F', 1, 1, 'user:create', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (1003, '用户修改', 100, 3, '', NULL, NULL, 1, 0, 'F', 1, 1, 'user:update', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
@@ -242,7 +273,6 @@ INSERT INTO `sys_menu` VALUES (1021, '菜单查询', 102, 1, '', NULL, NULL, 1, 
 INSERT INTO `sys_menu` VALUES (1022, '菜单新增', 102, 2, '', NULL, NULL, 1, 0, 'F', 1, 1, 'menu:create', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (1023, '菜单修改', 102, 3, '', NULL, NULL, 1, 0, 'F', 1, 1, 'menu:update', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (1024, '菜单删除', 102, 4, '', NULL, NULL, 1, 0, 'F', 1, 1, 'menu:delete', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
-INSERT INTO `sys_menu` VALUES (105, '组织结构', 3, 6, '/depts', 'Depts', NULL, 1, 0, 'C', 1, 1, 'dept:view', 'OfficeBuilding', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (1051, '组织查询', 105, 1, '', NULL, NULL, 1, 0, 'F', 1, 1, 'dept:view', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (1052, '组织新增', 105, 2, '', NULL, NULL, 1, 0, 'F', 1, 1, 'dept:create', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
 INSERT INTO `sys_menu` VALUES (1053, '组织修改', 105, 3, '', NULL, NULL, 1, 0, 'F', 1, 1, 'dept:edit', '#', '2025-12-07 14:31:39', '2025-12-07 14:31:39', 0, '');
@@ -272,7 +302,7 @@ CREATE TABLE `sys_operation_log`  (
   `deleted` int NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
   `remark` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 38 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 54 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_operation_log
@@ -280,6 +310,56 @@ CREATE TABLE `sys_operation_log`  (
 INSERT INTO `sys_operation_log` VALUES (1, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 311, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 18:01:22', '2025-12-05 18:01:22', 0, NULL);
 INSERT INTO `sys_operation_log` VALUES (2, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 56, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 18:05:07', '2025-12-05 18:05:07', 0, NULL);
 INSERT INTO `sys_operation_log` VALUES (3, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 57, '0:0:0:0:0:0:0:1', 'curl/8.16.0', 1, NULL, '2025-12-05 18:11:15', '2025-12-05 18:11:15', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (4, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 250, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 18:18:03', '2025-12-05 18:18:03', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (5, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 246, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:28:07', '2025-12-05 19:28:07', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (6, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 102, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:37:21', '2025-12-05 19:37:21', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (7, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 58, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:38:38', '2025-12-05 19:38:38', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (8, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 58, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:39:23', '2025-12-05 19:39:23', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (9, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 60, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:50:01', '2025-12-05 19:50:01', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (10, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 58, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 19:50:51', '2025-12-05 19:50:51', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (11, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 260, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 20:14:05', '2025-12-05 20:14:05', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (12, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.yushuang.demo.controller.AuthController.login', NULL, 129, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-05 20:50:28', '2025-12-05 20:50:28', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (13, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 141, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:32:03', '2025-12-07 14:32:03', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (14, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 245, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:49:22', '2025-12-07 14:49:22', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (15, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 56, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:49:30', '2025-12-07 14:49:30', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (16, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 112, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:49:36', '2025-12-07 14:49:36', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (17, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 54, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:50:15', '2025-12-07 14:50:15', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (18, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 54, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Windsurf/1.105.0 Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36', 1, NULL, '2025-12-07 14:50:21', '2025-12-07 14:50:21', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (19, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 363, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:17:00', '2025-12-08 20:17:00', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (20, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 78, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:17:08', '2025-12-08 20:17:08', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (21, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 3, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:17:08', '2025-12-08 20:17:08', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (22, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 4, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:18:34', '2025-12-08 20:18:34', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (23, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 2, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:20:27', '2025-12-08 20:20:27', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (24, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 2, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:23:21', '2025-12-08 20:23:21', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (25, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 2, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:24:51', '2025-12-08 20:24:51', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (26, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 7, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:34:41', '2025-12-08 20:34:41', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (27, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 68, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:03', '2025-12-08 20:38:03', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (28, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 73, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:08', '2025-12-08 20:38:08', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (29, NULL, 'yushuang', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 3, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:08', '2025-12-08 20:38:08', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (30, NULL, 'yushuang', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 2, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:19', '2025-12-08 20:38:19', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (31, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 61, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:26', '2025-12-08 20:38:26', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (32, NULL, 'yushuang', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 3, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:38:26', '2025-12-08 20:38:26', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (33, NULL, 'yushuang', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 2, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:39:00', '2025-12-08 20:39:00', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (34, NULL, 'anonymousUser', '用户登录', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.login', NULL, 62, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:39:17', '2025-12-08 20:39:17', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (35, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 1, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:39:17', '2025-12-08 20:39:17', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (36, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 2, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:39:38', '2025-12-08 20:39:38', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (37, NULL, 'admin', '获取用户信息', NULL, NULL, NULL, 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 3, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 20:41:16', '2025-12-08 20:41:16', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (38, NULL, 'admin', '获取用户信息', '认证管理', 'GET', '/api/auth/userinfo', 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 43, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 21:05:41', '2025-12-08 21:05:41', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (39, NULL, 'anonymousUser', '用户登录', '认证管理', 'POST', '/api/auth/login', 'com.zhangjiajie.system.controller.AuthController.login', NULL, 110, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 21:05:51', '2025-12-08 21:05:51', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (40, NULL, 'admin', '获取用户信息', '认证管理', 'GET', '/api/auth/userinfo', 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 8, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 21:05:51', '2025-12-08 21:05:51', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (41, NULL, 'admin', '获取用户信息', '认证管理', 'GET', '/api/auth/userinfo', 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 7, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 21:07:33', '2025-12-08 21:07:33', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (42, NULL, 'admin', '获取用户信息', '认证管理', 'GET', '/api/auth/userinfo', 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 4, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 21:07:33', '2025-12-08 21:07:33', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (43, NULL, 'anonymousUser', '用户登录', '认证管理', 'POST', '/api/auth/login', 'com.zhangjiajie.system.controller.AuthController.login', NULL, 82, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 21:09:31', '2025-12-08 21:09:31', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (44, NULL, 'admin', '获取用户信息', '认证管理', 'GET', '/api/auth/userinfo', 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 2, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 21:09:31', '2025-12-08 21:09:31', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (45, NULL, 'admin', '获取用户信息', '认证管理', 'GET', '/api/auth/userinfo', 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 1, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 21:10:35', '2025-12-08 21:10:35', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (46, NULL, 'anonymousUser', '用户登录', '认证管理', 'POST', '/api/auth/login', 'com.zhangjiajie.system.controller.AuthController.login', NULL, 549, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 23:35:24', '2025-12-08 23:35:24', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (47, NULL, 'anonymousUser', '用户登录', '认证管理', 'POST', '/api/auth/login', 'com.zhangjiajie.system.controller.AuthController.login', NULL, 17, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 23:35:28', '2025-12-08 23:35:28', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (48, NULL, 'anonymousUser', '用户登录', '认证管理', 'POST', '/api/auth/login', 'com.zhangjiajie.system.controller.AuthController.login', NULL, 3, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 23:35:35', '2025-12-08 23:35:35', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (49, NULL, 'anonymousUser', '用户登录', '认证管理', 'POST', '/api/auth/login', 'com.zhangjiajie.system.controller.AuthController.login', NULL, 3, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 23:35:38', '2025-12-08 23:35:38', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (50, NULL, 'anonymousUser', '用户登录', '认证管理', 'POST', '/api/auth/login', 'com.zhangjiajie.system.controller.AuthController.login', NULL, 4, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 23:35:52', '2025-12-08 23:35:52', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (51, NULL, 'anonymousUser', '用户登录', '认证管理', 'POST', '/api/auth/login', 'com.zhangjiajie.system.controller.AuthController.login', NULL, 449, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 23:39:34', '2025-12-08 23:39:34', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (52, NULL, 'admin', '获取用户信息', '认证管理', 'GET', '/api/auth/userinfo', 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 4, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 23:39:34', '2025-12-08 23:39:34', 0, NULL);
+INSERT INTO `sys_operation_log` VALUES (53, NULL, 'admin', '获取用户信息', '认证管理', 'GET', '/api/auth/userinfo', 'com.zhangjiajie.system.controller.AuthController.getUserInfo', '', 8, '0:0:0:0:0:0:0:1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36', 1, NULL, '2025-12-08 23:42:54', '2025-12-08 23:42:54', 0, NULL);
 
 -- ----------------------------
 -- Table structure for sys_permission
@@ -334,7 +414,7 @@ CREATE TABLE `sys_role`  (
   `role_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '角色名称',
   `role_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '角色编码',
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '角色描述',
-  `data_scope` tinyint NULL DEFAULT 1 COMMENT '数据范围：1-全部数据 2-本部门及下级 3-本部门 4-仅本人',
+  `data_scope` tinyint NULL DEFAULT 1 COMMENT '数据范围',
   `sort_order` int NULL DEFAULT 0 COMMENT '排序',
   `status` tinyint NULL DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -349,8 +429,8 @@ CREATE TABLE `sys_role`  (
 -- Records of sys_role
 -- ----------------------------
 INSERT INTO `sys_role` VALUES (1, 'Super Admin', 'SUPER_ADMIN', 'System super administrator with all permissions', 1, 1, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_role` VALUES (2, 'Admin', 'ADMIN', 'System administrator with most permissions', 2, 2, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
-INSERT INTO `sys_role` VALUES (3, 'User', 'USER', 'Regular user with basic permissions', 4, 3, 1, '2025-12-05 17:59:19', '2025-12-05 17:59:19', 0, NULL);
+INSERT INTO `sys_role` VALUES (2, 'Admin', 'ADMIN', 'System administrator with most permissions', 2, 2, 1, '2025-12-05 17:59:19', '2025-12-08 23:38:13', 0, NULL);
+INSERT INTO `sys_role` VALUES (3, 'User', 'USER', 'Regular user with basic permissions', 4, 3, 1, '2025-12-05 17:59:19', '2025-12-08 23:38:13', 0, NULL);
 
 -- ----------------------------
 -- Table structure for sys_role_menu
@@ -363,7 +443,7 @@ CREATE TABLE `sys_role_menu`  (
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_role_menu`(`role_id` ASC, `menu_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 32 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色和菜单关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 37 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色和菜单关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_role_menu
@@ -388,11 +468,11 @@ INSERT INTO `sys_role_menu` VALUES (17, 1, 1021, '2025-12-07 14:31:39');
 INSERT INTO `sys_role_menu` VALUES (18, 1, 1022, '2025-12-07 14:31:39');
 INSERT INTO `sys_role_menu` VALUES (19, 1, 1023, '2025-12-07 14:31:39');
 INSERT INTO `sys_role_menu` VALUES (20, 1, 1024, '2025-12-07 14:31:39');
-INSERT INTO `sys_role_menu` VALUES (21, 1, 105, '2025-12-07 14:31:39');
-INSERT INTO `sys_role_menu` VALUES (22, 1, 1051, '2025-12-07 14:31:39');
-INSERT INTO `sys_role_menu` VALUES (23, 1, 1052, '2025-12-07 14:31:39');
-INSERT INTO `sys_role_menu` VALUES (24, 1, 1053, '2025-12-07 14:31:39');
-INSERT INTO `sys_role_menu` VALUES (25, 1, 1054, '2025-12-07 14:31:39');
+INSERT INTO `sys_role_menu` VALUES (32, 1, 105, '2025-12-08 21:10:31');
+INSERT INTO `sys_role_menu` VALUES (33, 1, 1051, '2025-12-08 21:10:31');
+INSERT INTO `sys_role_menu` VALUES (34, 1, 1052, '2025-12-08 21:10:31');
+INSERT INTO `sys_role_menu` VALUES (35, 1, 1053, '2025-12-08 21:10:31');
+INSERT INTO `sys_role_menu` VALUES (36, 1, 1054, '2025-12-08 21:10:31');
 
 -- ----------------------------
 -- Table structure for sys_role_permission
@@ -499,39 +579,3 @@ INSERT INTO `sys_user_role` VALUES (3, 5, 3, NULL, '2025-12-05 19:38:34', 0);
 INSERT INTO `sys_user_role` VALUES (4, 6, 3, NULL, '2025-12-05 20:14:00', 0);
 
 SET FOREIGN_KEY_CHECKS = 1;
-
--- ============================================
--- 数据库迁移脚本（用于升级现有数据库）
--- ============================================
-
--- 迁移: 添加 data_scope 列到 sys_role 表（如果不存在）
--- 注意: 如果列已存在会报错，可忽略
--- ALTER TABLE sys_role 
--- ADD COLUMN `data_scope` tinyint NULL DEFAULT 1 COMMENT '数据范围：1-全部数据 2-本部门及下级 3-本部门 4-仅本人'
--- AFTER `description`;
-
--- 使用存储过程安全添加列（不会因列已存在而报错）
-DROP PROCEDURE IF EXISTS add_data_scope_column;
-DELIMITER //
-CREATE PROCEDURE add_data_scope_column()
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns 
-        WHERE table_schema = DATABASE() 
-        AND table_name = 'sys_role' 
-        AND column_name = 'data_scope'
-    ) THEN
-        ALTER TABLE sys_role 
-        ADD COLUMN `data_scope` tinyint NULL DEFAULT 1 COMMENT '数据范围：1-全部数据 2-本部门及下级 3-本部门 4-仅本人'
-        AFTER `description`;
-        
-        -- 更新现有角色的 data_scope
-        UPDATE sys_role SET data_scope = 1 WHERE role_code = 'SUPER_ADMIN';
-        UPDATE sys_role SET data_scope = 2 WHERE role_code = 'ADMIN';
-        UPDATE sys_role SET data_scope = 4 WHERE role_code = 'USER';
-    END IF;
-END //
-DELIMITER ;
-
-CALL add_data_scope_column();
-DROP PROCEDURE IF EXISTS add_data_scope_column;
