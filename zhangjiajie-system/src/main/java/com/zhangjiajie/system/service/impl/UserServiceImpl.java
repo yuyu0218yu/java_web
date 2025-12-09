@@ -5,10 +5,14 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zhangjiajie.system.dto.UserExportDTO;
+import com.zhangjiajie.system.dto.UserImportDTO;
 import com.zhangjiajie.system.dto.UserWithRole;
+import com.zhangjiajie.system.entity.Dept;
 import com.zhangjiajie.system.entity.Role;
 import com.zhangjiajie.system.entity.User;
 import com.zhangjiajie.system.entity.UserRole;
+import com.zhangjiajie.system.mapper.DeptMapper;
 import com.zhangjiajie.system.mapper.RoleMapper;
 import com.zhangjiajie.system.mapper.UserMapper;
 import com.zhangjiajie.system.mapper.UserRoleMapper;
@@ -20,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +40,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final UserMapper userMapper;
     private final UserRoleMapper userRoleMapper;
     private final RoleMapper roleMapper;
+    private final DeptMapper deptMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -330,5 +335,143 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         return true;
+    }
+
+    @Override
+    public List<UserExportDTO> getExportData() {
+        // 获取所有用户（带角色信息）
+        List<UserWithRole> users = userMapper.selectAllUsersWithRole();
+
+        // 获取所有部门映射
+        Map<Long, String> deptMap = new HashMap<>();
+        List<Dept> depts = deptMapper.selectList(new LambdaQueryWrapper<Dept>().eq(Dept::getDeleted, 0));
+        for (Dept dept : depts) {
+            deptMap.put(dept.getId(), dept.getDeptName());
+        }
+
+        // 转换为导出DTO
+        return users.stream().map(user -> {
+            UserExportDTO dto = new UserExportDTO();
+            dto.setId(user.getId());
+            dto.setUsername(user.getUsername());
+            dto.setRealName(user.getRealName());
+            dto.setNickname(user.getNickname());
+            dto.setEmail(user.getEmail());
+            dto.setPhone(user.getPhone());
+            dto.setDeptName(user.getDeptId() != null ? deptMap.get(user.getDeptId()) : null);
+            dto.setGenderText(getGenderText(user.getGender()));
+            dto.setStatusText(user.getStatus() != null && user.getStatus() == 1 ? "启用" : "禁用");
+            dto.setBirthday(user.getBirthday());
+            dto.setLastLoginTime(user.getLastLoginTime());
+            dto.setLastLoginIp(user.getLastLoginIp());
+            dto.setCreateTime(user.getCreateTime());
+            dto.setRemark(user.getRemark());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    private String getGenderText(Integer gender) {
+        if (gender == null) return "未知";
+        return switch (gender) {
+            case 1 -> "男";
+            case 2 -> "女";
+            default -> "未知";
+        };
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Map<String, Object> importUsers(List<UserImportDTO> importData) {
+        int successCount = 0;
+        int failCount = 0;
+        List<String> failMessages = new ArrayList<>();
+
+        // 获取部门名称到ID的映射
+        Map<String, Long> deptNameToIdMap = new HashMap<>();
+        List<Dept> depts = deptMapper.selectList(new LambdaQueryWrapper<Dept>().eq(Dept::getDeleted, 0));
+        for (Dept dept : depts) {
+            deptNameToIdMap.put(dept.getDeptName(), dept.getId());
+        }
+
+        for (int i = 0; i < importData.size(); i++) {
+            UserImportDTO dto = importData.get(i);
+            int rowNum = i + 2; // Excel从第2行开始（第1行是表头）
+
+            try {
+                // 验证必填字段
+                if (!StringUtils.hasText(dto.getUsername())) {
+                    failCount++;
+                    failMessages.add("第" + rowNum + "行：用户名不能为空");
+                    continue;
+                }
+
+                // 检查用户名是否已存在
+                if (checkUsernameExists(dto.getUsername(), null)) {
+                    failCount++;
+                    failMessages.add("第" + rowNum + "行：用户名 [" + dto.getUsername() + "] 已存在");
+                    continue;
+                }
+
+                // 检查邮箱是否已存在
+                if (StringUtils.hasText(dto.getEmail()) && checkEmailExists(dto.getEmail(), null)) {
+                    failCount++;
+                    failMessages.add("第" + rowNum + "行：邮箱 [" + dto.getEmail() + "] 已存在");
+                    continue;
+                }
+
+                // 检查手机号是否已存在
+                if (StringUtils.hasText(dto.getPhone()) && checkPhoneExists(dto.getPhone(), null)) {
+                    failCount++;
+                    failMessages.add("第" + rowNum + "行：手机号 [" + dto.getPhone() + "] 已存在");
+                    continue;
+                }
+
+                // 创建用户
+                User user = new User();
+                user.setUsername(dto.getUsername());
+                user.setPassword(passwordEncoder.encode("123456")); // 默认密码
+                user.setRealName(dto.getRealName());
+                user.setNickname(dto.getNickname());
+                user.setEmail(dto.getEmail());
+                user.setPhone(dto.getPhone());
+                user.setBirthday(dto.getBirthday());
+                user.setRemark(dto.getRemark());
+                user.setStatus(1); // 默认启用
+
+                // 解析性别
+                if (StringUtils.hasText(dto.getGender())) {
+                    user.setGender(parseGender(dto.getGender()));
+                }
+
+                // 解析部门
+                if (StringUtils.hasText(dto.getDeptName())) {
+                    Long deptId = deptNameToIdMap.get(dto.getDeptName());
+                    if (deptId != null) {
+                        user.setDeptId(deptId);
+                    }
+                }
+
+                save(user);
+                successCount++;
+
+            } catch (Exception e) {
+                failCount++;
+                failMessages.add("第" + rowNum + "行：导入失败 - " + e.getMessage());
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("successCount", successCount);
+        result.put("failCount", failCount);
+        result.put("failMessages", failMessages);
+        result.put("message", String.format("导入完成，成功 %d 条，失败 %d 条", successCount, failCount));
+
+        return result;
+    }
+
+    private Integer parseGender(String gender) {
+        if ("男".equals(gender)) return 1;
+        if ("女".equals(gender)) return 2;
+        return 0;
     }
 }

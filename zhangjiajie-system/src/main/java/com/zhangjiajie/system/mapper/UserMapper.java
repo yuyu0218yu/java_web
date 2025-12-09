@@ -112,4 +112,17 @@ public interface UserMapper extends BaseMapper<User> {
             @Param("deptId") Long deptId,
             @Param("dataScopeSql") String dataScopeSql
     );
+
+    /**
+     * 查询所有用户（包含角色信息）用于导出
+     */
+    @Select("SELECT u.*, r.id as role_id, r.role_name, r.role_code, r.data_scope, " +
+            "d.dept_name, d.dept_code " +
+            "FROM sys_user u " +
+            "LEFT JOIN sys_user_role ur ON u.id = ur.user_id AND ur.deleted = 0 " +
+            "LEFT JOIN sys_role r ON ur.role_id = r.id AND r.deleted = 0 " +
+            "LEFT JOIN sys_dept d ON u.dept_id = d.id AND d.deleted = 0 " +
+            "WHERE u.deleted = 0 " +
+            "ORDER BY u.create_time DESC")
+    List<UserWithRole> selectAllUsersWithRole();
 }

@@ -60,6 +60,23 @@
             <el-icon><Download /></el-icon>
             导出
           </el-button>
+          <el-upload
+            ref="importRef"
+            :show-file-list="false"
+            :before-upload="beforeImport"
+            :http-request="handleImport"
+            accept=".xlsx,.xls"
+            style="display: inline-block; margin-left: 10px;"
+          >
+            <el-button type="warning" class="action-btn">
+              <el-icon><Upload /></el-icon>
+              导入
+            </el-button>
+          </el-upload>
+          <el-button type="info" @click="downloadTemplate" class="action-btn" style="margin-left: 10px;">
+            <el-icon><Document /></el-icon>
+            下载模板
+          </el-button>
         </div>
       </el-card>
     </transition>
@@ -320,10 +337,10 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  Search, Refresh, Plus, Delete, Download, Edit, Key, Lock, 
+import {
+  Search, Refresh, Plus, Delete, Download, Edit, Key, Lock,
   User, Message, Phone, Avatar, Clock, CircleCheck, CircleClose,
-  Close, Check, OfficeBuilding
+  Close, Check, OfficeBuilding, Upload, Document
 } from '@element-plus/icons-vue'
 import { userApi, roleApi, deptApi } from '@/api'
 import { getDataScopeLabel, getDataScopeTagType, getDataScopeTooltip } from '@/utils/dataScope'
@@ -335,6 +352,7 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const selectedRows = ref([])
 const formRef = ref()
+const importRef = ref()
 
 // 搜索表单
 const searchForm = reactive({
@@ -622,8 +640,75 @@ const handleStatusChange = async (row) => {
   }
 }
 
-const handleExport = () => {
-  ElMessage.info('导出功能开发中...')
+const handleExport = async () => {
+  try {
+    await userApi.exportUsers()
+    ElMessage.success('导出成功')
+  } catch (error) {
+    console.error('导出失败:', error)
+    ElMessage.error('导出失败')
+  }
+}
+
+// 导入前检查
+const beforeImport = (file) => {
+  const isExcel = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+                 file.type === 'application/vnd.ms-excel'
+  if (!isExcel) {
+    ElMessage.error('只能上传 Excel 文件!')
+    return false
+  }
+  const isLt5M = file.size / 1024 / 1024 < 5
+  if (!isLt5M) {
+    ElMessage.error('文件大小不能超过 5MB!')
+    return false
+  }
+  return true
+}
+
+// 处理导入
+const handleImport = async ({ file }) => {
+  try {
+    loading.value = true
+    const response = await userApi.importUsers(file)
+    const { successCount, failCount, failMessages, message } = response.data
+
+    if (failCount > 0) {
+      ElMessageBox.alert(
+        `<div>
+          <p>${message}</p>
+          <div style="max-height: 200px; overflow-y: auto; margin-top: 10px;">
+            ${failMessages.map(msg => `<p style="color: #F56C6C; font-size: 12px;">${msg}</p>`).join('')}
+          </div>
+        </div>`,
+        '导入结果',
+        {
+          dangerouslyUseHTMLString: true,
+          type: failCount === 0 ? 'success' : 'warning'
+        }
+      )
+    } else {
+      ElMessage.success(message)
+    }
+
+    loadData()
+  } catch (error) {
+    console.error('导入失败:', error)
+    ElMessage.error('导入失败：' + (error.message || '未知错误'))
+  } finally {
+    loading.value = false
+  }
+}
+
+// 下载导入模板
+const downloadTemplate = async () => {
+  try {
+    await userApi.downloadImportTemplate()
+    ElMessage.success('模板下载成功')
+  } catch (error) {
+    console.error('下载模板失败:', error)
+    ElMessage.error('下载模板失败')
+  }
 }
 
 const handleSelectionChange = (rows) => {

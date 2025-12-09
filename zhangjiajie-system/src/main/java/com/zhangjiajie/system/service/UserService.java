@@ -3,10 +3,13 @@ package com.zhangjiajie.system.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.zhangjiajie.system.dto.UserExportDTO;
+import com.zhangjiajie.system.dto.UserImportDTO;
 import com.zhangjiajie.system.dto.UserWithRole;
 import com.zhangjiajie.system.entity.User;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户服务接口
@@ -85,4 +88,14 @@ public interface UserService extends IService<User> {
      * 修改用户角色
      */
     boolean updateUserRoles(Long userId, List<Long> roleIds);
+
+    /**
+     * 获取用户导出数据
+     */
+    List<UserExportDTO> getExportData();
+
+    /**
+     * 导入用户数据
+     */
+    Map<String, Object> importUsers(List<UserImportDTO> importData);
 }

@@ -1,16 +1,13 @@
 package com.zhangjiajie.system.controller;
 
+import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhangjiajie.common.core.PageResult;
 import com.zhangjiajie.common.core.Result;
-import com.zhangjiajie.system.dto.ChangePasswordRequest;
-import com.zhangjiajie.system.dto.CreateUserRequest;
-import com.zhangjiajie.system.dto.ResetPasswordRequest;
-import com.zhangjiajie.system.dto.UpdateUserRequest;
-import com.zhangjiajie.system.dto.UpdateUserStatusRequest;
+import com.zhangjiajie.common.util.ExcelUtil;
+import com.zhangjiajie.system.dto.*;
 import com.zhangjiajie.system.entity.User;
-import com.zhangjiajie.system.dto.UserWithRole;
 import com.zhangjiajie.system.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,10 +16,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -256,5 +256,44 @@ public class UserController {
 
         boolean exists = userService.checkPhoneExists(phone, excludeId);
         return Result.success(Map.of("exists", exists));
+    }
+
+    @GetMapping("/export")
+    @Operation(summary = "导出用户数据")
+    @PreAuthorize("hasAuthority('user:export') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    public void exportUsers(HttpServletResponse response) {
+        List<UserExportDTO> exportData = userService.getExportData();
+        ExcelUtil.export(response, exportData, UserExportDTO.class, "用户数据", "用户列表");
+    }
+
+    @PostMapping("/import")
+    @Operation(summary = "导入用户数据")
+    @PreAuthorize("hasAuthority('user:import') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    public Result<Map<String, Object>> importUsers(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return Result.error("请选择要导入的文件");
+        }
+
+        try {
+            List<UserImportDTO> importData = EasyExcel.read(file.getInputStream())
+                    .head(UserImportDTO.class)
+                    .sheet()
+                    .doReadSync();
+
+            Map<String, Object> result = userService.importUsers(importData);
+            return Result.success(result);
+        } catch (IOException e) {
+            return Result.error("文件读取失败：" + e.getMessage());
+        } catch (Exception e) {
+            return Result.error("导入失败：" + e.getMessage());
+        }
+    }
+
+    @GetMapping("/import/template")
+    @Operation(summary = "下载导入模板")
+    @PreAuthorize("hasAuthority('user:import') or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    public void downloadImportTemplate(HttpServletResponse response) {
+        List<UserImportDTO> templateData = List.of();
+        ExcelUtil.export(response, templateData, UserImportDTO.class, "用户导入模板", "用户导入模板");
     }
 }

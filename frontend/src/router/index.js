@@ -68,6 +68,48 @@ const routes = [
         name: 'Generator',
         component: () => import('@/views/Generator.vue'),
         meta: { title: '代码生成器', requiresAuth: true, requiredRoles: ['SUPER_ADMIN'] }
+      },
+      {
+        path: 'dicts',
+        name: 'DictType',
+        component: () => import('@/views/DictType.vue'),
+        meta: { title: '字典类型', requiresAuth: true, requiredPermissions: ['dict:view'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
+      },
+      {
+        path: 'dicts/data',
+        name: 'DictData',
+        component: () => import('@/views/DictData.vue'),
+        meta: { title: '字典数据', requiresAuth: true, requiredPermissions: ['dict:view'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
+      },
+      {
+        path: 'logs/operation',
+        name: 'OperationLog',
+        component: () => import('@/views/OperationLog.vue'),
+        meta: { title: '操作日志', requiresAuth: true, requiredPermissions: ['log:operation:view'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
+      },
+      {
+        path: 'logs/login',
+        name: 'LoginLog',
+        component: () => import('@/views/LoginLog.vue'),
+        meta: { title: '登录日志', requiresAuth: true, requiredPermissions: ['log:login:view'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
+      },
+      {
+        path: 'notices',
+        name: 'Notice',
+        component: () => import('@/views/Notice.vue'),
+        meta: { title: '通知公告', requiresAuth: true, requiredPermissions: ['notice:view'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
+      },
+      {
+        path: 'jobs',
+        name: 'Job',
+        component: () => import('@/views/Job.vue'),
+        meta: { title: '定时任务', requiresAuth: true, requiredPermissions: ['job:view'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
+      },
+      {
+        path: 'jobs/logs',
+        name: 'JobLog',
+        component: () => import('@/views/JobLog.vue'),
+        meta: { title: '任务日志', requiresAuth: true, requiredPermissions: ['job:view'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
       }
     ]
   }

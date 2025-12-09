@@ -149,6 +149,79 @@ export const userApi = {
       method: 'put',
       data: { status }
     })
+  },
+
+  // 导出用户
+  async exportUsers() {
+    const token = localStorage.getItem('token')
+    try {
+      const response = await fetch('/api/users/export', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('导出失败')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      const timestamp = new Date().getTime()
+      link.download = `用户数据_${timestamp}.xlsx`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      throw error
+    }
+  },
+
+  // 导入用户
+  importUsers(file) {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request({
+      url: '/users/import',
+      method: 'post',
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
+  // 下载导入模板
+  async downloadImportTemplate() {
+    const token = localStorage.getItem('token')
+    try {
+      const response = await fetch('/api/users/import/template', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('下载失败')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = '用户导入模板.xlsx'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      throw error
+    }
   }
 }
 
@@ -540,6 +613,311 @@ export const dashboardApi = {
   }
 }
 
+// 字典类型管理API
+export const dictTypeApi = {
+  // 分页查询字典类型
+  getPage(params) {
+    return request({
+      url: '/dict/types/page',
+      method: 'get',
+      params
+    })
+  },
+
+  // 获取字典类型列表
+  getList() {
+    return request({
+      url: '/dict/types/list',
+      method: 'get'
+    })
+  },
+
+  // 获取字典类型详情
+  getById(id) {
+    return request({
+      url: `/dict/types/${id}`,
+      method: 'get'
+    })
+  },
+
+  // 创建字典类型
+  create(data) {
+    return request({
+      url: '/dict/types',
+      method: 'post',
+      data
+    })
+  },
+
+  // 更新字典类型
+  update(id, data) {
+    return request({
+      url: `/dict/types/${id}`,
+      method: 'put',
+      data
+    })
+  },
+
+  // 删除字典类型
+  delete(id) {
+    return request({
+      url: `/dict/types/${id}`,
+      method: 'delete'
+    })
+  },
+
+  // 批量删除字典类型
+  batchDelete(ids) {
+    return request({
+      url: '/dict/types/batch',
+      method: 'delete',
+      data: ids
+    })
+  }
+}
+
+// 字典数据管理API
+export const dictDataApi = {
+  // 分页查询字典数据
+  getPage(params) {
+    return request({
+      url: '/dict/data/page',
+      method: 'get',
+      params
+    })
+  },
+
+  // 根据字典类型获取数据
+  getByType(dictType) {
+    return request({
+      url: `/dict/data/type/${dictType}`,
+      method: 'get'
+    })
+  },
+
+  // 获取字典数据详情
+  getById(id) {
+    return request({
+      url: `/dict/data/${id}`,
+      method: 'get'
+    })
+  },
+
+  // 创建字典数据
+  create(data) {
+    return request({
+      url: '/dict/data',
+      method: 'post',
+      data
+    })
+  },
+
+  // 更新字典数据
+  update(id, data) {
+    return request({
+      url: `/dict/data/${id}`,
+      method: 'put',
+      data
+    })
+  },
+
+  // 删除字典数据
+  delete(id) {
+    return request({
+      url: `/dict/data/${id}`,
+      method: 'delete'
+    })
+  },
+
+  // 批量删除字典数据
+  batchDelete(ids) {
+    return request({
+      url: '/dict/data/batch',
+      method: 'delete',
+      data: ids
+    })
+  }
+}
+
+// 操作日志API
+export const operationLogApi = {
+  // 分页查询操作日志
+  getPage(params) {
+    return request({
+      url: '/logs/operation/page',
+      method: 'get',
+      params
+    })
+  },
+
+  // 获取操作日志详情
+  getById(id) {
+    return request({
+      url: `/logs/operation/${id}`,
+      method: 'get'
+    })
+  },
+
+  // 根据用户名查询
+  getByUsername(username, limit = 100) {
+    return request({
+      url: `/logs/operation/user/${username}`,
+      method: 'get',
+      params: { limit }
+    })
+  },
+
+  // 删除操作日志
+  delete(id) {
+    return request({
+      url: `/logs/operation/${id}`,
+      method: 'delete'
+    })
+  },
+
+  // 批量删除操作日志
+  batchDelete(ids) {
+    return request({
+      url: '/logs/operation/batch',
+      method: 'delete',
+      data: ids
+    })
+  },
+
+  // 清空操作日志
+  clean() {
+    return request({
+      url: '/logs/operation/clean',
+      method: 'delete'
+    })
+  },
+
+  // 删除指定天数之前的日志
+  cleanBeforeDays(days) {
+    return request({
+      url: `/logs/operation/clean/${days}`,
+      method: 'delete'
+    })
+  }
+}
+
+// 登录日志API
+export const loginLogApi = {
+  // 分页查询登录日志
+  getPage(params) {
+    return request({
+      url: '/logs/login/page',
+      method: 'get',
+      params
+    })
+  },
+
+  // 获取登录日志详情
+  getById(id) {
+    return request({
+      url: `/logs/login/${id}`,
+      method: 'get'
+    })
+  },
+
+  // 删除登录日志
+  delete(id) {
+    return request({
+      url: `/logs/login/${id}`,
+      method: 'delete'
+    })
+  },
+
+  // 批量删除登录日志
+  batchDelete(ids) {
+    return request({
+      url: '/logs/login/batch',
+      method: 'delete',
+      data: ids
+    })
+  },
+
+  // 清空登录日志
+  clean() {
+    return request({
+      url: '/logs/login/clean',
+      method: 'delete'
+    })
+  },
+
+  // 删除指定天数之前的日志
+  cleanBeforeDays(days) {
+    return request({
+      url: `/logs/login/clean/${days}`,
+      method: 'delete'
+    })
+  }
+}
+
+// 通知公告API
+export const noticeApi = {
+  // 分页查询通知公告
+  getPage(params) {
+    return request({
+      url: '/notices/page',
+      method: 'get',
+      params
+    })
+  },
+
+  // 获取通知公告详情
+  getById(id) {
+    return request({
+      url: `/notices/${id}`,
+      method: 'get'
+    })
+  },
+
+  // 获取最新通知公告
+  getLatest(limit = 10) {
+    return request({
+      url: '/notices/latest',
+      method: 'get',
+      params: { limit }
+    })
+  },
+
+  // 创建通知公告
+  create(data) {
+    return request({
+      url: '/notices',
+      method: 'post',
+      data
+    })
+  },
+
+  // 更新通知公告
+  update(id, data) {
+    return request({
+      url: `/notices/${id}`,
+      method: 'put',
+      data
+    })
+  },
+
+  // 删除通知公告
+  delete(id) {
+    return request({
+      url: `/notices/${id}`,
+      method: 'delete'
+    })
+  },
+
+  // 批量删除通知公告
+  batchDelete(ids) {
+    return request({
+      url: '/notices/batch',
+      method: 'delete',
+      data: ids
+    })
+  }
+}
+
 // 代码生成器API (RuoYi风格)
 export const generatorApi = {
   // 分页查询已导入的表列表
@@ -670,5 +1048,163 @@ export const generatorApi = {
     } catch (error) {
       throw error
     }
+  }
+}
+
+// 定时任务API
+export const jobApi = {
+  // 分页查询定时任务
+  getPage(params) {
+    return request({
+      url: '/jobs/page',
+      method: 'get',
+      params
+    })
+  },
+
+  // 获取定时任务详情
+  getById(id) {
+    return request({
+      url: `/jobs/${id}`,
+      method: 'get'
+    })
+  },
+
+  // 获取所有正常状态的任务
+  getActiveJobs() {
+    return request({
+      url: '/jobs/active',
+      method: 'get'
+    })
+  },
+
+  // 创建定时任务
+  create(data) {
+    return request({
+      url: '/jobs',
+      method: 'post',
+      data
+    })
+  },
+
+  // 更新定时任务
+  update(id, data) {
+    return request({
+      url: `/jobs/${id}`,
+      method: 'put',
+      data
+    })
+  },
+
+  // 删除定时任务
+  delete(id) {
+    return request({
+      url: `/jobs/${id}`,
+      method: 'delete'
+    })
+  },
+
+  // 批量删除定时任务
+  batchDelete(ids) {
+    return request({
+      url: '/jobs/batch',
+      method: 'delete',
+      data: ids
+    })
+  },
+
+  // 暂停任务
+  pause(id) {
+    return request({
+      url: `/jobs/${id}/pause`,
+      method: 'put'
+    })
+  },
+
+  // 恢复任务
+  resume(id) {
+    return request({
+      url: `/jobs/${id}/resume`,
+      method: 'put'
+    })
+  },
+
+  // 立即执行一次任务
+  run(id) {
+    return request({
+      url: `/jobs/${id}/run`,
+      method: 'post'
+    })
+  },
+
+  // 校验cron表达式
+  checkCron(cronExpression) {
+    return request({
+      url: '/jobs/check-cron',
+      method: 'post',
+      data: { cronExpression }
+    })
+  }
+}
+
+// 定时任务日志API
+export const jobLogApi = {
+  // 分页查询任务日志
+  getPage(params) {
+    return request({
+      url: '/jobs/logs/page',
+      method: 'get',
+      params
+    })
+  },
+
+  // 获取任务日志详情
+  getById(id) {
+    return request({
+      url: `/jobs/logs/${id}`,
+      method: 'get'
+    })
+  },
+
+  // 根据任务ID查询日志
+  getByJobId(jobId, params) {
+    return request({
+      url: `/jobs/logs/job/${jobId}`,
+      method: 'get',
+      params
+    })
+  },
+
+  // 删除任务日志
+  delete(id) {
+    return request({
+      url: `/jobs/logs/${id}`,
+      method: 'delete'
+    })
+  },
+
+  // 批量删除任务日志
+  batchDelete(ids) {
+    return request({
+      url: '/jobs/logs/batch',
+      method: 'delete',
+      data: ids
+    })
+  },
+
+  // 清空任务日志
+  clean() {
+    return request({
+      url: '/jobs/logs/clean',
+      method: 'delete'
+    })
+  },
+
+  // 删除指定天数之前的日志
+  cleanBeforeDays(days) {
+    return request({
+      url: `/jobs/logs/clean/${days}`,
+      method: 'delete'
+    })
   }
 }

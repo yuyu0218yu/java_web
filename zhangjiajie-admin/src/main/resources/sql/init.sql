@@ -489,3 +489,97 @@ INSERT INTO `sys_user_role` VALUES (3, 5, 3, NULL, '2025-12-05 19:38:34', 0);
 INSERT INTO `sys_user_role` VALUES (4, 6, 3, NULL, '2025-12-05 20:14:00', 0);
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- ===========================================
+-- 新增模块数据库表结构
+-- 包含：通知公告、定时任务、登录日志增强
+-- ===========================================
+
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for sys_notice (通知公告表)
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_notice`;
+CREATE TABLE `sys_notice` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '公告ID',
+  `title` varchar(100) NOT NULL COMMENT '公告标题',
+  `content` text COMMENT '公告内容',
+  `notice_type` tinyint NOT NULL DEFAULT 1 COMMENT '公告类型：1-通知，2-公告',
+  `status` tinyint NOT NULL DEFAULT 1 COMMENT '状态：0-关闭，1-正常',
+  `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` tinyint NOT NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
+  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`id`),
+  KEY `idx_notice_type` (`notice_type`),
+  KEY `idx_status` (`status`),
+  KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='通知公告表';
+
+-- ----------------------------
+-- Table structure for sys_job (定时任务表)
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_job`;
+CREATE TABLE `sys_job` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '任务ID',
+  `job_name` varchar(100) NOT NULL COMMENT '任务名称',
+  `job_group` varchar(50) NOT NULL DEFAULT 'DEFAULT' COMMENT '任务组名',
+  `invoke_target` varchar(500) NOT NULL COMMENT '调用目标字符串',
+  `cron_expression` varchar(100) DEFAULT '' COMMENT 'cron执行表达式',
+  `misfire_policy` tinyint DEFAULT 1 COMMENT '计划执行错误策略：1-立即执行，2-执行一次，3-放弃执行',
+  `concurrent` tinyint DEFAULT 1 COMMENT '是否并发执行：0-允许，1-禁止',
+  `status` tinyint NOT NULL DEFAULT 1 COMMENT '状态：0-暂停，1-正常',
+  `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` tinyint NOT NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
+  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`id`),
+  KEY `idx_job_group` (`job_group`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='定时任务表';
+
+-- ----------------------------
+-- Table structure for sys_job_log (定时任务执行日志表)
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_job_log`;
+CREATE TABLE `sys_job_log` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志ID',
+  `job_id` bigint NOT NULL COMMENT '任务ID',
+  `job_name` varchar(100) NOT NULL COMMENT '任务名称',
+  `job_group` varchar(50) NOT NULL DEFAULT 'DEFAULT' COMMENT '任务组名',
+  `invoke_target` varchar(500) DEFAULT '' COMMENT '调用目标字符串',
+  `job_message` varchar(500) DEFAULT '' COMMENT '日志信息',
+  `status` tinyint DEFAULT 0 COMMENT '执行状态：0-失败，1-成功',
+  `exception_info` text COMMENT '异常信息',
+  `start_time` datetime DEFAULT NULL COMMENT '开始时间',
+  `end_time` datetime DEFAULT NULL COMMENT '结束时间',
+  `elapsed_time` bigint DEFAULT 0 COMMENT '耗时（毫秒）',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `deleted` tinyint NOT NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_job_id` (`job_id`),
+  KEY `idx_status` (`status`),
+  KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='定时任务执行日志表';
+
+-- ----------------------------
+-- 初始化示例数据
+-- ----------------------------
+
+-- 示例通知公告
+INSERT INTO `sys_notice` (`title`, `content`, `notice_type`, `status`, `create_by`, `remark`) VALUES
+('系统更新通知', '系统将于今晚22:00-23:00进行例行维护升级，届时服务将暂时不可用，请各位用户提前做好准备。', 1, 1, 'admin', '系统维护通知'),
+('新功能上线公告', '本次更新新增了以下功能：1.字典管理 2.操作日志 3.登录日志 4.定时任务管理 5.数据导入导出。欢迎大家使用体验！', 2, 1, 'admin', '功能更新公告');
+
+-- 示例定时任务
+INSERT INTO `sys_job` (`job_name`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `create_by`, `remark`) VALUES
+('系统健康检查', 'SYSTEM', 'systemHealthTask.check()', '0 0/30 * * * ?', 1, 1, 1, 'admin', '每30分钟检查一次系统健康状态'),
+('日志清理任务', 'SYSTEM', 'logCleanTask.clean(30)', '0 0 2 * * ?', 1, 1, 1, 'admin', '每天凌晨2点清理30天前的日志'),
+('数据备份任务', 'SYSTEM', 'dataBackupTask.backup()', '0 0 3 * * ?', 1, 1, 0, 'admin', '每天凌晨3点备份数据（暂停状态）');
+
+SET FOREIGN_KEY_CHECKS = 1;
