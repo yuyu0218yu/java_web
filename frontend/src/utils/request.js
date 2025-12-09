@@ -2,6 +2,10 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { resetTokenValidation } from '@/utils/tokenState'
 
+// 网络错误消息防抖
+let networkErrorShown = false
+let networkErrorTimer = null
+
 // 创建axios实例
 const request = axios.create({
   baseURL: '/api',
@@ -75,7 +79,15 @@ request.interceptors.response.use(
           ElMessage.error(message || `连接错误${status}`)
       }
     } else {
-      ElMessage.error('连接到服务器失败')
+      // 网络错误防抖：5秒内只显示一次
+      if (!networkErrorShown) {
+        networkErrorShown = true
+        ElMessage.error('连接到服务器失败，请检查后端服务是否启动')
+        if (networkErrorTimer) clearTimeout(networkErrorTimer)
+        networkErrorTimer = setTimeout(() => {
+          networkErrorShown = false
+        }, 5000)
+      }
     }
     return Promise.reject(error)
   }

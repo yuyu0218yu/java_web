@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import request from '@/utils/request'
-import { isTokenValidated, setTokenValidated } from '@/utils/tokenState'
+import { isTokenValidated, setTokenValidated, isValidationAttempted } from '@/utils/tokenState'
 
 const routes = [
   {
@@ -88,19 +88,21 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   
-  // 如果有 token 但还没验证过，先验证 token 有效性
-  if (authStore.isAuthenticated && !isTokenValidated()) {
+  // 如果有 token 但还没验证过，且没有尝试过验证，先验证 token 有效性
+  if (authStore.isAuthenticated && !isTokenValidated() && !isValidationAttempted()) {
     try {
       await request({ url: '/auth/userinfo', method: 'get' })
       setTokenValidated(true)
     } catch (error) {
-      // token 无效，清除登录状态（request.js 中 401 响应会自动清除）
+      // token 无效或网络错误，标记为已尝试
       setTokenValidated(false)
-      // 如果目标页面需要认证，重定向到登录页
-      if (to.meta.requiresAuth !== false) {
+      // 如果是 401 错误，request.js 会清除 token 并跳转登录页
+      // 如果是网络错误（后端宕机），保留 token 但标记验证失败，避免循环请求
+      if (error.response?.status === 401 && to.meta.requiresAuth !== false) {
         next('/login')
         return
       }
+      // 网络错误时不跳转登录页，让用户可以继续使用缓存的登录状态
     }
   }
   

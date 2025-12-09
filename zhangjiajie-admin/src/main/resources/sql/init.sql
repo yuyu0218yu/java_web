@@ -499,3 +499,39 @@ INSERT INTO `sys_user_role` VALUES (3, 5, 3, NULL, '2025-12-05 19:38:34', 0);
 INSERT INTO `sys_user_role` VALUES (4, 6, 3, NULL, '2025-12-05 20:14:00', 0);
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================
+-- 数据库迁移脚本（用于升级现有数据库）
+-- ============================================
+
+-- 迁移: 添加 data_scope 列到 sys_role 表（如果不存在）
+-- 注意: 如果列已存在会报错，可忽略
+-- ALTER TABLE sys_role 
+-- ADD COLUMN `data_scope` tinyint NULL DEFAULT 1 COMMENT '数据范围：1-全部数据 2-本部门及下级 3-本部门 4-仅本人'
+-- AFTER `description`;
+
+-- 使用存储过程安全添加列（不会因列已存在而报错）
+DROP PROCEDURE IF EXISTS add_data_scope_column;
+DELIMITER //
+CREATE PROCEDURE add_data_scope_column()
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = DATABASE() 
+        AND table_name = 'sys_role' 
+        AND column_name = 'data_scope'
+    ) THEN
+        ALTER TABLE sys_role 
+        ADD COLUMN `data_scope` tinyint NULL DEFAULT 1 COMMENT '数据范围：1-全部数据 2-本部门及下级 3-本部门 4-仅本人'
+        AFTER `description`;
+        
+        -- 更新现有角色的 data_scope
+        UPDATE sys_role SET data_scope = 1 WHERE role_code = 'SUPER_ADMIN';
+        UPDATE sys_role SET data_scope = 2 WHERE role_code = 'ADMIN';
+        UPDATE sys_role SET data_scope = 4 WHERE role_code = 'USER';
+    END IF;
+END //
+DELIMITER ;
+
+CALL add_data_scope_column();
+DROP PROCEDURE IF EXISTS add_data_scope_column;
