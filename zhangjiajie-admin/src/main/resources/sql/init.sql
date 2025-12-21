@@ -18,6 +18,71 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
+-- Table structure for sys_dict_type
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_dict_type`;
+CREATE TABLE `sys_dict_type`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '字典类型ID',
+  `dict_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '字典名称',
+  `dict_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '字典类型（唯一标识）',
+  `status` tinyint NOT NULL DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` tinyint NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_dict_type`(`dict_type` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典类型表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of sys_dict_type
+-- ----------------------------
+INSERT INTO `sys_dict_type` VALUES (1, '组件类型', 'sys_component', 1, '系统可用前端组件', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_type` VALUES (2, '常用图标', 'sys_icon', 1, 'Element Plus 常用图标', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_type` VALUES (3, '权限标识', 'sys_permission', 1, '按钮与接口权限', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+
+-- ----------------------------
+-- Table structure for sys_dict_data
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_dict_data`;
+CREATE TABLE `sys_dict_data`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '字典数据ID',
+  `dict_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '字典类型',
+  `dict_label` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '字典标签',
+  `dict_value` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '字典值',
+  `dict_sort` int NULL DEFAULT 0 COMMENT '排序',
+  `css_class` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'CSS样式',
+  `list_class` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '表格样式',
+  `is_default` tinyint NULL DEFAULT 0 COMMENT '是否默认：0-否，1-是',
+  `status` tinyint NULL DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` tinyint NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_dict_type`(`dict_type` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典数据表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of sys_dict_data
+-- ----------------------------
+INSERT INTO `sys_dict_data` VALUES (1, 'sys_component', '仪表盘', 'Dashboard', 1, NULL, NULL, 1, 1, '首页仪表盘组件', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_data` VALUES (2, 'sys_component', '角色管理', 'Roles', 2, NULL, NULL, 0, 1, '角色管理页面组件', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_data` VALUES (3, 'sys_component', '用户管理', 'Users', 3, NULL, NULL, 0, 1, '用户管理页面组件', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_data` VALUES (4, 'sys_icon', '房屋', 'House', 1, 'text-primary', NULL, 1, 1, '仪表盘图标', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_data` VALUES (5, 'sys_icon', '用户', 'User', 2, 'text-info', NULL, 0, 1, '用户类页面图标', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_data` VALUES (6, 'sys_icon', '设置', 'Setting', 3, 'text-warning', NULL, 0, 1, '系统设置图标', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_data` VALUES (7, 'sys_icon', '角色', 'Avatar', 4, NULL, NULL, 0, 1, '角色管理图标', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_data` VALUES (8, 'sys_permission', '用户查看', 'user:view', 1, 'success', NULL, 1, 1, '查看用户列表权限', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_data` VALUES (9, 'sys_permission', '用户新增', 'user:create', 2, 'primary', NULL, 0, 1, '新增用户权限', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_data` VALUES (10, 'sys_permission', '角色查看', 'role:view', 3, 'success', NULL, 0, 1, '查看角色列表权限', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_data` VALUES (11, 'sys_permission', '角色编辑', 'role:update', 4, 'warning', NULL, 0, 1, '编辑角色权限', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_data` VALUES (12, 'sys_permission', '菜单查看', 'menu:view', 5, 'info', NULL, 0, 1, '查看菜单权限', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_data` VALUES (13, 'sys_permission', '菜单新增', 'menu:create', 6, 'primary', NULL, 0, 1, '新增菜单权限', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_data` VALUES (14, 'sys_permission', '菜单删除', 'menu:delete', 7, 'danger', NULL, 0, 1, '删除菜单权限', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+INSERT INTO `sys_dict_data` VALUES (15, 'sys_permission', '代码生成查看', 'generator:view', 8, 'info', NULL, 0, 1, '查看代码生成器权限', '2025-12-06 00:00:00', '2025-12-06 00:00:00', 0);
+
+-- ----------------------------
 -- Table structure for gen_table
 -- ----------------------------
 DROP TABLE IF EXISTS `gen_table`;

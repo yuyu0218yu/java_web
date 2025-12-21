@@ -2,6 +2,7 @@ package com.zhangjiajie.system.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhangjiajie.common.util.TreeUtil;
+import com.zhangjiajie.system.dto.PermissionTreeNode;
 import com.zhangjiajie.system.entity.Menu;
 import com.zhangjiajie.system.entity.RoleMenu;
 import com.zhangjiajie.system.mapper.MenuMapper;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,8 +82,39 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     }
 
     @Override
+    public List<PermissionTreeNode> getPermissionTree() {
+        List<Menu> menus = lambdaQuery()
+                .orderByAsc(Menu::getParentId)
+                .orderByAsc(Menu::getOrderNum)
+                .list();
+        List<Menu> tree = buildMenuTree(menus);
+        return tree.stream()
+                .map(this::convertToPermissionNode)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Menu> buildMenuTree(List<Menu> menus) {
         // 使用TreeUtil构建树形结构
         return TreeUtil.buildLongTree(menus, Menu::getId, Menu::getParentId, Menu::setChildren);
+    }
+
+    private PermissionTreeNode convertToPermissionNode(Menu menu) {
+        PermissionTreeNode node = new PermissionTreeNode();
+        node.setId(menu.getId());
+        node.setParentId(menu.getParentId());
+        node.setName(menu.getMenuName());
+        node.setCode(menu.getPerms());
+        node.setType(PermissionTreeNode.resolveType(menu.getMenuType()));
+        node.setOrderNum(menu.getOrderNum());
+
+        if (menu.getChildren() != null && !menu.getChildren().isEmpty()) {
+            List<PermissionTreeNode> children = menu.getChildren().stream()
+                    .sorted(Comparator.comparing(Menu::getOrderNum, Comparator.nullsLast(Integer::compareTo)))
+                    .map(this::convertToPermissionNode)
+                    .collect(Collectors.toList());
+            node.setChildren(children);
+        }
+        return node;
     }
 }
