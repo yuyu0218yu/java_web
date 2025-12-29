@@ -1,6 +1,7 @@
 package com.zhangjiajie.system.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.zhangjiajie.system.dto.PermissionTreeNode;
 import com.zhangjiajie.system.entity.Menu;
 
 import java.util.List;
@@ -37,6 +38,11 @@ public interface MenuService extends IService<Menu> {
      * 查询所有菜单树
      */
     List<Menu> getAllMenuTree();
+
+    /**
+     * 查询权限树（含按钮）
+     */
+    List<PermissionTreeNode> getPermissionTree();
 
     /**
      * 构建菜单树
