@@ -174,7 +174,7 @@ const handleImageError = (e) => {
       .section-title {
         font-size: 22px;
         font-weight: 600;
-        color: #333;
+        color: var(--text-primary);
         position: relative;
         padding-left: 16px;
 
@@ -186,7 +186,7 @@ const handleImageError = (e) => {
           transform: translateY(-50%);
           width: 4px;
           height: 20px;
-          background: #409eff;
+          background: var(--accent-color);
           border-radius: 2px;
         }
       }
@@ -195,7 +195,7 @@ const handleImageError = (e) => {
         display: flex;
         align-items: center;
         gap: 4px;
-        color: #409eff;
+        color: var(--accent-color);
         font-size: 14px;
 
         &:hover {
@@ -206,7 +206,7 @@ const handleImageError = (e) => {
   }
 
   .category-card {
-    background: #fff;
+    background: var(--bg-secondary);
     border-radius: 8px;
     padding: 24px;
     text-align: center;
@@ -216,30 +216,31 @@ const handleImageError = (e) => {
     flex-direction: column;
     align-items: center;
     gap: 12px;
+    border: 1px solid var(--border-color);
 
     &:hover {
       transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--card-shadow);
 
       .el-icon {
-        color: #409eff;
+        color: var(--accent-color);
       }
     }
 
     .el-icon {
-      color: #666;
+      color: var(--text-secondary);
       transition: color 0.3s;
     }
 
     .category-name {
       font-size: 16px;
       font-weight: 500;
-      color: #333;
+      color: var(--text-primary);
     }
 
     .category-count {
       font-size: 12px;
-      color: #999;
+      color: var(--text-muted);
     }
   }
 }

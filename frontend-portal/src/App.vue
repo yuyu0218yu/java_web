@@ -72,7 +72,7 @@
           <a href="#">隐私政策</a>
         </div>
         <div class="copyright">
-          © 2024 张家界旅游 版权所有
+          © 2025 张家界旅游 版权所有
         </div>
       </div>
     </footer>
@@ -80,7 +80,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -88,6 +88,26 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const searchKeyword = ref('')
+
+// 初始化主题 - 默认暗色模式
+const initTheme = () => {
+  const savedTheme = localStorage.getItem('theme')
+  if (savedTheme) {
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  } else {
+    // 默认使用暗色模式
+    document.documentElement.classList.add('dark')
+    localStorage.setItem('theme', 'dark')
+  }
+}
+
+onMounted(() => {
+  initTheme()
+})
 
 const handleSearch = () => {
   if (searchKeyword.value.trim()) {
@@ -122,11 +142,12 @@ const handleCommand = (command) => {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--bg-primary);
 }
 
 .app-header {
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -154,7 +175,7 @@ const handleCommand = (command) => {
     .logo-text {
       font-size: 20px;
       font-weight: bold;
-      color: #409eff;
+      color: var(--text-primary);
     }
   }
 
@@ -163,7 +184,7 @@ const handleCommand = (command) => {
     gap: 32px;
 
     .nav-item {
-      color: #333;
+      color: var(--text-secondary);
       text-decoration: none;
       font-size: 15px;
       padding: 8px 0;
@@ -172,8 +193,8 @@ const handleCommand = (command) => {
 
       &:hover,
       &.router-link-active {
-        color: #409eff;
-        border-bottom-color: #409eff;
+        color: var(--text-primary);
+        border-bottom-color: var(--accent-color);
       }
     }
   }
@@ -185,6 +206,28 @@ const handleCommand = (command) => {
 
     .search-input {
       width: 200px;
+
+      :deep(.el-input__wrapper) {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        box-shadow: none;
+
+        &:hover, &.is-focus {
+          border-color: var(--accent-color);
+        }
+      }
+
+      :deep(.el-input__inner) {
+        color: var(--text-primary);
+
+        &::placeholder {
+          color: var(--text-muted);
+        }
+      }
+
+      :deep(.el-input__prefix) {
+        color: var(--text-muted);
+      }
     }
 
     .user-info {
@@ -195,7 +238,28 @@ const handleCommand = (command) => {
 
       .username {
         font-size: 14px;
-        color: #333;
+        color: var(--text-primary);
+      }
+    }
+
+    .el-button--primary {
+      background: var(--accent-color);
+      border: none;
+      color: var(--bg-secondary);
+
+      &:hover {
+        background: var(--accent-hover);
+      }
+    }
+
+    .el-button:not(.el-button--primary) {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+
+      &:hover {
+        border-color: var(--accent-color);
+        color: var(--text-primary);
       }
     }
   }
@@ -203,13 +267,14 @@ const handleCommand = (command) => {
 
 .app-main {
   flex: 1;
-  background: #f5f7fa;
+  background: var(--bg-primary);
 }
 
 .app-footer {
-  background: #333;
-  color: #fff;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   padding: 30px 20px;
+  border-top: 1px solid var(--border-color);
 
   .footer-content {
     max-width: 1200px;
@@ -221,19 +286,19 @@ const handleCommand = (command) => {
     margin-bottom: 16px;
 
     a {
-      color: #ccc;
+      color: var(--text-secondary);
       text-decoration: none;
       margin: 0 16px;
       font-size: 14px;
 
       &:hover {
-        color: #fff;
+        color: var(--text-primary);
       }
     }
   }
 
   .copyright {
-    color: #999;
+    color: var(--text-muted);
     font-size: 13px;
   }
 }

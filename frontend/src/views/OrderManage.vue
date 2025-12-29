@@ -1,31 +1,33 @@
 <template>
   <div class="order-manage-page">
     <el-card class="search-card">
-      <el-form :inline="true" :model="searchForm" class="search-form">
-        <el-form-item label="订单号">
-          <el-input v-model="searchForm.orderNo" placeholder="请输入订单号" clearable style="width: 200px" />
-        </el-form-item>
-        <el-form-item label="联系人">
-          <el-input v-model="searchForm.contactName" placeholder="请输入联系人" clearable style="width: 150px" />
-        </el-form-item>
-        <el-form-item label="订单状态">
-          <el-select v-model="searchForm.orderStatus" placeholder="请选择状态" clearable style="width: 150px">
-            <el-option label="待支付" :value="0" />
-            <el-option label="已支付" :value="1" />
-            <el-option label="已使用" :value="2" />
-            <el-option label="已取消" :value="3" />
-            <el-option label="已退款" :value="4" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">
-            <el-icon><Search /></el-icon> 搜索
-          </el-button>
-          <el-button @click="handleReset">
-            <el-icon><Refresh /></el-icon> 重置
-          </el-button>
-        </el-form-item>
-      </el-form>
+      <div class="search-header">
+        <el-form :inline="true" :model="searchForm" class="search-form">
+          <el-form-item label="订单号">
+            <el-input v-model="searchForm.orderNo" placeholder="请输入订单号" clearable style="width: 200px" />
+          </el-form-item>
+          <el-form-item label="联系人">
+            <el-input v-model="searchForm.contactName" placeholder="请输入联系人" clearable style="width: 150px" />
+          </el-form-item>
+          <el-form-item label="订单状态">
+            <el-select v-model="searchForm.orderStatus" placeholder="请选择状态" clearable style="width: 150px">
+              <el-option label="待支付" :value="0" />
+              <el-option label="已支付" :value="1" />
+              <el-option label="已使用" :value="2" />
+              <el-option label="已取消" :value="3" />
+              <el-option label="已退款" :value="4" />
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="handleSearch">
+              <el-icon><Search /></el-icon> 搜索
+            </el-button>
+            <el-button @click="handleReset">
+              <el-icon><Refresh /></el-icon> 重置
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
 
       <div class="action-buttons">
         <el-button type="success" @click="handleExport">
@@ -36,27 +38,27 @@
 
     <el-card class="table-card">
       <el-table v-loading="loading" :data="tableData" stripe>
-        <el-table-column prop="orderNo" label="订单号" width="180" />
-        <el-table-column prop="scenicName" label="景点" width="150" />
-        <el-table-column prop="ticketName" label="门票" width="120" />
-        <el-table-column prop="contactName" label="联系人" width="100" />
-        <el-table-column prop="contactPhone" label="联系电话" width="120" />
-        <el-table-column prop="visitDate" label="游玩日期" width="120" />
-        <el-table-column label="数量/金额" width="120">
+        <el-table-column prop="orderNo" label="订单号" min-width="180" />
+        <el-table-column prop="scenicName" label="景点" min-width="150" />
+        <el-table-column prop="ticketName" label="门票" min-width="120" />
+        <el-table-column prop="contactName" label="联系人" min-width="100" />
+        <el-table-column prop="contactPhone" label="联系电话" min-width="130" />
+        <el-table-column prop="visitDate" label="游玩日期" min-width="120" />
+        <el-table-column label="数量/金额" min-width="120">
           <template #default="{ row }">
             <div>{{ row.quantity }}张</div>
             <div style="color: #f56c6c; font-weight: bold;">¥{{ row.totalAmount }}</div>
           </template>
         </el-table-column>
-        <el-table-column label="订单状态" width="100">
+        <el-table-column label="订单状态" min-width="100">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.orderStatus)" size="small">
               {{ getStatusText(row.orderStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="下单时间" width="160" />
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column prop="createTime" label="下单时间" min-width="160" />
+        <el-table-column label="操作" min-width="180" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link @click="handleView(row)">查看</el-button>
             <el-button v-if="row.orderStatus === 1" type="success" link @click="handleConfirmUse(row)">核销</el-button>

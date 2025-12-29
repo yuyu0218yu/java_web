@@ -113,6 +113,7 @@ public class SecurityConfig {
                 // 允许匿名访问的接口
                 .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh").permitAll()
                 .requestMatchers("/api/config/**").permitAll()
+                .requestMatchers("/api/files/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/error").permitAll()
 

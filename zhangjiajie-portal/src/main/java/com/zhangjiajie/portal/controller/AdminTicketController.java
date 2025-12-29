@@ -1,11 +1,11 @@
 package com.zhangjiajie.portal.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhangjiajie.common.core.PageResult;
 import com.zhangjiajie.common.core.Result;
 import com.zhangjiajie.portal.entity.Ticket;
+import com.zhangjiajie.portal.mapper.TicketMapper;
 import com.zhangjiajie.portal.service.TicketService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,9 +24,10 @@ import java.util.List;
 public class AdminTicketController {
 
     private final TicketService ticketService;
+    private final TicketMapper ticketMapper;
 
     /**
-     * 获取门票列表
+     * 获取门票列表（包含景点名称）
      */
     @GetMapping("/list")
     @Operation(summary = "获取门票列表")
@@ -38,14 +39,7 @@ public class AdminTicketController {
             @RequestParam(required = false) Integer status) {
 
         Page<Ticket> page = new Page<>(current, size);
-        LambdaQueryWrapper<Ticket> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(scenicId != null, Ticket::getScenicId, scenicId)
-               .eq(ticketType != null, Ticket::getTicketType, ticketType)
-               .eq(status != null, Ticket::getStatus, status)
-               .eq(Ticket::getDeleted, 0)
-               .orderByDesc(Ticket::getCreateTime);
-
-        IPage<Ticket> result = ticketService.page(page, wrapper);
+        IPage<Ticket> result = ticketMapper.selectTicketPage(page, scenicId, ticketType, status);
 
         PageResult<Ticket> pageResult = PageResult.of(
                 result.getRecords(),
