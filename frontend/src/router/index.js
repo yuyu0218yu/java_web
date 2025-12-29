@@ -110,6 +110,37 @@ const routes = [
         name: 'JobLog',
         component: () => import('@/views/JobLog.vue'),
         meta: { title: '任务日志', requiresAuth: true, requiredPermissions: ['job:view'], requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
+      },
+      // 门户管理
+      {
+        path: 'portal/scenic',
+        name: 'ScenicManage',
+        component: () => import('@/views/ScenicManage.vue'),
+        meta: { title: '景点管理', requiresAuth: true, requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
+      },
+      {
+        path: 'portal/ticket',
+        name: 'TicketManage',
+        component: () => import('@/views/TicketManage.vue'),
+        meta: { title: '门票管理', requiresAuth: true, requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
+      },
+      {
+        path: 'portal/guide',
+        name: 'GuideManage',
+        component: () => import('@/views/GuideManage.vue'),
+        meta: { title: '攻略管理', requiresAuth: true, requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
+      },
+      {
+        path: 'portal/order',
+        name: 'OrderManage',
+        component: () => import('@/views/OrderManage.vue'),
+        meta: { title: '订单管理', requiresAuth: true, requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
+      },
+      {
+        path: 'portal/banner',
+        name: 'BannerManage',
+        component: () => import('@/views/BannerManage.vue'),
+        meta: { title: '轮播图管理', requiresAuth: true, requiredRoles: ['ADMIN', 'SUPER_ADMIN'] }
       }
     ]
   }

@@ -30,6 +30,12 @@
             <artifactId>zhangjiajie-generator</artifactId>
         </dependency>
 
+        <!-- 用户端模块 -->
+        <dependency>
+            <groupId>com.zhangjiajie</groupId>
+            <artifactId>zhangjiajie-portal</artifactId>
+        </dependency>
+
         <!-- Spring Boot Actuator -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

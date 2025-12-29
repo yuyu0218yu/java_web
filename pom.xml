@@ -17,6 +17,7 @@
         <module>zhangjiajie-common</module>
         <module>zhangjiajie-system</module>
         <module>zhangjiajie-generator</module>
+        <module>zhangjiajie-portal</module>
         <module>zhangjiajie-admin</module>
     </modules>
 
@@ -58,6 +59,11 @@
             <dependency>
                 <groupId>com.zhangjiajie</groupId>
                 <artifactId>zhangjiajie-generator</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zhangjiajie</groupId>
+                <artifactId>zhangjiajie-portal</artifactId>
                 <version>${project.version}</version>
             </dependency>
             

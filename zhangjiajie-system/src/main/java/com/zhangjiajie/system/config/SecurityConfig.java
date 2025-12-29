@@ -116,6 +116,12 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/error").permitAll()
 
+                // 用户端公开接口（无需登录）
+                .requestMatchers("/api/portal/home", "/api/portal/home/**").permitAll()
+                .requestMatchers("/api/portal/scenic", "/api/portal/scenic/**").permitAll()
+                .requestMatchers("/api/portal/guide", "/api/portal/guide/**").permitAll()
+                .requestMatchers("/api/portal/comment/list", "/api/portal/comment/list/**").permitAll()
+
                 // 所有其他API接口需要认证
                 .requestMatchers("/api/**").authenticated()
 
